@@ -33,7 +33,7 @@ Open for the owner (none blocks the start): Q-1, Q-3 to Q-10 in [SPEC.md](SPEC.m
 ## Last verified
 
 - Command: `pnpm verify` (format:check, lint, typecheck, build), `actionlint` on both workflows, the starter pack's `check-links.py`, a scan of staged files for sensitive patterns
-- Revision: `acf4786` (the setup commit)
+- Revision: `77f9004` (the setup commit; verified as `acf4786`, same tree, author email changed to the GitHub noreply address)
 - Working tree: clean
 - Result: passed
 - Not run: hosted CI (no PR yet; `ci.yml` triggers on pull requests only). Tests: none exist.
