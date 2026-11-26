@@ -22,7 +22,7 @@ When an entry changes, update the rules and tests that depend on it in the same 
 | O-01 | Manual entry is wanted; no bank connection is needed (A-1) | Scope, non-goal R-22 | Owner answers Q-9 |
 | O-02 | The current tracker can export history as a file (A-3) | Backlog item R-19 | Owner answers Q-1 |
 | O-03 | One value per investment account per month is enough; no holdings, units or prices (A-4) | Snapshot model, R-8, R-10 | Owner answers Q-3; H-4: enter 6 to 12 months of the owner's values after the snapshot PR |
-| O-04 | Free tiers (Vercel Hobby, Turso) host the app and database for up to 5 users at no cost for 12 months, without sleeping or deleting data (A-5) | Hosting, M-4 | H-3: deploy login plus database in the first feature PR and read the current limits |
+| O-04 | Free tiers (Vercel Hobby, Turso) host the app and database for up to 5 users at no cost for 12 months, without sleeping or deleting data (A-5) | Hosting, M-4 | H-3: the owner's first deploy (runbook "First deploy") with the limits read that day |
 | O-05 | Entry without a connection is not needed in the MVP (A-6) | PWA without a service worker | Owner answers Q-7 |
 | O-06 | Recurring payments post only after the owner confirms them (A-7) | Backlog items R-15, R-16 | Owner answers Q-5 |
 | O-07 | Budgets are monthly amounts per category without rollover (A-8) | Backlog item R-14 | Owner answers Q-4 |
@@ -31,6 +31,7 @@ When an entry changes, update the rules and tests that depend on it in the same 
 | O-10 | Paying off the credit card is recorded as a transfer between accounts (Q-6) | R-2, AC-2 | Owner answers Q-6 |
 | O-11 | Keypad-first entry with pre-filled account and date is fast enough to keep logging (H-1, RK-3) | Whether to continue to the backlog | H-1: two weeks of daily use after the quick-add PR; median 6 s or less, logging on 12 of 14 days (proposed targets) |
 | O-12 | ČNB publishes free daily CZK rates for EUR and USD that a server can fetch | Conversion, AC-15 | Read ČNB's current documentation before the rates code is written; record the URL and date in the PR |
+| O-13 | Vercel sets `x-forwarded-for` to the real client address, so per-address rate limits work (ADR 0004) | Rate limits on the auth API | Check after the first deploy: repeated sign-in attempts from one phone are limited, others are not |
 
 ## Disproved
 

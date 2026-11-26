@@ -1,3 +1,9 @@
+# Dependency install scripts are denied unless a reason is recorded here.
 allowBuilds:
+  # Optional native image optimiser; no images are optimised yet (revisit with next/image).
   sharp: false
+  # Optional native resolver speed-up for eslint-plugin-import; not needed.
   unrs-resolver: false
+  # Pulled in by drizzle-kit and Vitest. The platform binary ships as an optional dependency,
+  # so the install script is not needed.
+  esbuild: false

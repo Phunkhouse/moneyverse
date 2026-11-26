@@ -2,38 +2,34 @@
 
 Rewritten, not appended, at every handoff and whenever the state changes materially. Under one page; history lives in Git.
 
-Updated: 2026-11-26 16:30 CET by Claude Code
+Updated: 2026-11-26 17:00 CET by Claude Code
 
 ## Goal
 
-Build the MVP in [SPEC.md](SPEC.md) (D-3, AC-1 to AC-9 and AC-12 to AC-16), one PR at a time in the order under "Planning and open questions".
+Build the MVP in [SPEC.md](SPEC.md) (D-3), one PR at a time. Current PR: database, invite-only passkey sign-in and the first deploy (AC-12, H-3), branch `feat/database-sign-in`.
 
 ## State
 
-- Discovery handed over 2026-11-26 (D-1 to D-3 approved, H-2 waived by D-5). SPEC, assumptions, backlog, runbook, design source of truth and ADRs 0001 to 0003 filled from the handover.
-- Setup committed on `main`: Next.js 16.4.6 scaffold with a placeholder Czech page, Prettier, ESLint, `pnpm verify`, Standard CI (`.github/workflows/ci.yml`, job `check`) and Claude PR review (`.github/workflows/claude.yml`). No tests yet: there is no behavior to test.
-- Repository `Phunkhouse/moneyverse` created as public on GitHub; `origin` is set over SSH.
-- No feature work started.
+- `main` has the project setup (starter pack MVP profile, Standard CI, Claude PR review).
+- On the branch: Drizzle on libSQL with the first migration (`drizzle/0000_auth.sql`, Better Auth's tables); Better Auth with passkeys only and invites from `pnpm invite:create` ([ADR 0004](decisions/0004-invite-only-passkey-sign-in.md)); `/prihlaseni`, `/pozvanka` and a signed-in placeholder home; a proxy redirect; rate limits; security headers; `vercel.json` (deploy only `main`); Vitest with 22 tests; the deploy steps in the [runbook](runbook.md).
+- Checked locally in the browser: `/` redirects to sign-in; the invite page reads and clears the token; a bad invite is refused with a Czech message; security headers are present.
+- Not deployed: the first deploy is owner steps (runbook "First deploy").
 
 ## Next step
 
-First feature PR: database, sign-in and first deploy (BACKLOG "Next", item 1): Drizzle on libSQL, migrations, invite-only passkey sign-in with its decision record, user scoping tests (AC-12), Vercel and Turso deploy as the H-3 check, runbook. Offer the seed data recipe with the first migration.
+Owner reviews and merges the PR, then runs the runbook's "First deploy" (Turso, migrate, Vercel, invite yourself). After that: design tokens, app shell and kit (BACKLOG "Next").
 
 ## Blockers and open questions
 
-Owner actions:
-
-1. Turn on branch protection for `main` with `check` as a required status check, once CI has run on the first PR (so GitHub knows the check name).
-2. Turn on secret scanning with push protection and Dependabot alerts (Settings → Advanced Security).
-3. For `@claude review`: install the Claude GitHub App on the repository, and add the Actions secret `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`).
-4. Before the first feature PR's deploy step: a Vercel account linked to the repository and a Turso database. The PR will list the exact steps.
-
-Open for the owner (none blocks the start): Q-1, Q-3 to Q-10 in [SPEC.md](SPEC.md#planning-and-open-questions); whether the Plán tab is hidden or shown as "coming later" in the MVP ([design open question](design/README.md#open-design-questions)).
+- Owner: branch protection on `main` with `check` required, now that CI has a run to name.
+- Owner: the full passkey ceremony (create a passkey from an invite, sign out, sign in) is not verified by an agent; it needs a real authenticator. Try it locally or on the first deploy.
+- Owner: choose the production subdomain before the first deploy (passkeys are bound to it).
+- Open questions Q-1 and Q-3 to Q-10 ([SPEC](SPEC.md#planning-and-open-questions)); the Plán tab in the MVP ([design](design/README.md#open-design-questions)), needed before the app shell PR.
 
 ## Last verified
 
-- Command: `pnpm verify` (format:check, lint, typecheck, build), `actionlint` on both workflows, the starter pack's `check-links.py`, a scan of staged files for sensitive patterns
-- Revision: `77f9004` (the setup commit; verified as `acf4786`, same tree, author email changed to the GitHub noreply address)
-- Working tree: clean
+- Command: `pnpm verify` (format:check, lint, typecheck, test, build), `actionlint`, `check-links.py`; `pnpm db:migrate` and `pnpm invite:create` on a local file; browser checks on `pnpm dev`
+- Revision: the PR's first commit (see the PR)
+- Working tree: clean after commit
 - Result: passed
-- Not run: hosted CI (no PR yet; `ci.yml` triggers on pull requests only). Tests: none exist.
+- Not run: hosted CI (runs on the PR); the WebAuthn ceremony with a real passkey; anything against Vercel or Turso
