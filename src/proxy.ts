@@ -12,7 +12,8 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // Everything except the sign-in and invite pages, the auth API, Next's assets and the icon.
+  // Each exception matches a whole path segment, so `/prihlaseni-x` is still covered.
   matcher: [
-    '/((?!prihlaseni|pozvanka|api/auth|_next/static|_next/image|icon.svg|favicon.ico).*)',
+    '/((?!(?:prihlaseni|pozvanka|api/auth|_next/static|_next/image|icon\\.svg|favicon\\.ico)(?:/|$)).*)',
   ],
 }

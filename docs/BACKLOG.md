@@ -16,6 +16,8 @@ MVP build order, one PR at a time ([SPEC](SPEC.md#planning-and-open-questions)):
 
 ## Later
 
+- Full Content-Security-Policy with nonces for scripts and styles; today's CSP covers only `frame-ancestors`, `base-uri`, `form-action` and `object-src` (`next.config.ts`). From the PR 1 review, 2026-11-26.
+
 Proposed in the discovery brief; the owner orders them after H-1.
 
 - Budgets per category with overspending (R-14, AC-10). Depends on Q-4.
