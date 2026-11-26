@@ -1,0 +1,16 @@
+/* Placeholder until the design tokens arrive with the app shell (docs/design/README.md). */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  padding: 16px;
+  font-family: system-ui, sans-serif;
+}

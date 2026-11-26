@@ -1,0 +1,337 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Moneyverse Logo Concepts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: contact sheet. Home-screen comparison of all ten icons first, then one card per concept,
+   each split into a fixed light and a fixed dark preview surface. Page chrome follows the viewer's theme. */
+:root{
+  --bg:#f3f1fb; --glass:rgba(255,255,255,.72); --glass-line:rgba(255,255,255,.9); --line:#e4e0f3;
+  --ink:#16122b; --ink-2:#5b5675; --ink-3:#8f8aa8; --accent:#6d4dff;
+  --blob1:rgba(124,92,255,.28); --blob2:rgba(236,72,153,.20); --blob3:rgba(34,211,238,.22);
+  --shadow:0 1px 1px rgba(40,20,90,.04),0 12px 32px -16px rgba(60,30,140,.28);
+  /* brand colours (same in both themes) */
+  --g1:#5b5bf7; --g2:#a855f7; --g3:#ec4899; --g4:#22d3ee;
+  --grad:linear-gradient(135deg,var(--g1) 0%,var(--g2) 52%,var(--g3) 100%);
+  /* fixed preview surfaces: these never switch with the theme */
+  --pl-bg:#f3f1fb; --pl-ink:#16122b; --pl-ink-2:#5b5675; --pl-line:rgba(22,18,43,.08);
+  --pd-bg:#0b0918; --pd-ink:#f1eefc; --pd-ink-2:#b3add0; --pd-line:rgba(255,255,255,.08);
+  --font-display:"Sora","Plus Jakarta Sans",system-ui,sans-serif;
+  --font-body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --t-xs:.75rem; --t-sm:.875rem; --t-md:1rem; --t-lg:1.25rem; --t-xl:1.75rem; --t-2xl:2.5rem;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0b0918; --glass:rgba(28,24,54,.66); --glass-line:rgba(255,255,255,.07); --line:#2e2950;
+  --ink:#f1eefc; --ink-2:#b3add0; --ink-3:#827ca3; --accent:#a48bff;
+  --blob1:rgba(110,80,255,.30); --blob2:rgba(236,72,153,.18); --blob3:rgba(34,211,238,.14);
+  --shadow:0 1px 1px rgba(0,0,0,.3),0 16px 40px -18px rgba(0,0,0,.7); color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0b0918; --glass:rgba(28,24,54,.66); --glass-line:rgba(255,255,255,.07); --line:#2e2950;
+  --ink:#f1eefc; --ink-2:#b3add0; --ink-3:#827ca3; --accent:#a48bff;
+  --blob1:rgba(110,80,255,.30); --blob2:rgba(236,72,153,.18); --blob3:rgba(34,211,238,.14);
+  --shadow:0 1px 1px rgba(0,0,0,.3),0 16px 40px -18px rgba(0,0,0,.7); color-scheme:dark; }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:var(--t-md);line-height:1.55;
+  background-image:radial-gradient(900px 600px at 90% -10%,var(--blob1),transparent 60%),radial-gradient(700px 500px at 0% 40%,var(--blob2),transparent 60%),radial-gradient(700px 500px at 70% 100%,var(--blob3),transparent 65%);
+  background-attachment:fixed}
+.wrap{max-width:1160px;margin:0 auto;padding-block:48px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:40px}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-.02em}
+h1{font-size:clamp(1.9rem,4.5vw,var(--t-2xl));font-weight:700;line-height:1.1}
+h2{font-size:var(--t-xl);font-weight:600}
+h3{font-size:var(--t-lg);font-weight:600}
+p{margin:0}
+.eyebrow{font-size:var(--t-xs);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.lede{color:var(--ink-2);max-width:62ch;font-size:1.0625rem}
+header{display:flex;flex-direction:column;gap:12px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.chip{font-size:var(--t-xs);font-weight:600;padding:5px 10px;border-radius:999px;background:var(--glass);border:1px solid var(--glass-line);color:var(--ink-2);backdrop-filter:blur(10px)}
+.glass{background:var(--glass);border:1px solid var(--glass-line);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+section{display:flex;flex-direction:column;gap:16px}
+.sec-head{display:flex;flex-direction:column;gap:4px}
+.sec-head p{color:var(--ink-2);font-size:var(--t-sm)}
+
+/* fixed preview surfaces */
+.pv{border-radius:18px;position:relative;overflow:hidden;isolation:isolate}
+.pv.light{background:var(--pl-bg);color:var(--pl-ink);--pi2:var(--pl-ink-2);--pline:var(--pl-line);
+  background-image:radial-gradient(260px 200px at 100% 0%,rgba(124,92,255,.22),transparent 70%),radial-gradient(240px 200px at 0% 100%,rgba(34,211,238,.18),transparent 70%)}
+.pv.dark{background:var(--pd-bg);color:var(--pd-ink);--pi2:var(--pd-ink-2);--pline:var(--pd-line);
+  background-image:radial-gradient(260px 200px at 100% 0%,rgba(110,80,255,.30),transparent 70%),radial-gradient(240px 200px at 0% 100%,rgba(236,72,153,.16),transparent 70%)}
+.pv-tag{font-size:.6875rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--pi2)}
+
+/* home screens */
+.homes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px}
+.home{padding:20px 18px 22px;display:flex;flex-direction:column;gap:16px}
+.home-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px 10px}
+.app{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:inherit;border-radius:14px;padding:4px 0}
+.app:focus-visible{outline:2px solid var(--g2);outline-offset:2px}
+.app > svg{width:min(60px,100%);height:auto;display:block;filter:drop-shadow(0 6px 10px rgba(30,10,80,.22))}
+.app span{font-size:.6875rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.app:hover > svg{transform:translateY(-2px)}
+.app > svg{transition:transform .15s}
+
+/* concept cards */
+.cards{display:flex;flex-direction:column;gap:20px}
+.card{padding:22px;display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:22px;scroll-margin-top:16px}
+.info{display:flex;flex-direction:column;gap:10px}
+.num{font-family:var(--font-display);font-weight:700;font-size:var(--t-sm);color:var(--accent);font-variant-numeric:tabular-nums}
+.info p{color:var(--ink-2);font-size:var(--t-sm)}
+.spec{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:var(--t-xs);color:var(--ink-3);margin-top:4px}
+.spec b{font-weight:600;color:var(--ink-2)}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.panel{padding:16px;display:flex;flex-direction:column;gap:14px}
+.panel-top{display:flex;align-items:center;gap:16px}
+.panel-top .big{width:96px;height:96px;flex:none;filter:drop-shadow(0 10px 18px rgba(30,10,80,.25))}
+.sizes{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.sizes figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.sizes figcaption{font-size:.625rem;color:var(--pi2);font-variant-numeric:tabular-nums}
+.lockup-row{border-top:1px solid var(--pline);padding-top:14px;min-height:76px;display:flex;align-items:center}
+
+/* wordmarks */
+.lk{display:flex;align-items:center;gap:12px;min-width:0}
+.lk.stack{flex-direction:column;gap:8px;align-items:flex-start}
+.lk svg{flex:none}
+.wm{font-family:var(--font-display);font-size:1.6rem;line-height:1;white-space:nowrap}
+.gt{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.soft{color:var(--pi2)}
+
+.chosen{padding:22px;display:flex;flex-direction:column;gap:18px}
+.chosen .panel-top .big{width:128px;height:128px}
+.pick{display:inline-block;margin-left:6px;font-family:var(--font-body);font-size:.6875rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--grad);padding:2px 8px;border-radius:999px;vertical-align:2px}
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.sw{display:flex;flex-direction:column;gap:6px;font-size:var(--t-xs);color:var(--ink-2)}
+.sw i{display:block;height:52px;border-radius:14px;border:1px solid var(--line)}
+.sw b{color:var(--ink);font-size:var(--t-sm);font-weight:600}
+.sw code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem}
+.next{padding:22px;display:flex;flex-direction:column;gap:8px}
+.next p{color:var(--ink-2);font-size:var(--t-sm);max-width:70ch}
+
+@media (max-width:820px){
+  .card{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:560px){
+  .pair{grid-template-columns:minmax(0,1fr)}
+  .card{padding:16px}
+  .home-grid{gap:14px 6px}
+}
+@media (prefers-reduced-motion:reduce){ .app svg{transition:none} .app:hover > svg{transform:none} }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Moneyverse · brand, round 2</div>
+    <h1>Glass trio, plus the ten directions</h1>
+    <p class="lede">02, Glass trio, is the pick. The dark icon stays as it was, and the light icon now uses the exact same mark on a pale tile. Its colours set the product palette. The original ten concepts follow below for reference.</p>
+    <div class="meta"><span class="chip">Icon: 512 px, maskable safe zone</span><span class="chip">Small sizes: 48 · 32 · 16 px</span><span class="chip">Wordmark: Sora / Plus Jakarta Sans</span></div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <h2>The chosen mark</h2>
+      <p>Same three circles in both themes. Only the tile changes: pale lavender in light, night violet in dark.</p>
+    </div>
+    <div class="glass chosen">
+      <div class="pair">
+        <div class="pv light panel"><span class="pv-tag">Light</span><div class="panel-top" id="ch-light"></div><div class="lockup-row" id="ch-light-lk"></div></div>
+        <div class="pv dark panel"><span class="pv-tag">Dark</span><div class="panel-top" id="ch-dark"></div><div class="lockup-row" id="ch-dark-lk"></div></div>
+      </div>
+      <div class="pal" id="palette"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>On the home screen</h2>
+      <p>How the ten icons sit side by side at phone size. Tap one to jump to its details.</p>
+    </div>
+    <div class="homes">
+      <div class="pv light home"><span class="pv-tag">Light</span><div class="home-grid" id="home-light"></div></div>
+      <div class="pv dark home"><span class="pv-tag">Dark</span><div class="home-grid" id="home-dark"></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>The concepts</h2>
+      <p>Light icons put a white mark on the brand gradient. Dark icons put the gradient mark on the app's night background.</p>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <div class="glass next">
+    <h3>Next</h3>
+    <p>The trio palette and mark are now in the clickable prototype, together with a light and dark switch. The lightweight design system comes next and will take these colours as its starting tokens.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  const G1="#5b5bf7",G2="#a855f7",G3="#ec4899",G4="#22d3ee";
+  let uid=0;
+
+  // Paint sets for each rendering mode.
+  function paints(mode,id){
+    if(mode==="tile") return {main:"#fff",alt:"rgba(255,255,255,.6)",hi:"#fff",c:["rgba(255,255,255,.62)","rgba(255,255,255,.62)","rgba(255,255,255,.62)"],seg:["#fff","rgba(255,255,255,.78)","rgba(255,255,255,.56)","rgba(255,255,255,.36)"],blend:"normal",defs:""};
+    const dark=mode==="dark";
+    const defs=`<linearGradient id="${id}g" gradientUnits="userSpaceOnUse" x1="8" y1="8" x2="92" y2="92"><stop offset="0" stop-color="${G1}"/><stop offset=".52" stop-color="${G2}"/><stop offset="1" stop-color="${G3}"/></linearGradient>
+      <linearGradient id="${id}c" gradientUnits="userSpaceOnUse" x1="8" y1="92" x2="92" y2="8"><stop offset="0" stop-color="${G1}"/><stop offset="1" stop-color="${G4}"/></linearGradient>`;
+    return {main:`url(#${id}g)`,alt:`url(#${id}c)`,hi:G4,c:[G1,G3,G4],seg:[G1,G2,G3,G4],blend:dark?"screen":"multiply",defs};
+  }
+
+  // The chosen mark. Overlaps use the colours the dark icon produces (screen blend), drawn explicitly
+  // so the mark looks identical on any ground.
+  function trioMark(id,shadow){
+    const c=(x,y,f,ex="")=>`<circle cx="${x}" cy="${y}" r="24" fill="${f}" ${ex}/>`;
+    return `<defs><clipPath id="${id}ta"><circle cx="37" cy="39" r="24"/></clipPath><clipPath id="${id}tb"><circle cx="63" cy="39" r="24"/></clipPath>
+      <filter id="${id}ts" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#4b2db8" flood-opacity="${shadow}"/></filter></defs>
+      <g filter="url(#${id}ts)">${c(37,39,"#5b5bf7")}${c(63,39,"#ec4899")}${c(50,62,"#22d3ee")}</g>
+      ${c(63,39,"#f389fc",`clip-path="url(#${id}ta)"`)}${c(50,62,"#71e3fe",`clip-path="url(#${id}ta)"`)}${c(50,62,"#eedff8",`clip-path="url(#${id}tb)"`)}
+      <g clip-path="url(#${id}ta)">${c(50,62,"#fbf5ff",`clip-path="url(#${id}tb)"`)}</g>`;
+  }
+
+  // Marks, drawn in a 100 x 100 box.
+  const MARKS={
+    orbit(P,id){
+      const back=`<path d="M6,50 A44,15 0 0 1 94,50" fill="none" stroke="${P.alt}" stroke-width="6" stroke-linecap="round"/>`;
+      const front=`<path d="M94,50 A44,15 0 0 1 6,50" fill="none" stroke="${P.alt}" stroke-width="6" stroke-linecap="round"/>`;
+      return `<defs>${P.defs}<mask id="${id}m" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect width="100" height="100" fill="#fff"/><g transform="rotate(-22 50 50)"><path d="M94,50 A44,15 0 0 1 6,50" fill="none" stroke="#000" stroke-width="15"/></g></mask></defs>
+        <g transform="rotate(-22 50 50)">${back}</g>
+        <circle cx="50" cy="50" r="25" fill="${P.main}" mask="url(#${id}m)"/>
+        <g transform="rotate(-22 50 50)">${front}</g>
+        <circle cx="88.1" cy="42.7" r="6.5" fill="${P.hi}"/>`;
+    },
+    trio(P,id){
+      return trioMark(id, P.shadow||0);
+    },
+    constellation(P){
+      const pts=[[14,80],[30,28],[50,60],[70,20],[86,80]];
+      const dots=pts.map((p,i)=>i===3?"":`<circle cx="${p[0]}" cy="${p[1]}" r="6" fill="${P.main}"/>`).join("");
+      return `<defs>${P.defs}</defs><polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="${P.alt}" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/>${dots}
+        <circle cx="70" cy="20" r="14" fill="none" stroke="${P.hi}" stroke-width="2.5" opacity=".45"/><circle cx="70" cy="20" r="8.5" fill="${P.hi}"/>`;
+    },
+    barm(P){
+      return `<defs>${P.defs}</defs><rect x="14" y="30" width="20" height="56" rx="10" fill="${P.main}" opacity=".78"/><rect x="40" y="52" width="20" height="34" rx="10" fill="${P.main}" opacity=".55"/><rect x="66" y="14" width="20" height="72" rx="10" fill="${P.main}"/>`;
+    },
+    arches(P){
+      return `<defs>${P.defs}</defs><path d="M20,84 V54 a15,15 0 0 1 30,0 V84 M50,54 a15,15 0 0 1 30,0 V84" fill="none" stroke="${P.main}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><circle cx="80" cy="20" r="8" fill="${P.hi}"/>`;
+    },
+    spiral(P){
+      let s="";const n=11;
+      for(let i=0;i<n;i++){const t=i/(n-1);const a=-0.6+i*0.72;const r=3+t*38;const x=50+Math.cos(a)*r*0.98, y=50+Math.sin(a)*r;const d=1.8+t*7.2;
+        s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${d.toFixed(1)}" fill="${i===n-1?P.hi:P.main}" opacity="${(0.45+t*0.55).toFixed(2)}"/>`;}
+      return `<defs>${P.defs}</defs>${s}`;
+    },
+    ring(P){
+      const C=2*Math.PI*30, gap=7, fr=[.40,.26,.19,.15];let off=0,s="";
+      fr.forEach((f,i)=>{const L=f*C-gap;s+=`<circle cx="50" cy="50" r="30" fill="none" stroke="${P.seg[i]}" stroke-width="15" stroke-dasharray="${L.toFixed(2)} ${(C-L).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 50 50)"/>`;off+=f*C;});
+      return `<defs>${P.defs}</defs>${s}`;
+    },
+    portal(P){
+      return `<defs>${P.defs}</defs><circle cx="45" cy="55" r="34" fill="none" stroke="${P.main}" stroke-width="6"/><circle cx="52" cy="48" r="24" fill="none" stroke="${P.main}" stroke-width="5.5" opacity=".78"/><circle cx="58" cy="42" r="14.5" fill="none" stroke="${P.main}" stroke-width="5" opacity=".58"/><circle cx="62" cy="38" r="6.5" fill="${P.hi}"/>`;
+    },
+    coins(P){
+      let s="";[[44,66],[50,50],[56,34]].forEach(([cx,cy],i)=>{const top=i===2;
+        s+=`<path d="M${cx-28},${cy} v9 a28,10 0 0 0 56,0 v-9 z" fill="${P.alt}" opacity="${top?1:.85}"/><ellipse cx="${cx}" cy="${cy}" rx="28" ry="10" fill="${top?P.main:P.main}" opacity="${top?1:.7}"/>`;});
+      return `<defs>${P.defs}</defs>${s}<circle cx="82" cy="16" r="5" fill="${P.hi}"/>`;
+    },
+    horizon(P){
+      return `<defs>${P.defs}</defs><path d="M20,58 A30,30 0 0 1 80,58 Z" fill="${P.main}"/><g stroke="${P.alt}" stroke-width="5.5" stroke-linecap="round"><line x1="14" y1="68" x2="86" y2="68"/><line x1="26" y1="78" x2="74" y2="78"/><line x1="38" y1="88" x2="62" y2="88"/></g><circle cx="82" cy="20" r="5" fill="${P.hi}"/>`;
+    }
+  };
+
+  const CONCEPTS=[
+    {k:"orbit",name:"Orbit",scale:.66,desc:"A coin with a ring around it, like a small planet. The most literal take on money plus universe, and it still reads at 16 px.",
+      wm:`<span class="wm" style="font-weight:600;letter-spacing:-.02em">Moneyverse</span>`,type:"Sora SemiBold"},
+    {k:"trio",name:"Glass trio",chosen:true,scale:.66,desc:"Three overlapping circles for accounts, cards and investments merging into one total. Chosen. The mark is now the same on both grounds: the light icon sits on a pale lavender tile.",
+      wm:`<span class="wm" style="font-family:var(--font-body);font-weight:800;letter-spacing:-.04em">moneyverse</span>`,type:"Plus Jakarta ExtraBold, lowercase"},
+    {k:"constellation",name:"Constellation",scale:.64,stack:true,desc:"An M drawn as a star map whose points also read as a line chart. The brightest star marks the peak.",
+      wm:`<span class="wm" style="font-weight:600;font-size:1.05rem;letter-spacing:.24em">MONEYVERSE</span>`,type:"Sora SemiBold, spaced caps"},
+    {k:"barm",name:"Bar M",scale:.62,desc:"The letter M built from three chart bars, with the last one tallest. Ties the brand to the reports screen.",
+      wm:`<span class="wm" style="font-weight:700;letter-spacing:-.03em">Money<span class="gt">verse</span></span>`,type:"Sora Bold, gradient second half"},
+    {k:"arches",name:"Arches",scale:.64,desc:"A soft lowercase m with a coin dot over its last leg. Friendly, rounded, and the easiest one to draw by hand.",
+      wm:`<span class="wm gt" style="font-weight:700;letter-spacing:-.035em">moneyverse</span>`,type:"Sora Bold, lowercase, gradient"},
+    {k:"spiral",name:"Compound",scale:.7,desc:"Dots that grow as they spiral outward, a picture of savings compounding over time. The most abstract option in the set.",
+      wm:`<span class="wm" style="font-family:var(--font-body);font-weight:700;letter-spacing:-.02em">Money<span class="soft" style="font-weight:500">verse</span></span>`,type:"Plus Jakarta Bold + Medium"},
+    {k:"ring",name:"Budget ring",scale:.68,desc:"A segmented ring like the budget donut inside the app, with one segment for each of the four brand colours.",
+      wm:`<span class="wm" style="font-weight:400;letter-spacing:-.02em">money<b style="font-weight:700">verse</b></span>`,type:"Sora Regular + Bold"},
+    {k:"portal",name:"Portal",scale:.68,desc:"Nested rings drifting toward one corner, like looking down a tunnel. Suggests depth, and everything in one place.",
+      wm:`<span class="wm" style="font-weight:700;letter-spacing:-.045em">Moneyverse</span>`,type:"Sora Bold, tight"},
+    {k:"coins",name:"Coin stack",scale:.66,desc:"Three coins stacked with a slight lean upward. The most traditional finance mark here, softened by the gradient.",
+      wm:`<span class="wm" style="font-weight:600;letter-spacing:-.02em">Money<span class="gt">Verse</span></span>`,type:"Sora SemiBold, camel case"},
+    {k:"horizon",name:"Horizon",scale:.66,stack:true,desc:"A planet rising over a horizon of shrinking lines. Calm, and reads as your money's outlook.",
+      wm:`<span class="wm" style="font-weight:500;font-size:1.35rem;letter-spacing:-.01em;line-height:1.05">money<br><span class="gt" style="font-weight:700">verse</span></span>`,type:"Sora Medium + Bold, stacked"}
+  ];
+
+  function markSVG(c,mode,px){
+    const id="m"+(uid++);const P=paints(mode,id);
+    return `<svg width="${px}" height="${px}" viewBox="0 0 100 100" aria-hidden="true">${MARKS[c.k](P,id)}</svg>`;
+  }
+
+  function iconSVG(c,mode,px,label){
+    const id="i"+(uid++);const P=paints(mode==="light"?"tile":"dark",id);
+    const trioLight = c.k==="trio" && mode==="light";
+    if (trioLight) P.shadow=.3;
+    const s=c.scale*120, o=(120-s)/2;
+    const bg = trioLight
+      ? `<linearGradient id="${id}bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e9e4ff"/></linearGradient>
+         <radialGradient id="${id}hl" cx=".85" cy=".1" r=".7"><stop offset="0" stop-color="${G4}" stop-opacity=".10"/><stop offset="1" stop-color="${G4}" stop-opacity="0"/></radialGradient>`
+      : mode==="light"
+      ? `<linearGradient id="${id}bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${G1}"/><stop offset=".55" stop-color="${G2}"/><stop offset="1" stop-color="${G3}"/></linearGradient>
+         <radialGradient id="${id}hl" cx=".2" cy=".05" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>`
+      : `<linearGradient id="${id}bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c1838"/><stop offset="1" stop-color="#0b0918"/></linearGradient>
+         <radialGradient id="${id}hl" cx=".85" cy=".1" r=".8"><stop offset="0" stop-color="${G2}" stop-opacity=".35"/><stop offset="1" stop-color="${G2}" stop-opacity="0"/></radialGradient>`;
+    const stroke = trioLight ? "rgba(22,18,43,.07)" : mode==="light" ? "rgba(255,255,255,.35)" : "rgba(255,255,255,.08)";
+    return `<svg width="${px}" height="${px}" viewBox="0 0 120 120" role="img" aria-label="${label||c.name+" icon, "+mode}">
+      <defs>${bg}<clipPath id="${id}cl"><rect width="120" height="120" rx="27"/></clipPath></defs>
+      <g clip-path="url(#${id}cl)"><rect width="120" height="120" fill="url(#${id}bg)"/><rect width="120" height="120" fill="url(#${id}hl)"/></g>
+      <rect x=".75" y=".75" width="118.5" height="118.5" rx="26.3" fill="none" stroke="${stroke}" stroke-width="1.5"/>
+      <svg x="${o}" y="${o}" width="${s}" height="${s}" viewBox="0 0 100 100">${MARKS[c.k](P,id)}</svg></svg>`;
+  }
+
+  function lockup(c,mode){
+    return `<div class="lk${c.stack?" stack":""}">${markSVG(c,mode,c.stack?40:44)}${c.wm}</div>`;
+  }
+
+  function panel(c,mode){
+    return `<div class="pv ${mode} panel">
+      <span class="pv-tag">${mode==="light"?"Light":"Dark"}</span>
+      <div class="panel-top">
+        <span class="big">${iconSVG(c,mode,96)}</span>
+        <div class="sizes">
+          <figure>${iconSVG(c,mode,48)}<figcaption>48</figcaption></figure>
+          <figure>${iconSVG(c,mode,32)}<figcaption>32</figcaption></figure>
+          <figure>${iconSVG(c,mode,16)}<figcaption>16</figcaption></figure>
+        </div>
+      </div>
+      <div class="lockup-row">${lockup(c,mode)}</div>
+    </div>`;
+  }
+
+  const pad=n=>String(n).padStart(2,"0");
+  document.getElementById("cards").innerHTML=CONCEPTS.map((c,i)=>`
+    <article class="glass card" id="c${i+1}">
+      <div class="info">
+        <div class="num">${pad(i+1)}${c.chosen?' <span class="pick">Chosen</span>':''}</div>
+        <h3>${c.name}</h3>
+        <p>${c.desc}</p>
+        <div class="spec"><b>Wordmark</b><span>${c.type}</span></div>
+      </div>
+      <div class="pair">${panel(c,"light")}${panel(c,"dark")}</div>
+    </article>`).join("");
+
+  const T=CONCEPTS[1];
+  ["light","dark"].forEach(mode=>{
+    document.getElementById("ch-"+mode).innerHTML=`<span class="big">${iconSVG(T,mode,128)}</span><div class="sizes"><figure>${iconSVG(T,mode,48)}<figcaption>48</figcaption></figure><figure>${iconSVG(T,mode,32)}<figcaption>32</figcaption></figure><figure>${iconSVG(T,mode,16)}<figcaption>16</figcaption></figure></div>`;
+    document.getElementById("ch-"+mode+"-lk").innerHTML=lockup(T,mode);
+  });
+  const PAL=[["Violet","#5b5bf7","Primary, first chart series"],["Pink","#ec4899","Second series, highlights"],["Cyan","#22d3ee","Third series, income, progress"],["Orchid","#f389fc","Violet over pink"],["Sky","#71e3fe","Violet over cyan"],["Mist","#eedff8","Pink over cyan"],["Night","#0b0918","Dark ground"],["Lavender","#e9e4ff","Light tile"]];
+  document.getElementById("palette").innerHTML=PAL.map(([n,h,u])=>`<div class="sw"><i style="background:${h}"></i><b>${n}</b><code>${h}</code><span>${u}</span></div>`).join("");
+
+  ["light","dark"].forEach(mode=>{
+    document.getElementById("home-"+mode).innerHTML=CONCEPTS.map((c,i)=>
+      `<a class="app" href="#c${i+1}">${iconSVG(c,mode,60,(i+1)+" "+c.name)}<span>${i+1} · ${c.name}</span></a>`).join("");
+  });
+})();
+</script>

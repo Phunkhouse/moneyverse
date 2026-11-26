@@ -1,0 +1,1379 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Moneyverse Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: a briefing rail on the left and a live device on the right; the app inside switches to a desktop layout by container width. */
+:root{
+  --bg:#e9edf3; --panel:#f4f6fa; --surface:#ffffff; --surface-2:#f3f5f9; --line:#dde2ea;
+  --ink:#121826; --ink-2:#556074; --ink-3:#8590a2;
+  --accent:#3946c9; --accent-ink:#ffffff; --accent-soft:#e6e8fb;
+  --pos:#0b7a32; --neg:#c33131; --warn:#9a6200; --warn-soft:#fdf1dc; --neg-soft:#fbe5e5;
+  --bezel:#161b26;
+  --s1:#257de0; --s2:#f47230; --s3:#00b894; --s4:#f2a600;
+  --font-display:"Bricolage Grotesque", "Inter", system-ui, sans-serif;
+  --font-body:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0c1018; --panel:#111620; --surface:#161c28; --surface-2:#1c2331; --line:#283245;
+  --ink:#e8ecf3; --ink-2:#a2acbd; --ink-3:#76819a;
+  --accent:#8b95ff; --accent-ink:#0d1020; --accent-soft:#232a4d;
+  --pos:#3fcf6e; --neg:#f27272; --warn:#e8b04a; --warn-soft:#3a2e14; --neg-soft:#3d1d20;
+  --bezel:#03050a;
+  --s1:#338ced; --s2:#e76624; --s3:#00a888; --s4:#d28e05; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0c1018; --panel:#111620; --surface:#161c28; --surface-2:#1c2331; --line:#283245;
+  --ink:#e8ecf3; --ink-2:#a2acbd; --ink-3:#76819a;
+  --accent:#8b95ff; --accent-ink:#0d1020; --accent-soft:#232a4d;
+  --pos:#3fcf6e; --neg:#f27272; --warn:#e8b04a; --warn-soft:#3a2e14; --neg-soft:#3d1d20;
+  --bezel:#03050a;
+  --s1:#338ced; --s2:#e76624; --s3:#00a888; --s4:#d28e05; color-scheme:dark; }
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0}
+
+.shell{display:grid;grid-template-columns:330px minmax(0,1fr);height:100%}
+.brief{background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding:28px 24px;display:flex;flex-direction:column;gap:22px}
+.brief h1{font-size:26px;letter-spacing:-.01em}
+.brief .tag{font-size:12px;color:var(--ink-2)}
+.brief h2{font-family:var(--font-body);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:8px}
+.brief p,.brief li{color:var(--ink-2);font-size:13px}
+.brief ul{margin:0;padding-left:18px;display:grid;gap:4px}
+.brief-body{display:flex;flex-direction:column;gap:22px}
+.jump{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.jump button{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 10px;font-size:13px}
+.jump button:hover{border-color:var(--accent)}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;border-radius:999px;padding:5px 12px;font-size:13px;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.row-ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.linkbtn{border:0;background:none;color:var(--accent);padding:0;font-size:13px;text-decoration:underline;text-underline-offset:2px}
+select.sel{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 8px;font-size:13px}
+
+.stage{display:grid;place-items:center;overflow:auto;padding:24px}
+.device{width:390px;height:min(844px,calc(100vh - 48px));border:10px solid var(--bezel);border-radius:46px;overflow:hidden;position:relative;background:var(--bg);box-shadow:0 30px 60px -30px rgba(10,20,40,.45)}
+.device.wide{width:min(1200px,100%);height:min(800px,calc(100vh - 48px));border-width:1px;border-color:var(--line);border-radius:14px}
+.mobile-bar{display:none}
+
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+  .brief{display:none}
+  .mobile-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px max(16px,env(safe-area-inset-left,0px)) 8px max(16px,env(safe-area-inset-right,0px));background:var(--panel);border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-2)}
+  .mobile-bar b{color:var(--ink);font-family:var(--font-display);font-size:14px}
+  .stage{padding:0;display:block}
+  .device,.device.wide{width:100%;height:100%;border:0;border-radius:0;box-shadow:none}
+  .wide-only{display:none}
+}
+.about{position:fixed;inset:0;background:rgba(5,10,20,.5);display:grid;place-items:end center;z-index:50}
+.about .card{background:var(--panel);width:100%;max-height:85%;overflow:auto;border-radius:18px 18px 0 0;padding:20px max(16px,env(safe-area-inset-left,0px)) calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px}
+
+/* ===== App ===== */
+.app{position:relative;height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;container-type:inline-size;background:var(--bg)}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px 10px;padding-top:calc(14px + var(--notch,0px))}
+.device:not(.wide) .topbar{--notch:22px}
+@media (max-width:860px){ .device .topbar{--notch:0px} }
+.topbar h2{font-size:22px;letter-spacing:-.01em}
+.topbar .sub{font-size:12px;color:var(--ink-3)}
+.iconbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:none}
+.iconbtn svg{width:18px;height:18px}
+.views{overflow:auto;padding:0 16px 24px;overscroll-behavior:contain}
+.view{display:flex;flex-direction:column;gap:14px}
+.nav{display:grid;grid-template-columns:repeat(5,1fr);align-items:center;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(8px + env(safe-area-inset-bottom,0px))}
+.device:not(.wide) .nav{padding-bottom:18px}
+.nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--ink-3);padding:6px 0;border-radius:10px}
+.nav button svg{width:22px;height:22px}
+.nav button[aria-current="page"]{color:var(--accent);font-weight:600}
+.nav .add{justify-self:center;width:54px;height:54px;border-radius:18px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;margin-top:-22px;box-shadow:0 8px 18px -8px var(--accent)}
+.nav .add svg{width:26px;height:26px}
+.nav .add span{display:none}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px}
+.card h3{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--ink-2)}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px}
+.card-head .more{font-size:12px;color:var(--accent);border:0;background:none;padding:0}
+.eyebrow{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.hero-num{font-family:var(--font-display);font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.delta{font-size:12px;font-weight:600;display:inline-flex;gap:4px;align-items:center;padding:2px 8px;border-radius:999px}
+.delta.up{color:var(--pos);background:color-mix(in srgb,var(--pos) 12%,transparent)}
+.delta.down{color:var(--neg);background:var(--neg-soft)}
+.muted{color:var(--ink-3);font-size:12px}
+.sample{display:inline-block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:4px;padding:1px 6px}
+
+.banner{display:flex;gap:12px;align-items:center;background:var(--accent-soft);border-radius:14px;padding:12px 14px}
+.banner p{margin:0;font-size:13px;flex:1;min-width:0}
+.btn{border:0;border-radius:10px;padding:9px 14px;font-weight:600;font-size:13px;background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:var(--neg-soft);color:var(--neg)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.list{display:flex;flex-direction:column}
+.tx{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);background:none;border-left:0;border-right:0;border-top:0;text-align:left;width:100%}
+.list .tx:last-child{border-bottom:0}
+.glyph{width:36px;height:36px;border-radius:11px;background:var(--surface-2);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--ink-2);border:1px solid var(--line)}
+.tx .t{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx .m{font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.amt{font-weight:600;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.amt.in{color:var(--pos)}
+.amt.tr{color:var(--ink-2)}
+.dayhead{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3);padding:12px 0 2px;font-weight:600}
+
+.acct{display:grid;grid-template-columns:minmax(0,1fr) 70px auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left}
+.group .acct:last-child{border-bottom:0}
+.acct .n{font-weight:500}
+.acct .ty{font-size:12px;color:var(--ink-3)}
+.group-head{display:flex;justify-content:space-between;align-items:baseline}
+
+.bud{display:grid;gap:6px;padding:10px 0;border-bottom:1px solid var(--line)}
+.bud:last-child{border-bottom:0}
+.bud .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.bar{height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;border-radius:4px;background:var(--s1)}
+.bar i.warn{background:var(--warn)}
+.bar i.over{background:var(--neg)}
+.pill{font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px}
+.pill.over{color:var(--neg);background:var(--neg-soft)}
+.pill.warn{color:var(--warn);background:var(--warn-soft)}
+.pill.ok{color:var(--ink-3);background:var(--surface-2)}
+.budedit{border:1px dashed var(--line);background:none;border-radius:6px;padding:1px 6px;font-size:12px;color:var(--ink-2)}
+.budinput{width:80px;border:1px solid var(--accent);border-radius:6px;padding:2px 6px;background:var(--surface);font-size:12px}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 11px;font-size:13px;display:inline-flex;gap:6px;align-items:center}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip .k{font-size:10px;font-weight:700;opacity:.7}
+
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .dow{font-size:11px;color:var(--ink-3);text-align:center;padding-bottom:2px}
+.cal .d{aspect-ratio:1/1.05;border-radius:10px;border:1px solid transparent;background:var(--surface-2);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:5px;gap:3px;font-size:12px;max-width:100%}
+.cal .d.out{background:transparent;color:var(--ink-3);opacity:.5}
+.cal .d.today{border-color:var(--accent);font-weight:700}
+.cal .d[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.cal .dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;max-width:28px}
+.cal .dots i{width:6px;height:6px;border-radius:50%;background:var(--ink-3)}
+.cal .dots i.due{background:var(--warn)}
+.cal .dots i.done{background:var(--pos)}
+.cal .dots i.inc{background:var(--s1)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.legend i.line{height:2px;border-radius:1px;width:14px}
+.legend i.dash{height:0;border-top:2px dashed var(--ink);width:14px;border-radius:0;background:none}
+.rec{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.rec:last-child{border-bottom:0}
+.rec .when{font-size:11px;color:var(--ink-3);text-align:center;line-height:1.1}
+.rec .when b{display:block;font-size:17px;color:var(--ink);font-family:var(--font-display)}
+.state{font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.state.done{color:var(--pos)}
+.state.due{color:var(--warn)}
+.state.next{color:var(--ink-3)}
+
+/* charts */
+.chart{width:100%;height:auto;display:block;overflow:visible;touch-action:pan-y}
+.chart text{fill:var(--ink-3);font-size:10px;font-family:var(--font-body)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .base{stroke:var(--ink-3);stroke-width:1}
+.chart .xh{stroke:var(--ink-2);stroke-width:1;stroke-dasharray:3 3;opacity:0}
+.chart .xh.on{opacity:1}
+.chart .hit{fill:transparent}
+.hbars{display:grid;gap:10px}
+.hb{display:grid;grid-template-columns:96px minmax(0,1fr) 62px;gap:8px;align-items:center;font-size:12px}
+.hb .lb{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb .tracks{display:grid;gap:2px}
+.hb .tracks i{display:block;height:8px;border-radius:0 4px 4px 0;min-width:2px}
+.hb .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.tip{position:fixed;z-index:60;pointer-events:none;background:var(--ink);color:var(--surface);border-radius:8px;padding:7px 9px;font-size:12px;line-height:1.35;box-shadow:0 8px 20px -8px rgba(0,0,0,.5);max-width:220px;opacity:0;transition:opacity .08s}
+.tip.on{opacity:1}
+.tip b{font-weight:600}
+.tip .r{display:flex;justify-content:space-between;gap:12px}
+.tip .sw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
+
+/* sheet */
+.backdrop{position:absolute;inset:0;background:rgba(5,10,20,.42);opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+.backdrop.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:94%;background:var(--surface);border-radius:22px 22px 0 0;z-index:21;transform:translateY(105%);transition:transform .25s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;overflow:hidden}
+.sheet.on{transform:translateY(0)}
+.sheet .grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:8px auto 2px;flex:none}
+.sheet .body{overflow:auto;padding:6px 16px 18px;display:flex;flex-direction:column;gap:12px}
+.sheet .foot{padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);display:flex;gap:8px}
+.device:not(.wide) .sheet .foot{padding-bottom:22px}
+.sheet .foot .btn{flex:1;padding:13px}
+.amount-disp{text-align:center;font-family:var(--font-display);font-size:42px;font-weight:700;letter-spacing:-.02em;padding:4px 0 0}
+.amount-disp.expense{color:var(--ink)}
+.amount-disp.income{color:var(--pos)}
+.amount-disp .cur{font-size:22px;color:var(--ink-3);margin-right:4px}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.keypad button{border:0;background:var(--surface-2);border-radius:12px;padding:11px 0;font-size:20px;font-weight:500;font-variant-numeric:tabular-nums}
+.keypad button:active{background:var(--accent-soft)}
+.field{display:grid;gap:5px}
+.field label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.txt{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:9px 11px;font-size:14px}
+.typeseg{align-self:center}
+.toast{position:absolute;left:50%;bottom:92px;transform:translate(-50%,20px);background:var(--ink);color:var(--surface);border-radius:12px;padding:10px 14px;display:flex;gap:14px;align-items:center;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:30;white-space:nowrap}
+.toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{border:0;background:none;color:var(--accent-soft);font-weight:700;padding:0}
+.snaprow{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.snaprow:last-child{border-bottom:0}
+.empty{padding:20px;text-align:center;color:var(--ink-3)}
+.back{display:inline-flex;align-items:center;gap:4px;border:0;background:none;color:var(--accent);padding:0;font-weight:600}
+.grid2{display:grid;gap:14px}
+.kv{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:4px 0}
+
+/* desktop layout inside the app */
+@container (min-width: 760px){
+  .app{grid-template-columns:220px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+  .nav{grid-row:1 / -1;grid-column:1;grid-template-columns:1fr;align-content:start;gap:4px;border-top:0;border-right:1px solid var(--line);padding:20px 12px}
+  .nav::before{order:-2;content:"Moneyverse";font-family:var(--font-display);font-weight:700;font-size:20px;padding:0 10px 14px}
+  .nav button{flex-direction:row;gap:10px;font-size:14px;padding:9px 10px;justify-content:flex-start}
+  .nav button[aria-current="page"]{background:var(--accent-soft)}
+  .nav .add{order:-1;width:auto;height:auto;margin:0 0 10px;border-radius:12px;display:flex;gap:8px;padding:11px 12px;justify-self:stretch;justify-content:center;font-weight:600}
+  .nav .add svg{width:20px;height:20px}
+  .nav .add span{display:inline}
+  .topbar{grid-column:2;padding:22px 28px 12px}
+  .views{grid-column:2;padding:0 28px 28px}
+  .grid2{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+  .grid2 .span{grid-column:1 / -1}
+  .sheet{left:50%;right:auto;bottom:50%;width:440px;border-radius:20px;transform:translate(-50%,60%) scale(.96);opacity:0;pointer-events:none;transition:.2s}
+  .sheet.on{transform:translate(-50%,50%);opacity:1;pointer-events:auto}
+  .sheet .grab{display:none}
+  .toast{bottom:28px;left:calc(50% + 110px)}
+  .home-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:18px;align-items:center}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+
+<style>
+.ccy{font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--ink-3);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-left:4px;vertical-align:1px}
+.chip[aria-pressed="true"] .ccy{color:var(--accent-ink);border-color:currentColor}
+.fxnote{font-size:12px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.amt .orig{display:block;font-size:11px;font-weight:500;color:var(--ink-3)}
+</style>
+
+<style>
+/* Modern pass: soft mesh background, glass cards, violet → pink → cyan gradients. Overrides the base tokens above. */
+:root{
+  --bg:#f3f1fb; --panel:rgba(255,255,255,.62); --surface:#ffffff; --surface-2:#f1effa; --line:#e4e0f3;
+  --ink:#16122b; --ink-2:#5b5675; --ink-3:#8f8aa8;
+  --accent:#6d4dff; --accent-ink:#ffffff; --accent-soft:#ece7ff;
+  --g1:#5b5bf7; --g2:#a855f7; --g3:#ec4899; --g4:#22d3ee;
+  --grad:linear-gradient(135deg,var(--g1) 0%,var(--g2) 52%,var(--g3) 100%);
+  --grad-cool:linear-gradient(90deg,var(--g1),var(--g4));
+  --grad-warm:linear-gradient(90deg,#f59e0b,#f97316);
+  --grad-hot:linear-gradient(90deg,#f43f5e,#e11d48);
+  --glass:rgba(255,255,255,.72); --glass-line:rgba(255,255,255,.9);
+  --shadow:0 1px 1px rgba(40,20,90,.04),0 12px 32px -16px rgba(60,30,140,.28);
+  --blob1:rgba(124,92,255,.28); --blob2:rgba(236,72,153,.20); --blob3:rgba(34,211,238,.22);
+  --font-display:"Sora","Plus Jakarta Sans",system-ui,sans-serif;
+  --font-body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0b0918; --panel:rgba(22,18,44,.62); --surface:#17142c; --surface-2:#211d3c; --line:#2e2950;
+  --ink:#f1eefc; --ink-2:#b3add0; --ink-3:#827ca3;
+  --accent:#a48bff; --accent-ink:#ffffff; --accent-soft:#2a2350;
+  --glass:rgba(28,24,54,.66); --glass-line:rgba(255,255,255,.07);
+  --shadow:0 1px 1px rgba(0,0,0,.3),0 16px 40px -18px rgba(0,0,0,.7);
+  --blob1:rgba(110,80,255,.30); --blob2:rgba(236,72,153,.18); --blob3:rgba(34,211,238,.14); color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0b0918; --panel:rgba(22,18,44,.62); --surface:#17142c; --surface-2:#211d3c; --line:#2e2950;
+  --ink:#f1eefc; --ink-2:#b3add0; --ink-3:#827ca3;
+  --accent:#a48bff; --accent-ink:#ffffff; --accent-soft:#2a2350;
+  --glass:rgba(28,24,54,.66); --glass-line:rgba(255,255,255,.07);
+  --shadow:0 1px 1px rgba(0,0,0,.3),0 16px 40px -18px rgba(0,0,0,.7);
+  --blob1:rgba(110,80,255,.30); --blob2:rgba(236,72,153,.18); --blob3:rgba(34,211,238,.14); color-scheme:dark; }
+
+body{background:var(--bg)}
+.shell{background:radial-gradient(900px 600px at 85% -10%,var(--blob1),transparent 60%),radial-gradient(700px 500px at 10% 110%,var(--blob2),transparent 60%),radial-gradient(600px 400px at 60% 60%,var(--blob3),transparent 65%)}
+.brief{background:var(--panel);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-right:1px solid var(--glass-line)}
+.brief h1,.nav::before{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.jump button{border-radius:12px;background:var(--glass);border-color:var(--glass-line);box-shadow:var(--shadow)}
+.jump button:hover{border-color:var(--g2)}
+.device{border-color:#0d0b1a;box-shadow:0 40px 80px -30px rgba(80,40,180,.55),0 0 0 1px rgba(255,255,255,.06)}
+.device.wide{border-color:var(--glass-line)}
+.app{background:radial-gradient(420px 320px at 100% 0%,var(--blob1),transparent 70%),radial-gradient(380px 300px at 0% 100%,var(--blob3),transparent 70%),var(--bg)}
+.card{background:var(--glass);border:1px solid var(--glass-line);border-radius:22px;box-shadow:var(--shadow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.hero-card{background:var(--grad);border:0;color:#fff;box-shadow:0 20px 40px -18px rgba(124,58,237,.65);position:relative;overflow:hidden}
+.hero-card::after{content:"";position:absolute;width:260px;height:260px;right:-80px;top:-120px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.35),transparent 65%);pointer-events:none}
+.hero-card .eyebrow,.hero-card .muted{color:rgba(255,255,255,.78)}
+.hero-card .sample{background:rgba(255,255,255,.2);color:#fff}
+.hero-card .delta.up,.hero-card .delta.down{background:rgba(255,255,255,.2);color:#fff}
+.hero-card .chart text{fill:rgba(255,255,255,.78)}
+.hero-card .chart .grid{stroke:rgba(255,255,255,.18)}
+.hero-card .chart .xh{stroke:#fff}
+.hero-num{font-weight:700;letter-spacing:-.03em}
+.banner{background:linear-gradient(120deg,color-mix(in srgb,var(--g1) 14%,transparent),color-mix(in srgb,var(--g4) 16%,transparent));border:1px solid var(--glass-line);border-radius:20px}
+.btn{background:var(--grad);color:#fff;border-radius:12px;box-shadow:0 8px 18px -10px rgba(124,58,237,.8)}
+.btn.ghost{background:var(--glass);color:var(--ink);box-shadow:none;border:1px solid var(--line)}
+.btn.danger{background:var(--neg-soft);color:var(--neg);box-shadow:none}
+.nav{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--glass-line)}
+.nav button[aria-current="page"]{color:var(--accent)}
+.nav .add{background:var(--grad);color:#fff;border-radius:20px;box-shadow:0 12px 24px -10px rgba(168,85,247,.9)}
+.iconbtn{background:var(--glass);border-color:var(--glass-line);box-shadow:var(--shadow)}
+.chip{background:var(--glass);border-color:var(--line)}
+.chip[aria-pressed="true"]{background:var(--grad);border-color:transparent;color:#fff}
+.seg{background:var(--glass);border-color:var(--glass-line)}
+.seg button[aria-pressed="true"]{background:var(--grad);color:#fff;box-shadow:0 6px 14px -8px rgba(124,58,237,.9)}
+.glyph{border-radius:12px;border:0;color:#fff;background:linear-gradient(135deg,hsl(var(--h,255) 85% 62%),hsl(calc(var(--h,255) + 40) 85% 58%))}
+.bar{background:var(--surface-2);border:0;height:9px;border-radius:999px}
+.bar i{background:var(--grad-cool);border-radius:999px}
+.bar i.warn{background:var(--grad-warm)}
+.bar i.over{background:var(--grad-hot)}
+.hb .tracks i{border-radius:0 999px 999px 0}
+.tip{background:rgba(20,16,40,.92);color:#fff;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08)}
+.toast{background:rgba(20,16,40,.92);color:#fff;backdrop-filter:blur(8px)}
+.toast button{color:#c4b5fd}
+.sheet{background:var(--surface);border-radius:28px 28px 0 0}
+.amount-disp{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.amount-disp.income{background:linear-gradient(90deg,#10b981,#22d3ee);-webkit-background-clip:text;background-clip:text}
+.amount-disp .cur{-webkit-text-fill-color:var(--ink-3)}
+.amount-disp.expense,.amount-disp.income{color:transparent}
+.sheet{visibility:hidden}
+.sheet.on{visibility:visible}
+.keypad button{border-radius:16px;background:var(--surface-2)}
+.keypad button:active{background:var(--accent-soft)}
+.txt{border-radius:12px}
+.cal .d{border-radius:12px;background:var(--glass)}
+.cal .d.today{border-color:transparent;background:var(--grad);color:#fff}
+.cal .d.today .dots i{outline:1.5px solid #fff}
+.cal .d[aria-pressed="true"]:not(.today){background:var(--accent-soft);border-color:var(--g2)}
+.fxnote{border-radius:12px;background:var(--glass)}
+.mobile-bar{background:var(--panel);backdrop-filter:blur(14px)}
+@container (min-width: 760px){
+  .nav{background:var(--glass);border-right:1px solid var(--glass-line)}
+  .nav button[aria-current="page"]{background:var(--accent-soft)}
+  .nav .add{border-radius:14px}
+}
+</style>
+
+<style>
+/* Type system: 6 sizes, 4 weight roles.
+   Sizes: xs 11 labels · sm 13 secondary · md 15 body · lg 19 figures · xl 24 titles · 2xl 34 hero (3xl 40 entry amount only)
+   Weights: 400 supporting text · 500 names and controls · 600 headings and amounts · 700 key figures only */
+:root{--fs-xs:11px;--fs-sm:13px;--fs-md:15px;--fs-lg:19px;--fs-xl:24px;--fs-2xl:34px;--fs-3xl:40px;--w-text:400;--w-name:500;--w-head:600;--w-key:700}
+body{font-size:var(--fs-md);font-weight:var(--w-text)}
+.brief h1{font-size:var(--fs-xl);font-weight:var(--w-key)}
+.brief .tag,.brief p,.brief li{font-size:var(--fs-sm)}
+.brief li b{font-weight:var(--w-head)}
+.brief h2,.eyebrow,.field label{font-size:var(--fs-xs);font-weight:var(--w-head);letter-spacing:.08em}
+.jump button{font-size:var(--fs-sm);font-weight:var(--w-name)}
+.mobile-bar{font-size:var(--fs-sm)} .mobile-bar b{font-size:var(--fs-md);font-weight:var(--w-key)}
+.topbar h2{font-size:var(--fs-xl);font-weight:var(--w-key);letter-spacing:-.02em}
+.topbar .sub{font-size:var(--fs-sm);font-weight:var(--w-text);color:var(--ink-3)}
+.card h3{font-family:var(--font-body);font-size:var(--fs-md);font-weight:var(--w-head);color:var(--ink)}
+.card-head .more,.back{font-size:var(--fs-sm);font-weight:var(--w-head)}
+.hero-num{font-size:var(--fs-2xl);font-weight:var(--w-key);letter-spacing:-.03em}
+.hero-num.md{font-size:var(--fs-xl)}
+.figure{font-size:var(--fs-lg);font-weight:var(--w-head);font-variant-numeric:tabular-nums}
+.muted,.empty,.kv,.fxnote,.banner p,.legend,.toast,.tip{font-size:var(--fs-sm);font-weight:var(--w-text)}
+.banner p b,.tip b{font-weight:var(--w-head)}
+.delta{font-size:var(--fs-sm);font-weight:var(--w-head)}
+.sample,.ccy,.pill,.state,.chip .k{font-size:var(--fs-xs);font-weight:var(--w-head)}
+.sample{letter-spacing:.06em}
+.tx .t,.acct .n,.rec .t{font-size:var(--fs-md);font-weight:var(--w-name);color:var(--ink)}
+.tx .m,.acct .ty,.rec .m{font-size:var(--fs-sm);font-weight:var(--w-text);color:var(--ink-3)}
+.amt{font-size:var(--fs-md);font-weight:var(--w-head)}
+.amt .orig{font-size:var(--fs-xs);font-weight:var(--w-text)}
+.glyph{font-size:var(--fs-xs);font-weight:var(--w-key)}
+.dayhead{font-size:var(--fs-sm);font-weight:var(--w-head);color:var(--ink-2)}
+.dayhead .num{font-weight:var(--w-text);color:var(--ink-3)}
+.group-head h3{font-size:var(--fs-md)}
+.bud .top{font-size:var(--fs-md)}
+.bud .top .muted{font-size:var(--fs-sm)}
+.budedit,.budinput{font-size:var(--fs-sm);font-weight:var(--w-name)}
+.chip,.seg button,.nav button{font-weight:var(--w-name)}
+.chip,.seg button{font-size:var(--fs-sm)}
+.seg button[aria-pressed="true"],.chip[aria-pressed="true"],.nav button[aria-current="page"]{font-weight:var(--w-head)}
+.nav button{font-size:var(--fs-xs)}
+.btn{font-size:var(--fs-sm);font-weight:var(--w-head)}
+.sheet .foot .btn{font-size:var(--fs-md)}
+.sheet-title{font-family:var(--font-display);font-size:var(--fs-lg);font-weight:var(--w-key)}
+.txt{font-size:var(--fs-md)}
+.amount-disp{font-size:var(--fs-3xl);font-weight:var(--w-key)}
+.amount-disp .cur{font-size:var(--fs-xl);font-weight:var(--w-head)}
+.keypad button{font-size:var(--fs-xl);font-weight:var(--w-name)}
+.hb{font-size:var(--fs-sm)} .hb .lb{font-weight:var(--w-name)} .hb .v{font-weight:var(--w-head)}
+.cal .dow{font-size:var(--fs-xs);font-weight:var(--w-head)}
+.cal .d{font-size:var(--fs-sm);font-weight:var(--w-name)}
+.cal .d.today{font-weight:var(--w-key)}
+.rec .when{font-size:var(--fs-xs);font-weight:var(--w-head);text-transform:uppercase;letter-spacing:.04em}
+.rec .when b{font-size:var(--fs-lg);font-weight:var(--w-key);letter-spacing:0}
+.snaprow label > div:first-child{font-size:var(--fs-md);font-weight:var(--w-name)}
+select.sel,.linkbtn{font-size:var(--fs-sm)}
+@container (min-width: 760px){ .nav button{font-size:var(--fs-md)} .nav::before{font-size:var(--fs-xl)} .nav .add span{font-size:var(--fs-sm)} }
+</style>
+
+<style>
+/* Spacing scale: 4 · 8 · 12 · 16 · 24 · 32. Cards get 20/24 px padding, sections 16/24 px apart, charts render at true pixel size. */
+:root{--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px}
+.views{padding:var(--sp-2) var(--sp-4) var(--sp-6)}
+.view,.grid2{gap:var(--sp-4)}
+.card{padding:20px}
+.card-head{margin-bottom:var(--sp-4)}
+.topbar{padding-bottom:var(--sp-3)}
+.chart{overflow:visible}
+.chart text{font-size:var(--fs-xs);font-family:var(--font-body)}
+.legend{gap:var(--sp-2) var(--sp-4);margin-top:var(--sp-3)!important}
+.hbars{gap:var(--sp-3)}
+.hb{grid-template-columns:104px minmax(0,1fr) 84px;gap:var(--sp-3)}
+.list .tx,.acct,.rec,.bud{padding:var(--sp-3) 0}
+.banner{padding:var(--sp-4) 20px;gap:var(--sp-4)}
+.chips{gap:var(--sp-2)}
+.hero-card{padding:var(--sp-5)}
+.hero-card .home-hero{display:flex;flex-direction:column;gap:var(--sp-5)}
+.hero-card .eyebrow{display:flex;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-2)}
+.hero-card .hero-num{margin-bottom:var(--sp-3)}
+.hero-card .delta{padding:var(--sp-1) 10px}
+.hero-card .chart{margin-inline:calc(-1 * var(--sp-1))}
+@container (min-width: 760px){
+  .views{padding:var(--sp-2) var(--sp-6) var(--sp-6)}
+  .topbar{padding:28px var(--sp-6) var(--sp-4)}
+  .view,.grid2{gap:var(--sp-5)}
+  .card{padding:var(--sp-5)}
+  .hero-card{padding:28px var(--sp-6)}
+  .hero-card .home-hero{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(0,2fr);gap:var(--sp-6);align-items:center}
+}
+</style>
+
+<style>
+/* Brand: Glass trio. Violet, pink and cyan from the logo, plus the colours their overlaps make. */
+:root{
+  --v:#5b5bf7; --p:#ec4899; --c:#22d3ee; --vp:#f389fc; --vc:#71e3fe;
+  --g1:var(--v); --g2:#a24ff0; --g3:var(--p); --g4:var(--c);
+  --s1:#5b5bf7; --s2:#ec4899; --s3:#0ab3d0; --s4:#b49cff;
+  --hero-bg:linear-gradient(135deg,#5b5bf7 0%,#a24ff0 55%,#ec4899 100%);
+  --hero-glow:radial-gradient(260px 220px at 100% 100%,rgba(34,211,238,.55),transparent 70%),radial-gradient(220px 200px at 0% 0%,rgba(255,255,255,.18),transparent 70%);
+  --hero-shadow:0 20px 40px -18px rgba(91,91,247,.65);
+  --hero-line:#ffffff;
+  --mark-tile:linear-gradient(135deg,#ffffff,#e9e4ff);
+  --hero-sheen:1;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --s1:#7c7dff; --s2:#f0609f; --s3:#22d3ee; --s4:#c4b5fd;
+  --hero-bg:linear-gradient(160deg,#1c1838 0%,#0b0918 100%);
+  --hero-glow:radial-gradient(300px 240px at 95% -10%,rgba(91,91,247,.55),transparent 70%),radial-gradient(260px 220px at 105% 105%,rgba(236,72,153,.38),transparent 70%),radial-gradient(280px 220px at -5% 115%,rgba(34,211,238,.30),transparent 70%);
+  --hero-shadow:0 24px 48px -22px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.07);
+  --hero-line:#71e3fe;
+  --mark-tile:linear-gradient(160deg,#1c1838,#0b0918); --hero-sheen:.18; } }
+:root[data-theme="dark"]{
+  --s1:#7c7dff; --s2:#f0609f; --s3:#22d3ee; --s4:#c4b5fd;
+  --hero-bg:linear-gradient(160deg,#1c1838 0%,#0b0918 100%);
+  --hero-glow:radial-gradient(300px 240px at 95% -10%,rgba(91,91,247,.55),transparent 70%),radial-gradient(260px 220px at 105% 105%,rgba(236,72,153,.38),transparent 70%),radial-gradient(280px 220px at -5% 115%,rgba(34,211,238,.30),transparent 70%);
+  --hero-shadow:0 24px 48px -22px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.07);
+  --hero-line:#71e3fe;
+  --mark-tile:linear-gradient(160deg,#1c1838,#0b0918); --hero-sheen:.18; }
+.hero-card{background:var(--hero-glow),var(--hero-bg);box-shadow:var(--hero-shadow)}
+.hero-card::after{opacity:var(--hero-sheen)}
+.glyph{background:linear-gradient(135deg,hsl(var(--h,240) 86% 64%),hsl(calc(var(--h,240) + 24) 84% 60%))}
+.bar i{background:linear-gradient(90deg,var(--v),var(--c))}
+.mv{display:inline-block;flex:none}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-body);font-weight:800;letter-spacing:-.04em;text-transform:lowercase;color:var(--ink)}
+.brief h1.brand{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--ink);font-size:var(--fs-xl)}
+.brand .tile{display:grid;place-items:center;border-radius:28%;background:var(--mark-tile);box-shadow:0 6px 14px -8px rgba(60,30,140,.5),inset 0 0 0 1px var(--glass-line)}
+.mobile-bar b.brand{display:inline-flex;gap:6px;font-weight:800}
+.nav-brand{display:none}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.theme-seg button{padding:5px 10px}
+@container (min-width: 760px){
+  .nav::before{content:none}
+  .nav-brand{display:flex;order:-2;padding:0 8px 16px;font-size:var(--fs-xl)}
+}
+</style>
+
+
+<style>
+/* Design system page (#design-system): a reference built from the live tokens and component classes above. */
+.shell[hidden],.ds[hidden]{display:none!important}
+.ds{height:100%;overflow:auto;background:radial-gradient(900px 600px at 90% -10%,var(--blob1),transparent 60%),radial-gradient(700px 500px at 0% 50%,var(--blob2),transparent 60%),radial-gradient(700px 500px at 70% 110%,var(--blob3),transparent 65%),var(--bg)}
+.ds-bar{position:sticky;top:0;z-index:5;background:var(--panel);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--glass-line)}
+.ds-bar-in{max-width:1080px;margin:0 auto;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ds-back{display:inline-flex;align-items:center;gap:6px;color:var(--accent);font-weight:var(--w-head);font-size:var(--fs-sm);text-decoration:none}
+.ds-main{max-width:1080px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:40px}
+.ds-head{display:flex;flex-direction:column;gap:10px}
+.ds-head h1{font-size:clamp(28px,5vw,40px);font-weight:var(--w-key);letter-spacing:-.03em;line-height:1.1}
+.ds-head p{color:var(--ink-2);max-width:64ch;margin:0}
+.ds-toc{display:flex;flex-wrap:wrap;gap:8px}
+.ds-toc a{font-size:var(--fs-sm);font-weight:var(--w-name);color:var(--ink-2);text-decoration:none;padding:6px 12px;border-radius:999px;background:var(--glass);border:1px solid var(--glass-line)}
+.ds-toc a:hover{color:var(--ink)}
+.ds-sec{display:flex;flex-direction:column;gap:16px;scroll-margin-top:72px}
+.ds-sec > header{display:flex;flex-direction:column;gap:4px}
+.ds-sec h2{font-size:var(--fs-xl);font-weight:var(--w-key);letter-spacing:-.02em}
+.ds-sec > header p{color:var(--ink-2);font-size:var(--fs-sm);margin:0;max-width:70ch}
+.ds h3{font-family:var(--font-body);font-size:var(--fs-md);font-weight:var(--w-head);color:var(--ink)}
+.ds-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.ds-note{font-size:var(--fs-sm);color:var(--ink-2);margin:0}
+.ds-note b{color:var(--ink);font-weight:var(--w-head)}
+.ds code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--ink-2)}
+/* brand */
+.ds-tiles{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
+.ds-tile{border-radius:22.5%;display:grid;place-items:center;flex:none}
+.ds-tile.l{background:linear-gradient(135deg,#ffffff,#e9e4ff);box-shadow:inset 0 0 0 1px rgba(22,18,43,.07),0 10px 20px -12px rgba(60,30,140,.45)}
+.ds-tile.d{background:linear-gradient(160deg,#1c1838,#0b0918);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 10px 20px -12px rgba(0,0,0,.6)}
+.ds-fig{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:var(--fs-xs);color:var(--ink-3)}
+.ds-lock{display:flex;flex-wrap:wrap;gap:12px}
+.ds-lock > div{flex:1 1 220px;border-radius:16px;padding:18px;display:flex;align-items:center;gap:10px;font-family:var(--font-body);font-weight:800;letter-spacing:-.04em;font-size:26px}
+.ds-lock .on-l{background:#f3f1fb;color:#16122b;border:1px solid rgba(22,18,43,.08)}
+.ds-lock .on-d{background:#0b0918;color:#f1eefc;border:1px solid rgba(255,255,255,.08)}
+.ds-rules{margin:0;padding-left:18px;display:grid;gap:6px;color:var(--ink-2);font-size:var(--fs-sm)}
+/* colour */
+.ds-sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.ds-sw > div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ds-sw i{display:block;height:56px;border-radius:14px;border:1px solid var(--line)}
+.ds-sw b{font-size:var(--fs-sm);font-weight:var(--w-head)}
+.ds-sw span{font-size:var(--fs-xs);color:var(--ink-3)}
+.ds-table{overflow-x:auto}
+.ds-table table{width:100%;border-collapse:collapse;font-size:var(--fs-sm)}
+.ds-table th{text-align:left;font-size:var(--fs-xs);font-weight:var(--w-head);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.ds-table td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--ink-2)}
+.ds-table tr:last-child td{border-bottom:0}
+.ds-table td:first-child{white-space:nowrap;color:var(--ink)}
+.ds-dot{display:inline-block;width:14px;height:14px;border-radius:5px;vertical-align:-2px;margin-right:6px;border:1px solid rgba(128,128,160,.3)}
+.ds-hex{display:inline-flex;align-items:center;white-space:nowrap}
+/* type */
+.ds-type{display:flex;flex-direction:column}
+.ds-type > div{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line)}
+.ds-type > div:last-child{border-bottom:0}
+.ds-type .meta{font-size:var(--fs-xs);color:var(--ink-3);line-height:1.4}
+.ds-type .meta b{display:block;color:var(--ink);font-size:var(--fs-sm);font-weight:var(--w-head)}
+.ds-type .smp{min-width:0;overflow-wrap:anywhere}
+.ds-faces{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px}
+.ds-face{display:flex;flex-direction:column;gap:6px}
+.ds-face .big{font-size:48px;line-height:1;letter-spacing:-.03em}
+/* spacing & radius */
+.ds-space{display:grid;gap:10px}
+.ds-space > div{display:grid;grid-template-columns:70px minmax(0,1fr);gap:12px;align-items:center;font-size:var(--fs-sm)}
+.ds-space i{display:block;height:14px;border-radius:4px;background:linear-gradient(90deg,var(--v),var(--c))}
+.ds-radii{display:flex;flex-wrap:wrap;gap:14px}
+.ds-radii > div{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:var(--fs-xs);color:var(--ink-3)}
+.ds-radii i{display:block;width:64px;height:64px;background:var(--accent-soft);border:1.5px solid var(--accent)}
+/* components */
+.ds-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ds-stack{display:flex;flex-direction:column;gap:14px}
+.ds-label{font-size:var(--fs-xs);font-weight:var(--w-head);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.ds-sec .card{padding:20px}
+.ds-mini-hero{border-radius:22px;padding:20px}
+.ds-chart{width:100%;height:auto;max-height:220px;display:block}
+@media (max-width:560px){ .ds-type > div{grid-template-columns:minmax(0,1fr);gap:4px} }
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <clipPath id="mvA"><circle cx="37" cy="39" r="24"/></clipPath><clipPath id="mvB"><circle cx="63" cy="39" r="24"/></clipPath>
+  <symbol id="mv-mark" viewBox="12 14 76 73">
+    <circle cx="37" cy="39" r="24" fill="#5b5bf7"/><circle cx="63" cy="39" r="24" fill="#ec4899"/><circle cx="50" cy="62" r="24" fill="#22d3ee"/>
+    <circle cx="63" cy="39" r="24" fill="#f389fc" clip-path="url(#mvA)"/><circle cx="50" cy="62" r="24" fill="#71e3fe" clip-path="url(#mvA)"/><circle cx="50" cy="62" r="24" fill="#eedff8" clip-path="url(#mvB)"/>
+    <g clip-path="url(#mvA)"><circle cx="50" cy="62" r="24" fill="#fbf5ff" clip-path="url(#mvB)"/></g>
+  </symbol></defs></svg>
+<div class="shell">
+  <div class="mobile-bar"><div><b class="brand"><svg class="mv" width="18" height="18"><use href="#mv-mark"/></svg>moneyverse</b> · klikací prototyp, ukázková data</div><span style="display:flex;gap:12px"><a class="linkbtn" href="#design-system">Design systém</a><button class="linkbtn" id="aboutBtn" type="button">O prototypu</button></span></div>
+  <aside class="brief" id="brief">
+    <div>
+      <h1 class="brand"><span class="tile" style="width:40px;height:40px"><svg class="mv" width="26" height="26"><use href="#mv-mark"/></svg></span>moneyverse</h1>
+      <div class="tag">Klikací prototyp osobního správce financí · všechna čísla jsou ukázková</div>
+    </div>
+    <div class="brief-body">
+      <section>
+        <h2>Vyzkoušejte</h2>
+        <ul>
+          <li>Klepněte na <b>+</b> a zapište kávu: napište částku, vyberte kategorii, uložte. Na počítači stačí psát číslice a stisknout Enter.</li>
+          <li>Zkuste výdaj z účtu v EUR. Částka zůstane v eurech, souhrny a grafy ji převedou na zvolenou měnu.</li>
+          <li>Na Přehledu zadejte listopadové hodnoty investic.</li>
+          <li>V Přehledech najeďte nebo přejeďte prstem po grafech pro přesné hodnoty.</li>
+          <li>V Plánu upravte rozpočet, pak v kalendáři potvrďte splatnou platbu.</li>
+          <li>Přepněte světlý a tmavý vzhled ikonou vpravo nahoře v aplikaci nebo v Nastavení.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Design systém</h2>
+        <p style="margin:0 0 8px">Barvy, písmo, mezery a komponenty, ze kterých je prototyp postavený.</p>
+        <a class="btn" href="#design-system" style="display:inline-block;text-decoration:none">Otevřít design systém</a>
+      </section>
+      <section>
+        <h2>Přejít na obrazovku</h2>
+        <div class="jump">
+          <button type="button" data-act="go" data-v="home">Přehled</button>
+          <button type="button" data-act="open-add">Rychlé zadání</button>
+          <button type="button" data-act="go" data-v="accounts">Účty</button>
+          <button type="button" data-act="open-snap">Hodnoty investic</button>
+          <button type="button" data-act="go" data-v="activity">Transakce</button>
+          <button type="button" data-act="plan" data-v="budgets">Rozpočty</button>
+          <button type="button" data-act="plan" data-v="calendar">Kalendář</button>
+          <button type="button" data-act="go" data-v="insights">Grafy</button>
+        </div>
+      </section>
+      <section class="wide-only">
+        <h2>Náhled jako</h2>
+        <div class="seg" role="group" aria-label="Velikost náhledu">
+          <button type="button" data-act="device" data-v="phone" aria-pressed="true">Telefon</button>
+          <button type="button" data-act="device" data-v="wide" aria-pressed="false">Počítač</button>
+        </div>
+      </section>
+      <section>
+        <h2>Nastavení</h2>
+        <div class="row-ctl" style="margin-bottom:10px">
+          <span class="muted">Vzhled</span>
+          <div class="seg theme-seg" role="group" aria-label="Vzhled">
+            <button type="button" data-act="theme" data-v="system" aria-pressed="true">Podle systému</button>
+            <button type="button" data-act="theme" data-v="light" aria-pressed="false">Světlý</button>
+            <button type="button" data-act="theme" data-v="dark" aria-pressed="false">Tmavý</button>
+          </div>
+        </div>
+        <div class="row-ctl">
+          <label for="curSel" class="muted">Zobrazovat souhrny v</label>
+          <select id="curSel" class="sel">
+            <option value="CZK">CZK Kč</option><option value="EUR">EUR €</option><option value="USD">USD $</option>
+          </select>
+          <button type="button" class="linkbtn" data-act="reset">Obnovit ukázková data</button>
+        </div>
+        <p class="muted" style="margin-top:8px" id="fxLine"></p>
+      </section>
+      <section>
+        <h2>Co plán navrhuje</h2>
+        <p>Nejdřív MVP: rychlé zadávání, všechny typy účtů včetně měsíčních hodnot investic, tři měny (CZK výchozí, EUR, USD) a grafy čistého jmění, zůstatků a kategorií. Rozpočty a kalendář opakovaných plateb přijdou v další fázi. Tady jsou klikací už teď, abyste je mohl posoudit.</p>
+        <p>Změny se ukládají jen v tomto prohlížeči. Dnešek je v prototypu 26. 11. 2026.</p>
+      </section>
+    </div>
+  </aside>
+
+  <main class="stage">
+    <div class="device" id="device">
+      <div class="app" id="app">
+        <header class="topbar" id="topbar"></header>
+        <div class="views" id="views"></div>
+        <nav class="nav" id="nav" aria-label="Hlavní navigace">
+          <div class="nav-brand brand" aria-hidden="true"><span class="tile" style="width:34px;height:34px"><svg class="mv" width="22" height="22"><use href="#mv-mark"/></svg></span>moneyverse</div>
+          <button type="button" data-act="go" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Přehled</button>
+          <button type="button" data-act="go" data-v="accounts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>Účty</button>
+          <button type="button" class="add" data-act="open-add" aria-label="Přidat transakci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Přidat transakci</span></button>
+          <button type="button" data-act="go" data-v="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plán</button>
+          <button type="button" data-act="go" data-v="insights"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 15l4-5 3 3 5-6"/></svg>Grafy</button>
+        </nav>
+        <div class="backdrop" id="backdrop" data-act="close-sheet"></div>
+        <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Panel"></section>
+        <div class="toast" id="toast" role="status"><span id="toastMsg"></span><button type="button" data-act="undo" id="undoBtn">Zpět</button></div>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="ds" id="ds" hidden></div>
+<div class="tip" id="tip"></div>
+
+<script>
+(function(){
+"use strict";
+document.documentElement.lang = "cs";
+const TODAY = "2026-11-26";
+const CUR_MONTH = "2026-11";
+const MONTHS = [];
+for (let i=0;i<12;i++){ const d=new Date(Date.UTC(2025,11+i,1)); MONTHS.push(d.toISOString().slice(0,7)); }
+const MON = ["led","úno","bře","dub","kvě","čvn","čvc","srp","zář","říj","lis","pro"];
+const MLONG = ["leden","únor","březen","duben","květen","červen","červenec","srpen","září","říjen","listopad","prosinec"];
+const MGEN = ["ledna","února","března","dubna","května","června","července","srpna","září","října","listopadu","prosince"];
+const mLabel = m => MON[+m.slice(5,7)-1];
+const mLong = m => MLONG[+m.slice(5,7)-1] + " " + m.slice(0,4);
+const mName = m => MLONG[+m.slice(5,7)-1];
+const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+const daysIn = m => new Date(Date.UTC(+m.slice(0,4), +m.slice(5,7), 0)).getUTCDate();
+const pad = n => String(n).padStart(2,"0");
+const addDays = (ds,n) => { const d=new Date(ds+"T00:00:00Z"); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); };
+const prevMonth = m => { const d=new Date(m+"-01T00:00:00Z"); d.setUTCMonth(d.getUTCMonth()-1); return d.toISOString().slice(0,7); };
+const nextMonth = m => { const d=new Date(m+"-01T00:00:00Z"); d.setUTCMonth(d.getUTCMonth()+1); return d.toISOString().slice(0,7); };
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const $ = id => document.getElementById(id);
+
+/* ---------- currencies: base CZK, sample rates ---------- */
+const FX = {CZK:1, EUR:25.0, USD:23.0}; // CZK per unit, sample
+let DISP = "CZK";
+try { DISP = localStorage.getItem("mv-cs-disp") || "CZK"; } catch(e){}
+const toBase = (v, cur) => v * FX[cur];
+const fromBase = (v, cur) => v / FX[cur];
+function nf(v, cur, dec){
+  try { return new Intl.NumberFormat("cs-CZ",{style:"currency",currency:cur,minimumFractionDigits:dec,maximumFractionDigits:dec}).format(v); }
+  catch(e){ return v.toFixed(dec)+" "+cur; }
+}
+// amount in its own currency
+function fmtA(v, cur){ const r=Math.round(v*100)/100; const dec = cur==="CZK" ? (Number.isInteger(r)?0:2) : 2; return nf(r,cur,dec); }
+// base CZK value shown in the display currency
+function fmtD(baseV, dec){ const v = fromBase(baseV, DISP); return nf(v, DISP, dec===undefined?0:dec); }
+function compactD(baseV){ const v = fromBase(baseV, DISP);
+  try { return new Intl.NumberFormat("cs-CZ",{style:"currency",currency:DISP,notation:"compact",maximumFractionDigits:1}).format(v); } catch(e){ return Math.round(v)+""; } }
+function symbol(cur){ return {CZK:"Kč",EUR:"€",USD:"$"}[cur]||cur; }
+const numCs = (v,dec) => new Intl.NumberFormat("cs-CZ",{minimumFractionDigits:dec,maximumFractionDigits:dec}).format(v);
+
+/* ---------- sample data ---------- */
+const ACCOUNTS = [
+  {id:"chk", name:"Běžný účet", type:"Běžný účet", kind:"cash", group:"Každodenní", cur:"CZK", opening:60000},
+  {id:"cc",  name:"Kreditní karta", type:"Kreditní karta", kind:"cash", group:"Každodenní", cur:"CZK", opening:-9500},
+  {id:"eur", name:"Účet v EUR", type:"Běžný účet", kind:"cash", group:"Každodenní", cur:"EUR", opening:1400},
+  {id:"sav", name:"Spořicí účet", type:"Spoření", kind:"cash", group:"Spoření", cur:"CZK", opening:205000},
+  {id:"brk", name:"Aktivní portfolio", type:"Brokerský účet", kind:"invest", group:"Investice", cur:"USD"},
+  {id:"fund",name:"Podílový fond", type:"Podílový fond", kind:"invest", group:"Investice", cur:"CZK"},
+  {id:"btc", name:"Bitcoin", type:"Kryptoměna", kind:"invest", group:"Investice", cur:"CZK"},
+  {id:"ret", name:"Penzijní spoření", type:"Penzijní", kind:"invest", group:"Penzijní", cur:"CZK"}
+];
+const CATS = [
+  {id:"groc",name:"Potraviny",g:"PO"},{id:"dine",name:"Restaurace",g:"RE"},{id:"tran",name:"Doprava",g:"DO"},
+  {id:"home",name:"Bydlení",g:"BY"},{id:"util",name:"Energie a služby",g:"EN"},{id:"subs",name:"Předplatné",g:"PŘ"},
+  {id:"heal",name:"Zdraví",g:"ZD"},{id:"shop",name:"Nákupy",g:"NÁ"},{id:"fun",name:"Zábava",g:"ZA"},
+  {id:"trav",name:"Cestování",g:"CE"},{id:"ins",name:"Pojištění",g:"PJ"},{id:"sal",name:"Mzda",g:"MZ",income:true},{id:"oinc",name:"Jiný příjem",g:"JP",income:true}
+];
+const TITLES = {groc:["Supermarket","Velký nákup","Pekárna","Farmářské trhy","Večerka"],dine:["Oběd","Káva","Večeře","Pizza","Brunch"],tran:["Jízdenka na vlak","Benzín","Lítačka","Taxi","Parkování"],shop:["Oblečení","Elektronika","Knihy","Do bytu","Dárek"],fun:["Kino","Koncert","Deskovky","Lezení"],heal:["Lékárna","Zubař"],trav:["Letenky","Hotel","Půjčení auta"]};
+const RECURRING = [
+  {id:"r-rent", title:"Nájem", amount:23750, kind:"expense", acct:"chk", cat:"home", day:1, every:1},
+  {id:"r-net",  title:"Internet", amount:599, kind:"expense", acct:"chk", cat:"util", day:3, every:1},
+  {id:"r-host", title:"Webhosting", amount:5.5, kind:"expense", acct:"eur", cat:"subs", day:4, every:1},
+  {id:"r-gym",  title:"Posilovna", amount:990, kind:"expense", acct:"cc", cat:"heal", day:8, every:1},
+  {id:"r-ins",  title:"Pojištění domácnosti", amount:4500, kind:"expense", acct:"chk", cat:"ins", day:10, every:3, start:1},
+  {id:"r-mus",  title:"Hudební streaming", amount:199, kind:"expense", acct:"cc", cat:"subs", day:12, every:1},
+  {id:"r-cloud",title:"Cloudové úložiště", amount:2.99, kind:"expense", acct:"eur", cat:"subs", day:14, every:1},
+  {id:"r-elec", title:"Elektřina", amount:1850, kind:"expense", acct:"chk", cat:"util", day:15, every:1},
+  {id:"r-phone",title:"Mobilní tarif", amount:499, kind:"expense", acct:"cc", cat:"util", day:20, every:1},
+  {id:"r-sal",  title:"Výplata", amount:80000, kind:"income", acct:"chk", cat:"sal", day:25, every:1},
+  {id:"r-save", title:"Převod na spoření", amount:7500, kind:"transfer", acct:"chk", to:"sav", day:26, every:1}
+];
+const BUDGETS = {groc:16000,dine:6500,tran:3800,home:23750,util:4800,subs:1600,heal:2500,shop:6500,fun:3000,ins:1500}; // CZK
+
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function recurringDue(r, m){ const mi=+m.slice(5,7); if (r.every===1) return true; return ((mi-(r.start||1))%r.every+r.every)%r.every===0; }
+
+function seed(){
+  const R = mulberry(20261126);
+  const rnd=(a,b)=>a+(b-a)*R(); const pick=a=>a[Math.floor(R()*a.length)];
+  const tx=[]; let n=0;
+  const add=o=>{ tx.push(Object.assign({id:"t"+(++n)},o)); };
+  let ccPrev = 9500; const confirmed = {};
+  for (const m of MONTHS){
+    const last = m===CUR_MONTH ? 26 : daysIn(m); let ccSpend = 0; const D = d => m+"-"+pad(d);
+    for (const r of RECURRING){
+      if (!recurringDue(r,m) || r.day>last) continue;
+      if (m===CUR_MONTH && (r.id==="r-phone" || r.id==="r-save")) continue;
+      let amt = r.amount; if (r.id==="r-elec") amt = Math.round(rnd(1450,2400));
+      if (r.kind==="transfer") add({date:D(r.day),kind:"transfer",acct:r.acct,to:r.to,amount:amt,toAmount:amt,title:r.title,rec:r.id});
+      else add({date:D(r.day),kind:r.kind,acct:r.acct,cat:r.cat,amount:amt,title:r.title,rec:r.id});
+      if (r.acct==="cc") ccSpend+=amt; confirmed[r.id+"|"+m]=true;
+    }
+    add({date:D(5),kind:"transfer",acct:"chk",to:"cc",amount:Math.round(ccPrev),toAmount:Math.round(ccPrev),title:"Splátka kreditní karty"});
+    const plan = [["groc",10,13,350,1950],["dine",6,10,110,1150],["tran",5,8,75,1050],["shop",1,4,450,3700],["fun",1,3,300,1500],["heal",0,1,220,1400]];
+    for (const [c,lo,hi,a,b] of plan){
+      const count = Math.round(rnd(lo,hi));
+      for (let i=0;i<count;i++){
+        const day = 1+Math.floor(R()*last);
+        const acct = (c==="groc"||c==="tran") ? (R()<.55?"chk":"cc") : "cc";
+        const amt = Math.round(rnd(a,b));
+        add({date:D(day),kind:"expense",acct,cat:c,amount:amt,title:pick(TITLES[c]),note:R()<.12?"s přáteli":""});
+        if (acct==="cc") ccSpend+=amt;
+      }
+    }
+    if (m==="2025-12"){ add({date:D(14),kind:"expense",acct:"cc",cat:"shop",amount:7160,title:"Vánoční dárky"}); ccSpend+=7160; }
+    if (m==="2026-07"){ add({date:D(18),kind:"expense",acct:"cc",cat:"trav",amount:15300,title:"Letenky",note:"Letní dovolená"}); ccSpend+=15300;
+      add({date:D(20),kind:"expense",acct:"eur",cat:"trav",amount:540,title:"Hotel",note:"Lisabon"}); add({date:D(21),kind:"expense",acct:"eur",cat:"dine",amount:86.4,title:"Večeře"}); add({date:D(22),kind:"expense",acct:"eur",cat:"tran",amount:42,title:"Taxi"}); }
+    if (m==="2026-03"){ add({date:D(9),kind:"income",acct:"eur",cat:"oinc",amount:420,title:"Faktura za freelance"}); }
+    if (m==="2026-10"){ add({date:D(22),kind:"expense",acct:"cc",cat:"shop",amount:8490,title:"Nová sluchátka"}); ccSpend+=8490; }
+    ccPrev = ccSpend;
+  }
+  const snaps = {brk:{},fund:{},btc:{},ret:{}};
+  let v = {brk:15600, fund:227000, btc:140000, ret:560000};
+  const drift = {brk:[.012,.035],fund:[.005,.012],btc:[.03,.14],ret:[.007,.01]};
+  const add2 = {brk:220, fund:0, btc:0, ret:3750};
+  const R2 = mulberry(77);
+  for (const m of MONTHS){ if (m===CUR_MONTH) break;
+    for (const k in v){ const [mu,sd]=drift[k]; v[k]=v[k]*(1+mu+(R2()-.5)*2*sd)+add2[k]; snaps[k][m]=Math.round(v[k]); } }
+  return {tx, snaps, budgets:Object.assign({},BUDGETS), confirmed, n, cats:[]};
+}
+
+let S;
+function load(){ try { const s = JSON.parse(localStorage.getItem("mv-cs-v1")||"null"); if (s && s.tx) return s; } catch(e){} return null; }
+function save(){ try { localStorage.setItem("mv-cs-v1", JSON.stringify(S)); } catch(e){} }
+S = load() || seed();
+if (!S.cats) S.cats = [];
+
+/* ---------- derived ---------- */
+const acctById = id => ACCOUNTS.find(a=>a.id===id);
+const allCats = () => CATS.slice(0,11).concat(S.cats).concat(CATS.slice(11));
+const catById = id => allCats().find(c=>c.id===id);
+const curOf = id => acctById(id).cur;
+function monthEndDate(m){ return m===CUR_MONTH ? TODAY : m+"-"+pad(daysIn(m)); }
+function cashBalance(id, upto){
+  let b = acctById(id).opening||0;
+  for (const t of S.tx){ if (t.date>upto) continue;
+    if (t.kind==="expense" && t.acct===id) b-=t.amount;
+    else if (t.kind==="income" && t.acct===id) b+=t.amount;
+    else if (t.kind==="transfer"){ if (t.acct===id) b-=t.amount; if (t.to===id) b+=(t.toAmount!=null?t.toAmount:t.amount); } }
+  return b;
+}
+function snapAt(id, m){ const s=S.snaps[id]||{}; let best=null,bm=null; for (const k in s){ if (k<=m && (bm===null||k>bm)){ bm=k; best=s[k]; } } return {value:best||0, month:bm, carried:bm!==m}; }
+function balanceAt(id, m){ const a=acctById(id); return a.kind==="invest" ? snapAt(id,m).value : cashBalance(id, monthEndDate(m)); } // own currency
+const baseAt = (id,m) => toBase(balanceAt(id,m), curOf(id));
+function series(id){ return MONTHS.map(m=>balanceAt(id,m)); }
+function netWorth(m){ return ACCOUNTS.reduce((s,a)=>s+baseAt(a.id,m),0); }
+function spendBy(m){ const o={}; for (const t of S.tx){ if (t.kind!=="expense"||t.date.slice(0,7)!==m) continue; o[t.cat]=(o[t.cat]||0)+toBase(t.amount,curOf(t.acct)); } return o; }
+function sum(o){ let s=0; for (const k in o) s+=o[k]; return s; }
+function incomeIn(m){ let s=0; for (const t of S.tx) if (t.kind==="income"&&t.date.slice(0,7)===m) s+=toBase(t.amount,curOf(t.acct)); return s; }
+function snapshotsDue(){ return ACCOUNTS.filter(a=>a.kind==="invest" && !(S.snaps[a.id]||{})[CUR_MONTH]); }
+
+/* ---------- charts ---------- */
+const CHARTS = {}; let chartSeq = 0; let WIDE = false; const MEAS = {}; let FITTING = false;
+function niceTicks(min,max,count){ if (min===max) max=min+1; const span=max-min, s0=span/count, mag=Math.pow(10,Math.floor(Math.log10(s0)));
+  const step=[1,2,2.5,5,10].map(x=>x*mag).find(x=>span/x<=count)||mag*10; const lo=Math.floor(min/step)*step, hi=Math.ceil(max/step)*step; const t=[];
+  for (let v=lo; v<=hi+1e-9; v+=step) t.push(Math.round(v*100)/100); return t; }
+function lineChart(opts){
+  const id="c"+(++chartSeq); const F = opts.fmt||(v=>fmtD(v)), C = opts.compact||compactD;
+  const W=MEAS[id]||((opts.wide&&WIDE)?640:340), H=opts.h||170, L=52, Rr=12, T=14, B=26; const labels=opts.labels, n=labels.length;
+  const stackS=opts.series.filter(s=>s.stack), lineS=opts.series.filter(s=>!s.stack);
+  const cum=stackS.map(()=>new Array(n).fill(0)); stackS.forEach((s,i)=>{ for(let j=0;j<n;j++) cum[i][j]=(i?cum[i-1][j]:0)+s.values[j]; });
+  let all=[]; cum.forEach(c=>all=all.concat(c)); lineS.forEach(s=>all=all.concat(s.values));
+  let min=Math.min.apply(null,all), max=Math.max.apply(null,all);
+  if (opts.zero||stackS.length||lineS.some(s=>s.area)) min=Math.min(0,min); else { const pd=(max-min)*.15||1; min-=pd; }
+  const ticks=niceTicks(min,max,4), y0=ticks[0], y1=ticks[ticks.length-1];
+  const x=j=>L+(W-L-Rr)*(n===1?.5:j/(n-1)), y=v=>T+(H-T-B)*(1-(v-y0)/(y1-y0));
+  let g="<defs>"; stackS.forEach((s,i)=>{ g+=`<linearGradient id="${id}-s${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:${s.color};stop-opacity:.95"/><stop offset="1" style="stop-color:${s.color};stop-opacity:.6"/></linearGradient>`; });
+  const ar=lineS.find(s=>s.area); if (ar) g+=`<linearGradient id="${id}-a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:${ar.color};stop-opacity:.42"/><stop offset="1" style="stop-color:${ar.color};stop-opacity:0"/></linearGradient>`;
+  g+="</defs>";
+  ticks.forEach(t=>{ g+=`<line class="grid" x1="${L}" x2="${W-Rr}" y1="${y(t)}" y2="${y(t)}"/><text x="${L-6}" y="${y(t)+3}" text-anchor="end">${esc(C(t))}</text>`; });
+  if (y0<0&&y1>0) g+=`<line class="base" x1="${L}" x2="${W-Rr}" y1="${y(0)}" y2="${y(0)}"/>`;
+  const every=n>8?2:1; labels.forEach((lb,j)=>{ if (j%every===(n-1)%every) g+=`<text x="${x(j)}" y="${H-6}" text-anchor="middle">${esc(lb)}</text>`; });
+  stackS.forEach((s,i)=>{ const top=cum[i].map((v,j)=>`${x(j)},${y(v)}`), bot=(i?cum[i-1]:new Array(n).fill(0)).map((v,j)=>`${x(j)},${y(v)}`).reverse();
+    g+=`<polygon points="${top.concat(bot).join(" ")}" fill="url(#${id}-s${i})" stroke="var(--surface)" stroke-width="1.5" stroke-linejoin="round"/>`; });
+  lineS.forEach(s=>{ const pts=s.values.map((v,j)=>`${x(j)},${y(v)}`).join(" ");
+    if (s.area) g+=`<polygon points="${x(0)},${y(Math.max(0,y0))} ${pts} ${x(n-1)},${y(Math.max(0,y0))}" fill="url(#${id}-a)"/>`;
+    g+=`<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" ${s.dash?'stroke-dasharray="5 4"':''}/>`;
+    g+=`<circle cx="${x(n-1)}" cy="${y(s.values[n-1])}" r="4.5" fill="${s.color}" stroke="var(--surface)" stroke-width="2"/>`; });
+  g+=`<line class="xh" id="${id}-xh" x1="0" x2="0" y1="${T}" y2="${H-B}"/><rect class="hit" data-chart="${id}" x="${L}" y="0" width="${W-L-Rr+6}" height="${H}"/>`;
+  CHARTS[id]={W,xs:labels.map((_,j)=>x(j)),rows:labels.map((lb,j)=>{ let h=`<b>${esc(opts.tipLabels?opts.tipLabels[j]:lb)}</b>`;
+    opts.series.slice().reverse().forEach(s=>{ h+=`<div class="r"><span><i class="sw" style="background:${s.color}"></i>${esc(s.name)}</span><span class="num">${esc(F(s.values[j]))}</span></div>`; });
+    if (opts.extraTip) h+=opts.extraTip(j); return h; })};
+  return `<svg class="chart" data-cid="${id}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.aria||"Graf")}">${g}</svg>`;
+}
+function columnChart(opts){
+  const id="c"+(++chartSeq);
+  const W=MEAS[id]||340,H=opts.h||170,L=52,Rr=8,T=14,B=26,n=opts.values.length;
+  const max=Math.max.apply(null,opts.values.concat([opts.ref||0,1])); const ticks=niceTicks(0,max,4), y1=ticks[ticks.length-1];
+  const y=v=>T+(H-T-B)*(1-v/y1), bw=(W-L-Rr)/n, w=Math.max(4,bw-6); let g=`<defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--g2)"/><stop offset="1" style="stop-color:var(--g1)"/></linearGradient></defs>`;
+  ticks.forEach(t=>{ g+=`<line class="grid" x1="${L}" x2="${W-Rr}" y1="${y(t)}" y2="${y(t)}"/><text x="${L-6}" y="${y(t)+3}" text-anchor="end">${esc(compactD(t))}</text>`; });
+  opts.values.forEach((v,j)=>{ const x0=L+j*bw+(bw-w)/2, top=y(v), base=y(0), r=Math.min(4,(base-top)/2);
+    if (v>0) g+=`<path d="M${x0},${base} V${top+r} Q${x0},${top} ${x0+r},${top} H${x0+w-r} Q${x0+w},${top} ${x0+w},${top+r} V${base} Z" fill="url(#cg)" fill-opacity="${j===n-1?1:.5}"/>`;
+    g+=`<rect class="hit" x="${L+j*bw}" y="${T}" width="${bw}" height="${H-T-B}" data-tip="${esc(`<b>${opts.tipLabels[j]}</b><div class="r"><span>${opts.name}</span><span class="num">${fmtD(v)}</span></div>`)}"/>`;
+    if (j%(n>8?2:1)===(n-1)%(n>8?2:1)) g+=`<text x="${L+j*bw+bw/2}" y="${H-6}" text-anchor="middle">${esc(opts.labels[j])}</text>`; });
+  if (opts.ref) g+=`<line x1="${L}" x2="${W-Rr}" y1="${y(opts.ref)}" y2="${y(opts.ref)}" stroke="var(--ink-2)" stroke-dasharray="4 3"/><text x="${W-Rr}" y="${y(opts.ref)-4}" text-anchor="end">${esc(opts.refLabel)}</text>`;
+  g+=`<line class="base" x1="${L}" x2="${W-Rr}" y1="${y(0)}" y2="${y(0)}"/>`;
+  return `<svg class="chart" data-cid="${id}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.aria)}">${g}</svg>`;
+}
+function spark(values,color){ const W=70,H=26,n=values.length,mn=Math.min.apply(null,values),mx=Math.max.apply(null,values),sp=(mx-mn)||1;
+  return `<svg viewBox="0 0 ${W} ${H}" width="70" height="26" aria-hidden="true"><polyline points="${values.map((v,j)=>`${(j/(n-1))*W},${H-3-(v-mn)/sp*(H-6)}`).join(" ")}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linejoin="round"/></svg>`; }
+
+/* ---------- UI ---------- */
+const UI = {view:"home", planTab:"budgets", acct:null, range:12, trendCat:"all", calMonth:CUR_MONTH, calDay:TODAY, q:"", fAcct:"all", editBud:null};
+const ICON = {
+  back:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>`,
+  list:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>`,
+  check:`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>`,
+  clock:`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>`,
+  moon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>`,
+  sun:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>`,
+  warn:`<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>`
+};
+const HUE = {groc:188,dine:328,tran:236,home:252,util:200,subs:290,heal:340,shop:312,fun:182,trav:222,ins:268,sal:176,oinc:190}; // around the brand violet, pink and cyan
+const ccyTag = cur => cur==="CZK" ? "" : `<span class="ccy">${cur}</span>`;
+
+function txRow(t){
+  const c = t.kind==="transfer"?null:catById(t.cat); const a=acctById(t.acct);
+  const glyph = t.kind==="transfer"?"⇄":c.g;
+  const meta = t.kind==="transfer" ? `${a.name} → ${acctById(t.to).name}` : `${c.name} · ${a.name}${t.note?" · "+esc(t.note):""}`;
+  const cls = t.kind==="income"?"in":t.kind==="transfer"?"tr":""; const sign = t.kind==="income"?"+":t.kind==="transfer"?"":"−";
+  const conv = a.cur!==DISP && t.kind!=="transfer" ? `<span class="orig">≈ ${esc(fmtD(toBase(t.amount,a.cur)))}</span>` : "";
+  return `<button type="button" class="tx" data-act="edit-tx" data-v="${t.id}"><span class="glyph" aria-hidden="true" style="--h:${t.kind==="transfer"?200:HUE[t.cat]||260}">${glyph}</span><span style="min-width:0"><div class="t">${esc(t.title||(c?c.name:"Převod"))}</div><div class="m">${meta}</div></span><span class="amt ${cls}">${sign}${esc(fmtA(t.amount,a.cur))}${conv}</span></button>`;
+}
+function sortedTx(){ return S.tx.slice().sort((a,b)=>a.date===b.date?(b.id.slice(1)-a.id.slice(1)):(a.date<b.date?1:-1)); }
+function dayLabel(ds){ if (ds===TODAY) return "Dnes"; if (ds===addDays(TODAY,-1)) return "Včera";
+  const d=new Date(ds+"T00:00:00Z"); return ["ne","po","út","st","čt","pá","so"][d.getUTCDay()]+" "+d.getUTCDate()+". "+MGEN[d.getUTCMonth()]; }
+
+function vHome(){
+  const nw=MONTHS.map(netWorth), cur=nw[11], prev=nw[10], d=cur-prev, pct=prev?d/Math.abs(prev)*100:0;
+  const sp=spendBy(CUR_MONTH), spent=sum(sp), bud=sum(S.budgets), pctB=Math.min(100,spent/bud*100), dayFrac=26/30;
+  const due=snapshotsDue(), up=upcoming(4), recent=sortedTx().slice(0,6);
+  const top=Object.keys(sp).sort((a,b)=>sp[b]-sp[a]).slice(0,4), maxTop=top.length?sp[top[0]]:1;
+  return `<div class="view grid2">
+    ${due.length?`<div class="banner span"><p><b>Je čas zadat listopadové hodnoty.</b> U ${due.length} investičních účtů je zatím říjnová hodnota.</p><button type="button" class="btn" data-act="open-snap">Zadat</button></div>`:""}
+    <div class="card span hero-card"><div class="home-hero"><div>
+      <div class="eyebrow">Čisté jmění <span class="sample">Ukázka</span></div>
+      <div class="hero-num num">${esc(fmtD(cur))}</div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="delta ${d>=0?"up":"down"}">${d>=0?"▲":"▼"} ${esc(fmtD(Math.abs(d)))} · ${numCs(Math.abs(pct),1)} %</span><span class="muted">oproti konci října</span></div>
+    </div><div>${lineChart({labels:MONTHS.map(mLabel),tipLabels:MONTHS.map(m=>cap(mLong(m))),series:[{name:"Čisté jmění",color:"var(--hero-line)",values:nw,area:true}],h:150,aria:"Čisté jmění za posledních 12 měsíců"})}</div></div></div>
+    <div class="card">
+      <div class="card-head"><h3>Utraceno v listopadu</h3><button type="button" class="more" data-act="plan" data-v="budgets">Rozpočty</button></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><span class="hero-num num md">${esc(fmtD(spent))}</span><span class="muted num">z rozpočtu ${esc(fmtD(bud))}</span></div>
+      <div class="bar" style="margin:10px 0 4px"><i class="${spent>bud?"over":pctB>dayFrac*100+8?"warn":""}" style="width:${pctB}%"></i></div>
+      <div class="muted">Uplynulo ${Math.round(dayFrac*100)} % měsíce</div>
+      <div class="hbars" style="margin-top:12px">${top.map(c=>`<div class="hb"><span class="lb">${esc(catById(c).name)}</span><span class="tracks"><i style="width:${sp[c]/maxTop*100}%;background:var(--s1)" data-tip="${esc(`<b>${catById(c).name}</b><div class='r'><span>Listopad</span><span>${fmtD(sp[c])}</span></div>`)}"></i></span><span class="v">${esc(fmtD(sp[c]))}</span></div>`).join("")}</div>
+    </div>
+    <div class="card"><div class="card-head"><h3>Nadcházející platby</h3><button type="button" class="more" data-act="plan" data-v="calendar">Kalendář</button></div><div class="list">${up.map(recRow).join("")}</div></div>
+    <div class="card span"><div class="card-head"><h3>Poslední transakce</h3><button type="button" class="more" data-act="go" data-v="activity">Všechny transakce</button></div><div class="list">${recent.map(txRow).join("")}</div></div>
+  </div>`;
+}
+
+function vAccounts(){
+  const groups=["Každodenní","Spoření","Investice","Penzijní"]; const nw=netWorth(CUR_MONTH);
+  const assets=ACCOUNTS.reduce((s,a)=>{const b=baseAt(a.id,CUR_MONTH); return s+(b>0?b:0);},0), debts=nw-assets;
+  return `<div class="view grid2">
+    <div class="card span" style="display:flex;gap:18px;flex-wrap:wrap;justify-content:space-between">
+      <div><div class="eyebrow">Čisté jmění</div><div class="hero-num num md">${esc(fmtD(nw))}</div></div>
+      <div><div class="eyebrow">Majetek</div><div class="num figure" style="margin-top:4px">${esc(fmtD(assets))}</div></div>
+      <div><div class="eyebrow">Dluhy</div><div class="num figure" style="margin-top:4px;color:var(--neg)">${esc(fmtD(debts))}</div></div>
+    </div>
+    ${groups.map(gname=>{ const list=ACCOUNTS.filter(a=>a.group===gname); const tot=list.reduce((s,a)=>s+baseAt(a.id,CUR_MONTH),0);
+      return `<div class="card group"><div class="group-head"><h3>${gname}</h3><span class="num" style="font-weight:600">${esc(fmtD(tot))}</span></div>
+      ${list.map(a=>{ const b=balanceAt(a.id,CUR_MONTH); const sn=a.kind==="invest"?snapAt(a.id,CUR_MONTH):null;
+        return `<button type="button" class="acct" data-act="acct" data-v="${a.id}"><span style="min-width:0"><div class="n">${esc(a.name)}${ccyTag(a.cur)}</div><div class="ty">${esc(a.type)}${sn&&sn.carried?` · <span style="color:var(--warn)">hodnota za ${MLONG[+sn.month.slice(5,7)-1]}</span>`:""}</div></span>${spark(series(a.id),b<0?"var(--neg)":"var(--s1)")}<span class="amt" style="${b<0?"color:var(--neg)":""}">${esc(fmtA(Math.round(b),a.cur))}${a.cur!==DISP?`<span class="orig">≈ ${esc(fmtD(toBase(b,a.cur)))}</span>`:""}</span></button>`; }).join("")}
+      </div>`; }).join("")}
+    <div class="card span" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><b>Měsíční hodnoty investic</b><div class="muted">Portfolio, fond, bitcoin a penzijní spoření zadáváte ručně jednou za měsíc, každé ve své měně.</div></div><button type="button" class="btn ghost" data-act="open-snap">Zadat hodnoty</button></div>
+  </div>`;
+}
+
+function vAccount(){
+  const a=acctById(UI.acct), s=series(a.id), b=s[11]; let lower="";
+  const F = v=>fmtA(Math.round(v),a.cur);
+  const C = v=>{ try { return new Intl.NumberFormat("cs-CZ",{style:"currency",currency:a.cur,notation:"compact",maximumFractionDigits:1}).format(v);} catch(e){return v;} };
+  if (a.kind==="invest"){
+    lower=`<div class="card"><div class="card-head"><h3>Měsíční hodnoty</h3><button type="button" class="more" data-act="open-snap">Zadat</button></div>${MONTHS.slice().reverse().map(m=>{ const sn=snapAt(a.id,m);
+      return `<div class="kv"><span>${cap(mLong(m))}</span><span class="num">${sn.month?esc(F(sn.value)):"—"}${sn.carried&&sn.month?` <span class="muted">(převzato z ${MGEN[+sn.month.slice(5,7)-1]})</span>`:""}</span></div>`; }).join("")}</div>`;
+  } else {
+    lower=`<div class="card"><div class="card-head"><h3>Transakce</h3></div><div class="list">${sortedTx().filter(t=>t.acct===a.id||t.to===a.id).slice(0,25).map(txRow).join("")}</div></div>`;
+  }
+  return `<div class="view grid2">
+    <div class="span"><button type="button" class="back" data-act="go" data-v="accounts">${ICON.back} Účty</button></div>
+    <div class="card span"><div class="eyebrow">${esc(a.type)} · ${a.cur}</div>
+      <div class="hero-num num" style="${b<0?"color:var(--neg)":""}">${esc(F(b))}</div>
+      <div class="muted" style="margin-bottom:8px">${a.kind==="invest"?"Hodnota ke konci měsíce, zadaná ručně":"Zůstatek ke konci měsíce"}${a.cur!==DISP?` · ≈ ${esc(fmtD(toBase(b,a.cur)))}`:""}</div>
+      ${lineChart({wide:true,labels:MONTHS.map(mLabel),tipLabels:MONTHS.map(m=>cap(mLong(m))),series:[{name:a.name,color:b<0?"var(--neg)":"var(--s1)",values:s,area:true}],h:160,fmt:F,compact:C,aria:a.name+" za 12 měsíců"})}
+    </div>${lower}</div>`;
+}
+
+function vActivity(){
+  const q=UI.q.trim().toLowerCase();
+  const list=sortedTx().filter(t=>{ if (UI.fAcct!=="all"&&t.acct!==UI.fAcct&&t.to!==UI.fAcct) return false; if (!q) return true;
+    const c=t.cat?catById(t.cat).name:"převod"; return (t.title||"").toLowerCase().includes(q)||c.toLowerCase().includes(q)||(t.note||"").toLowerCase().includes(q); });
+  const shown=list.slice(0,80); let html="",cur=null,dayTot=0,buf="";
+  const flush=()=>{ if (cur) html+=`<div class="dayhead"><span>${dayLabel(cur)}</span><span class="num">${dayTot?"−"+esc(fmtD(dayTot)):""}</span></div><div class="list">${buf}</div>`; };
+  for (const t of shown){ if (t.date!==cur){ flush(); cur=t.date; dayTot=0; buf=""; } if (t.kind==="expense") dayTot+=toBase(t.amount,curOf(t.acct)); buf+=txRow(t); }
+  flush();
+  return `<div class="view">
+    <div style="display:grid;gap:8px"><input class="txt" id="searchInput" type="search" placeholder="Hledat podle názvu, kategorie nebo poznámky" value="${esc(UI.q)}" aria-label="Hledat transakce">
+      <div class="chips">${[["all","Všechny účty"]].concat(ACCOUNTS.filter(a=>a.kind==="cash").map(a=>[a.id,a.name])).map(([id,n])=>`<button type="button" class="chip" data-act="facct" data-v="${id}" aria-pressed="${UI.fAcct===id}">${esc(n)}</button>`).join("")}</div></div>
+    <div class="card" style="padding-top:2px">${shown.length?html:`<div class="empty">Nic neodpovídá hledání „${esc(UI.q)}“.</div>`}</div>
+    ${list.length>80?`<div class="muted" style="text-align:center">Zobrazeno posledních 80 z ${list.length}</div>`:""}
+  </div>`;
+}
+
+function recState(r,m){ if (S.confirmed[r.id+"|"+m]) return "done"; return (m+"-"+pad(Math.min(r.day,daysIn(m))))<=TODAY?"due":"next"; }
+function occurrences(m){ return RECURRING.filter(r=>recurringDue(r,m)).map(r=>({r,m,date:m+"-"+pad(Math.min(r.day,daysIn(m))),state:recState(r,m)})); }
+function upcoming(k){ const all=occurrences(CUR_MONTH).concat(occurrences(nextMonth(CUR_MONTH)));
+  return all.filter(o=>o.state==="due").concat(all.filter(o=>o.state==="next").sort((a,b)=>a.date<b.date?-1:1)).slice(0,k); }
+function recRow(o){
+  const d=new Date(o.date+"T00:00:00Z"), r=o.r, cur=curOf(r.acct);
+  const amt = r.kind==="income"?`<span class="amt in">+${esc(fmtA(r.amount,cur))}</span>`:`<span class="amt ${r.kind==="transfer"?"tr":""}">${r.kind==="transfer"?"":"−"}${esc(fmtA(r.amount,cur))}</span>`;
+  const st = o.state==="done"?`<span class="state done">${ICON.check} Zaplaceno</span>`:o.state==="due"?`<span class="state due">${ICON.clock} Splatné · nezapsáno</span>`:`<span class="state next">Naplánováno</span>`;
+  const sub = r.kind==="transfer"?`${acctById(r.acct).name} → ${acctById(r.to).name}`:`${catById(r.cat).name} · ${acctById(r.acct).name}`;
+  return `<div class="rec"><div class="when">${MON[d.getUTCMonth()]}<b>${d.getUTCDate()}</b></div><div style="min-width:0"><div class="t">${esc(r.title)}</div><div class="m muted">${esc(sub)} · ${r.every===1?"měsíčně":"každé "+r.every+" měsíce"}</div><div>${st}</div></div><div style="display:grid;gap:6px;justify-items:end">${amt}${o.state==="due"?`<button type="button" class="btn" style="padding:5px 10px" data-act="confirm" data-v="${r.id}|${o.m}">Potvrdit</button>`:""}</div></div>`;
+}
+
+function vPlan(){
+  return `<div class="view"><div class="seg" role="group" aria-label="Zobrazení plánu" style="align-self:flex-start"><button type="button" data-act="ptab" data-v="budgets" aria-pressed="${UI.planTab==="budgets"}">Rozpočty</button><button type="button" data-act="ptab" data-v="calendar" aria-pressed="${UI.planTab==="calendar"}">Kalendář plateb</button></div>${UI.planTab==="budgets"?vBudgets():vCalendar()}</div>`;
+}
+function vBudgets(){
+  const sp=spendBy(CUR_MONTH), frac=26/30, cats=allCats().filter(c=>!c.income);
+  const totB=sum(S.budgets), totS=cats.reduce((s,c)=>s+(sp[c.id]||0),0);
+  const rows=cats.map(c=>{ const b=S.budgets[c.id]||0, s=sp[c.id]||0, p=b?s/b:0;
+    let state="ok", label=b?`${Math.round(p*100)} %`:"Bez rozpočtu";
+    if (b&&s>b){ state="over"; label=`o ${fmtD(s-b)} přes`; } else if (b&&p>frac+.08){ state="warn"; label="Rychlejší tempo"; }
+    const ctl = UI.editBud===c.id ? `<input class="budinput num" id="budInput" type="number" inputmode="decimal" min="0" step="100" value="${Math.round(fromBase(b,DISP))}" data-cat="${c.id}" aria-label="Rozpočet pro ${esc(c.name)} v ${DISP}">` : `<button type="button" class="budedit num" data-act="edit-bud" data-v="${c.id}">${b?fmtD(b):"Nastavit"}</button>`;
+    return `<div class="bud"><div class="top"><span style="font-weight:var(--w-name)">${esc(c.name)} <span class="pill ${state}">${state==="over"?ICON.warn+" ":""}${esc(label)}</span></span><span class="muted num">${esc(fmtD(s))} z ${ctl}</span></div>${b?`<div class="bar"><i class="${state==="ok"?"":state}" style="width:${Math.min(100,p*100)}%"></i></div>`:""}</div>`; }).join("");
+  return `<div class="grid2">
+    <div class="card span"><div class="eyebrow">Rozpočet na listopad</div><div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px"><span class="hero-num num md">${esc(fmtD(totS))}</span><span class="muted num">zbývá ${esc(fmtD(Math.max(0,totB-totS)))} z ${esc(fmtD(totB))}</span></div><div class="bar" style="margin-top:10px"><i class="${totS>totB?"over":""}" style="width:${Math.min(100,totS/totB*100)}%"></i></div><div class="muted" style="margin-top:4px">Do konce měsíce zbývají 4 dny. Klepnutím na částku rozpočet změníte. Výdaje v EUR a USD se započítají přepočtené.</div></div>
+    <div class="card span">${rows}</div></div>`;
+}
+function vCalendar(){
+  const m=UI.calMonth, first=new Date(m+"-01T00:00:00Z"), lead=(first.getUTCDay()+6)%7, dim=daysIn(m), occ=occurrences(m), byDay={};
+  occ.forEach(o=>{ (byDay[o.date]=byDay[o.date]||[]).push(o); });
+  let cells=["Po","Út","St","Čt","Pá","So","Ne"].map(d=>`<div class="dow">${d}</div>`).join("");
+  for (let i=0;i<lead;i++) cells+=`<div class="d out" aria-hidden="true"></div>`;
+  for (let d=1; d<=dim; d++){ const ds=m+"-"+pad(d), os=byDay[ds]||[];
+    cells+=`<button type="button" class="d ${ds===TODAY?"today":""}" data-act="cal-day" data-v="${ds}" aria-pressed="${UI.calDay===ds}" aria-label="${d}. ${MGEN[+m.slice(5,7)-1]}, plateb: ${os.length}"><span class="num">${d}</span><span class="dots">${os.map(o=>`<i class="${o.state==="done"?"done":o.state==="due"?"due":o.r.kind==="income"?"inc":""}"></i>`).join("")}</span></button>`; }
+  const sel=byDay[UI.calDay]||[], showSel=UI.calDay.slice(0,7)===m&&sel.length;
+  const out=occ.filter(o=>o.r.kind==="expense").reduce((s,o)=>s+toBase(o.r.amount,curOf(o.r.acct)),0), inc=occ.filter(o=>o.r.kind==="income").reduce((s,o)=>s+toBase(o.r.amount,curOf(o.r.acct)),0);
+  return `<div class="grid2">
+    <div class="card"><div class="card-head"><button type="button" class="iconbtn" data-act="cal-prev" aria-label="Předchozí měsíc">${ICON.back}</button><h3>${cap(mLong(m))}</h3><button type="button" class="iconbtn" data-act="cal-next" aria-label="Další měsíc" style="transform:scaleX(-1)">${ICON.back}</button></div>
+      <div class="cal">${cells}</div>
+      <div class="legend" style="margin-top:10px"><span><i style="background:var(--pos);border-radius:50%"></i>Zaplaceno</span><span><i style="background:var(--warn);border-radius:50%"></i>Splatné, nezapsáno</span><span><i style="background:var(--ink-3);border-radius:50%"></i>Naplánováno</span><span><i style="background:var(--s1);border-radius:50%"></i>Příjem</span></div></div>
+    <div class="card"><div class="card-head"><h3>${showSel?cap(dayLabel(UI.calDay)):"Tento měsíc"}</h3><span class="muted num">−${esc(fmtD(out))} platby · +${esc(fmtD(inc))} příjmy</span></div><div class="list">${(showSel?sel:occ).map(recRow).join("")}</div></div></div>`;
+}
+
+function vInsights(){
+  const k=UI.range, ms=MONTHS.slice(12-k), labels=ms.map(mLabel), tl=ms.map(m=>cap(mLong(m)));
+  const grp=ids=>ms.map(m=>ids.reduce((s,id)=>s+baseAt(id,m),0));
+  const cashV=grp(["chk","eur","sav"]), invV=grp(["brk","fund"]), btcV=grp(["btc"]), retV=grp(["ret"]), debtV=grp(["cc"]), nwV=ms.map(netWorth);
+  const comp=lineChart({wide:true,labels,tipLabels:tl,h:190,aria:"Složení čistého jmění",series:[{name:"Hotovost a spoření",color:"var(--s1)",values:cashV,stack:true},{name:"Investice",color:"var(--s2)",values:invV,stack:true},{name:"Bitcoin",color:"var(--s3)",values:btcV,stack:true},{name:"Penzijní spoření",color:"var(--s4)",values:retV,stack:true},{name:"Čisté jmění",color:"var(--ink)",values:nwV,dash:true}],
+    extraTip:j=>`<div class="r" style="opacity:.8"><span>Dluh na kreditce</span><span class="num">${esc(fmtD(debtV[j]))}</span></div>`});
+  const bal=lineChart({labels,tipLabels:tl,h:170,aria:"Zůstatky účtů v čase",zero:true,series:[{name:"Běžný účet",color:"var(--s1)",values:grp(["chk"])},{name:"Účet v EUR",color:"var(--s2)",values:grp(["eur"])},{name:"Kreditní karta",color:"var(--s3)",values:debtV}]});
+  const tv=ms.map(m=>{ const sp=spendBy(m); return UI.trendCat==="all"?sum(sp):(sp[UI.trendCat]||0); });
+  const avg=tv.slice(0,-1).reduce((a,b)=>a+b,0)/Math.max(1,tv.length-1);
+  const tCats=[["all","Všechny výdaje"]].concat(allCats().filter(c=>!c.income).map(c=>[c.id,c.name]));
+  const trend=columnChart({values:tv,labels,tipLabels:tl,color:"var(--s1)",name:UI.trendCat==="all"?"Výdaje":catById(UI.trendCat).name,ref:avg,refLabel:"průměr "+compactD(avg),aria:"Výdaje po měsících"});
+  const now=spendBy(CUR_MONTH), prevMs=ms.slice(0,-1), avgBy={}; prevMs.forEach(m=>{ const s=spendBy(m); for (const c in s) avgBy[c]=(avgBy[c]||0)+s[c]/prevMs.length; });
+  const cats=allCats().filter(c=>!c.income&&(now[c.id]||avgBy[c.id])).sort((a,b)=>Math.max(now[b.id]||0,avgBy[b.id]||0)-Math.max(now[a.id]||0,avgBy[a.id]||0));
+  const mx=Math.max.apply(null,cats.map(c=>Math.max(now[c.id]||0,avgBy[c.id]||0)).concat([1]));
+  const cmp=cats.map(c=>{ const a=now[c.id]||0,b=avgBy[c.id]||0; const tip=`<b>${c.name}</b><div class='r'><span><i class='sw' style='background:var(--s1)'></i>Listopad</span><span>${fmtD(a)}</span></div><div class='r'><span><i class='sw' style='background:var(--s2)'></i>Průměr ${k-1} měs.</span><span>${fmtD(b)}</span></div>`;
+    return `<div class="hb" data-tip="${esc(tip)}"><span class="lb">${esc(c.name)}</span><span class="tracks"><i style="width:${a/mx*100}%;background:var(--s1)"></i><i style="width:${b/mx*100}%;background:var(--s2)"></i></span><span class="v">${esc(fmtD(a))}</span></div>`; }).join("");
+  const inc=ms.map(incomeIn), out=ms.map(m=>sum(spendBy(m))), ti=inc.reduce((a,b)=>a+b,0), saved=ti-out.reduce((a,b)=>a+b,0), rate=ti?saved/ti*100:0;
+  const ivs=lineChart({labels,tipLabels:tl,h:150,aria:"Příjmy a výdaje",zero:true,series:[{name:"Příjmy",color:"var(--s1)",values:inc},{name:"Výdaje",color:"var(--s2)",values:out}]});
+  return `<div class="view">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div class="seg" role="group" aria-label="Období"><button type="button" data-act="range" data-v="6" aria-pressed="${k===6}">6 měsíců</button><button type="button" data-act="range" data-v="12" aria-pressed="${k===12}">12 měsíců</button></div><span class="sample">Ukázková data · v ${DISP}</span></div>
+    <div class="grid2">
+      <div class="card span"><div class="card-head"><h3>Složení čistého jmění</h3><span class="num" style="font-weight:600">${esc(fmtD(nwV[nwV.length-1]))}</span></div>${comp}
+        <div class="legend" style="margin-top:8px"><span><i style="background:var(--s1)"></i>Hotovost a spoření</span><span><i style="background:var(--s2)"></i>Investice</span><span><i style="background:var(--s3)"></i>Bitcoin</span><span><i style="background:var(--s4)"></i>Penzijní spoření</span><span><i class="dash"></i>Čisté jmění po odečtení dluhu na kreditce</span></div>
+        <div class="muted" style="margin-top:6px">Listopad používá říjnové hodnoty investic, dokud nezadáte nové. Účty v EUR a USD jsou přepočtené ukázkovým kurzem.</div></div>
+      <div class="card"><div class="card-head"><h3>Výdaje po měsících</h3></div>
+        <div class="chips" style="margin-bottom:8px">${tCats.slice(0,7).map(([id,n])=>`<button type="button" class="chip" data-act="tcat" data-v="${id}" aria-pressed="${UI.trendCat===id}">${esc(n)}</button>`).join("")}</div>
+        ${trend}<div class="muted">Listopad zatím do 26. dne. Čárkovaně: průměr předchozích měsíců.</div></div>
+      <div class="card"><div class="card-head"><h3>Listopad vs. průměr ${k-1} měsíců</h3></div>
+        <div class="legend" style="margin-bottom:10px"><span><i style="background:var(--s1)"></i>Listopad</span><span><i style="background:var(--s2)"></i>Průměr ${k-1} měsíců</span></div><div class="hbars">${cmp}</div></div>
+      <div class="card"><div class="card-head"><h3>Zůstatky účtů</h3></div>${bal}
+        <div class="legend" style="margin-top:8px"><span><i class="line" style="background:var(--s1)"></i>Běžný účet</span><span><i class="line" style="background:var(--s2)"></i>Účet v EUR (přepočteno)</span><span><i class="line" style="background:var(--s3)"></i>Kreditní karta</span></div></div>
+      <div class="card"><div class="card-head"><h3>Příjmy a výdaje</h3><span class="muted">Ušetřeno ${esc(fmtD(saved))} · ${numCs(rate,0)} % příjmů</span></div>${ivs}
+        <div class="legend" style="margin-top:8px"><span><i class="line" style="background:var(--s1)"></i>Příjmy</span><span><i class="line" style="background:var(--s2)"></i>Výdaje (bez převodů)</span></div></div>
+    </div></div>`;
+}
+
+const TITLES_V = {home:["Přehled","Středa 26. listopadu"], accounts:["Účty","8 účtů · CZK, EUR, USD"], plan:["Plán","Rozpočty a opakované platby"], insights:["Grafy","Trendy a srovnání"]};
+function render(){
+  for (const k in CHARTS) delete CHARTS[k];
+  chartSeq = 0;
+  WIDE = $("app").clientWidth >= 760;
+  const v=UI.view, navKey=v==="account"?"accounts":v==="activity"?"home":v;
+  document.querySelectorAll("#nav [data-act=go]").forEach(b=>b.setAttribute("aria-current",b.dataset.v===navKey?"page":"false"));
+  let head;
+  if (v==="account"){ const a=acctById(UI.acct); head=`<div><h2>${esc(a.name)}</h2><div class="sub">${esc(a.group)} · ${a.cur}</div></div>`; }
+  else if (v==="activity") head=`<div style="display:flex;align-items:center;gap:8px"><button type="button" class="iconbtn" data-act="go" data-v="home" aria-label="Zpět na Přehled">${ICON.back}</button><div><h2>Transakce</h2><div class="sub">${S.tx.length} záznamů</div></div></div>`;
+  else { const t=TITLES_V[v]; head=`<div><h2>${t[0]}</h2><div class="sub">${t[1]}</div></div>`; }
+  const dk=isDark();
+  $("topbar").innerHTML = head + `<div class="topbar-actions"><button type="button" class="iconbtn" data-act="theme-flip" aria-label="${dk?"Přepnout na světlý vzhled":"Přepnout na tmavý vzhled"}">${dk?ICON.sun:ICON.moon}</button>${v==="home"?`<button type="button" class="iconbtn" data-act="go" data-v="activity" aria-label="Všechny transakce">${ICON.list}</button>`:""}</div>`;
+  $("views").innerHTML = v==="home"?vHome():v==="accounts"?vAccounts():v==="account"?vAccount():v==="activity"?vActivity():v==="plan"?vPlan():vInsights();
+  if (!FITTING){ let ch=false; document.querySelectorAll("svg.chart[data-cid]").forEach(svg=>{ const w=Math.round(svg.getBoundingClientRect().width), vb=svg.viewBox.baseVal.width; if (w>0&&Math.abs(w-vb)>2){ MEAS[svg.dataset.cid]=w; ch=true; } }); if (ch){ FITTING=true; render(); FITTING=false; return; } }
+  if (UI.editBud){ const i=$("budInput"); if (i){ i.focus(); i.select(); } }
+  $("fxLine").textContent = `Ukázkové kurzy: 1 EUR = ${numCs(FX.EUR,2)} Kč, 1 USD = ${numCs(FX.USD,2)} Kč. Aplikace by je denně stahovala z ČNB.`;
+}
+
+/* ---------- theme ---------- */
+const HOST_THEME = document.documentElement.getAttribute("data-theme"); // what the viewer set, used for "system"
+let THEME = "system";
+try { THEME = localStorage.getItem("mv-cs-theme") || "system"; } catch(e){}
+const mqDark = window.matchMedia ? matchMedia("(prefers-color-scheme: dark)") : null;
+function isDark(){ if (THEME!=="system") return THEME==="dark"; if (HOST_THEME) return HOST_THEME==="dark"; return !!(mqDark&&mqDark.matches); }
+function applyTheme(){
+  const r=document.documentElement;
+  if (THEME==="system"){ if (HOST_THEME) r.setAttribute("data-theme",HOST_THEME); else r.removeAttribute("data-theme"); }
+  else r.setAttribute("data-theme",THEME);
+  document.querySelectorAll("[data-act=theme]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===THEME));
+}
+function setTheme(t){ THEME=t; try{ localStorage.setItem("mv-cs-theme",t); }catch(e){} applyTheme(); render(); }
+applyTheme();
+if (mqDark&&mqDark.addEventListener) mqDark.addEventListener("change",()=>{ if (THEME==="system") render(); });
+
+/* ---------- quick add ---------- */
+let QA=null, sheetMode=null;
+function catUsage(){ const sc={}; sortedTx().slice(0,60).forEach((t,i)=>{ if (t.cat) sc[t.cat]=(sc[t.cat]||0)+(60-i); }); return sc; }
+function openAdd(edit){
+  const last=sortedTx().find(t=>t.kind==="expense"&&!t.rec);
+  if (edit) QA={editId:edit.id,kind:edit.kind,amount:String(edit.amount),cat:edit.cat||null,acct:edit.acct,to:edit.to||"sav",date:edit.date,title:edit.title||"",note:edit.note||"",showAllCats:false};
+  else QA={editId:null,kind:"expense",amount:"",cat:null,acct:last?last.acct:"chk",to:"sav",date:TODAY,title:"",note:"",showAllCats:false};
+  sheetMode="add"; renderSheet(); openSheet();
+}
+function qaOk(){ const amt=parseFloat(QA.amount||"0")||0; return amt>0 && (QA.kind==="transfer"?QA.acct!==QA.to:!!QA.cat); }
+function verb(){ return QA.editId?"Uložit změny":QA.kind==="transfer"?"Uložit převod":QA.kind==="income"?"Uložit příjem":"Uložit výdaj"; }
+function amtShown(){ return (QA.amount||"0").replace(".",","); }
+function fxNote(){
+  const amt=parseFloat(QA.amount||"0")||0, from=curOf(QA.acct);
+  if (QA.kind==="transfer"){ const to=curOf(QA.to); if (from===to) return ""; return `<div class="fxnote" id="fxNote">Na cílový účet dorazí ≈ ${esc(fmtA(Math.round(fromBase(toBase(amt,from),to)*100)/100,to))} (kurz ${from}/${to} z ČNB, v aplikaci lze upravit)</div>`; }
+  if (from===DISP) return ""; return `<div class="fxnote" id="fxNote">≈ ${esc(fmtD(toBase(amt,from),2))} v souhrnech a grafech</div>`;
+}
+function renderSheet(){
+  if (!QA) return; const isT=QA.kind==="transfer", sc=catUsage();
+  let cats=allCats().filter(c=>QA.kind==="income"?c.income:!c.income); cats.sort((a,b)=>(sc[b.id]||0)-(sc[a.id]||0));
+  const shown=QA.showAllCats?cats:cats.slice(0,6); if (QA.cat&&!shown.find(c=>c.id===QA.cat)) shown.push(catById(QA.cat));
+  const cash=ACCOUNTS.filter(a=>a.kind==="cash"), cur=curOf(QA.acct), amt=parseFloat(QA.amount||"0")||0;
+  $("sheet").innerHTML=`<div class="grab"></div><div class="body">
+    <div style="display:flex;justify-content:space-between;align-items:center"><b class="sheet-title">${QA.editId?"Upravit transakci":"Nová transakce"}</b><button type="button" class="linkbtn" data-act="close-sheet">Zrušit</button></div>
+    <div class="seg typeseg" role="group" aria-label="Typ">${[["expense","Výdaj"],["income","Příjem"],["transfer","Převod"]].map(([k,n])=>`<button type="button" data-act="qa-kind" data-v="${k}" aria-pressed="${QA.kind===k}">${n}</button>`).join("")}</div>
+    <div class="amount-disp ${QA.kind} num" aria-live="polite"><span id="amtNum">${esc(amtShown())}</span> <span class="cur">${esc(symbol(cur))}</span></div>
+    <div id="fxWrap">${fxNote()}</div>
+    <div class="keypad">${["1","2","3","4","5","6","7","8","9",",","0","⌫"].map(k=>`<button type="button" data-act="key" data-v="${k}" aria-label="${k==="⌫"?"Smazat číslici":k}">${k}</button>`).join("")}</div>
+    ${isT?`
+      <div class="field"><label>Z účtu</label><div class="chips">${cash.map(a=>`<button type="button" class="chip" data-act="qa-acct" data-v="${a.id}" aria-pressed="${QA.acct===a.id}">${esc(a.name)}${ccyTag(a.cur)}</button>`).join("")}</div></div>
+      <div class="field"><label>Na účet</label><div class="chips">${ACCOUNTS.map(a=>`<button type="button" class="chip" data-act="qa-to" data-v="${a.id}" aria-pressed="${QA.to===a.id}">${esc(a.name)}${ccyTag(a.cur)}</button>`).join("")}</div>${QA.acct===QA.to?`<div class="muted" style="color:var(--neg)">Vyberte dva různé účty.</div>`:""}</div>
+    `:`
+      <div class="field"><label>Kategorie</label><div class="chips">${shown.map(c=>`<button type="button" class="chip" data-act="qa-cat" data-v="${c.id}" aria-pressed="${QA.cat===c.id}"><span class="k">${c.g}</span>${esc(c.name)}</button>`).join("")}${!QA.showAllCats&&cats.length>6?`<button type="button" class="chip" data-act="qa-morecats">Další…</button>`:""}<button type="button" class="chip" data-act="qa-newcat">+ Nová</button></div></div>
+      <div class="field"><label>Účet</label><div class="chips">${cash.map(a=>`<button type="button" class="chip" data-act="qa-acct" data-v="${a.id}" aria-pressed="${QA.acct===a.id}">${esc(a.name)}${ccyTag(a.cur)}</button>`).join("")}</div></div>`}
+    <div class="field"><label>Datum</label><div class="chips">${[[TODAY,"Dnes"],[addDays(TODAY,-1),"Včera"]].map(([d,n])=>`<button type="button" class="chip" data-act="qa-date" data-v="${d}" aria-pressed="${QA.date===d}">${n}</button>`).join("")}<input class="txt" style="width:auto;padding:5px 9px" type="date" id="qaDate" value="${QA.date}" aria-label="Vybrat datum"></div></div>
+    <div class="field"><label for="qaTitle">Co (nepovinné)</label><input class="txt" id="qaTitle" placeholder="např. Káva s Janou" value="${esc(QA.title)}" autocomplete="off"></div>
+    <div class="field"><label for="qaNote">Poznámka (nepovinné)</label><input class="txt" id="qaNote" placeholder="Cokoli, co si chcete zapamatovat" value="${esc(QA.note)}" autocomplete="off"></div>
+    ${QA.editId?`<button type="button" class="btn danger" data-act="qa-delete">Smazat transakci</button>`:""}
+  </div><div class="foot"><button type="button" class="btn" data-act="qa-save" ${qaOk()?"":"disabled"}>${verb()}${amt>0?" · "+esc(fmtA(amt,cur)):""}</button></div>`;
+}
+function refreshSheetHead(){
+  const n=$("amtNum"); if (!n) return; n.textContent=amtShown(); $("fxWrap").innerHTML=fxNote();
+  const amt=parseFloat(QA.amount||"0")||0, b=document.querySelector("[data-act=qa-save]"); b.disabled=!qaOk(); b.textContent=verb()+(amt>0?" · "+fmtA(amt,curOf(QA.acct)):"");
+}
+function keyIn(k){
+  let a=QA.amount;
+  if (k==="⌫"||k==="Backspace") a=a.slice(0,-1);
+  else if (k===","||k==="."){ if (!a.includes(".")) a=(a||"0")+"."; }
+  else if (/^\d$/.test(k)){ if (a.includes(".")&&a.split(".")[1].length>=2) return; if (a==="0") a=""; if (a.replace(".","").length>=9) return; a+=k; }
+  QA.amount=a; refreshSheetHead();
+}
+function openSheet(){ $("backdrop").classList.add("on"); $("sheet").classList.add("on"); }
+function closeSheet(){ if (document.activeElement && $("sheet").contains(document.activeElement)) document.activeElement.blur(); $("device").scrollTop=0; $("app").scrollTop=0; $("backdrop").classList.remove("on"); $("sheet").classList.remove("on"); QA=null; sheetMode=null; }
+let undoState=null, toastTimer=null;
+function toast(msg, undo){ $("toastMsg").textContent=msg; undoState=undo||null; $("undoBtn").hidden=!undo; $("toast").classList.add("on"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>$("toast").classList.remove("on"),4500); }
+const snapState = () => JSON.stringify(S);
+function syncText(){ if (!QA) return; const t=$("qaTitle"), n=$("qaNote"); if (t) QA.title=t.value; if (n) QA.note=n.value; }
+function saveQA(){
+  syncText(); if (!qaOk()) return;
+  const amt=Math.round((parseFloat(QA.amount)||0)*100)/100, before=snapState();
+  const rec={date:QA.date,kind:QA.kind,acct:QA.acct,amount:amt,title:QA.title.trim(),note:QA.note.trim()};
+  if (QA.kind==="transfer"){ rec.to=QA.to; const f=curOf(QA.acct), t=curOf(QA.to); rec.toAmount = f===t?amt:Math.round(fromBase(toBase(amt,f),t)*100)/100; } else rec.cat=QA.cat;
+  if (!rec.title) rec.title = QA.kind==="transfer"?"Převod":catById(rec.cat).name;
+  if (QA.editId){ const i=S.tx.findIndex(t=>t.id===QA.editId); S.tx[i]=Object.assign({id:QA.editId},rec); }
+  else { S.n=(S.n||S.tx.length)+1; S.tx.push(Object.assign({id:"t"+S.n},rec)); }
+  const msg = QA.editId?"Změny uloženy":`Uloženo ${fmtA(amt,curOf(rec.acct))} · ${rec.title}`;
+  closeSheet(); save(); render(); toast(msg,before);
+}
+function openSnap(){
+  sheetMode="snap"; const list=ACCOUNTS.filter(a=>a.kind==="invest");
+  $("sheet").innerHTML=`<div class="grab"></div><div class="body">
+    <div style="display:flex;justify-content:space-between;align-items:center"><b class="sheet-title">Hodnoty za listopad</b><button type="button" class="linkbtn" data-act="close-sheet">Zrušit</button></div>
+    <div class="muted">Zadejte hodnotu každého účtu ke konci měsíce v jeho měně, jak ji ukazuje broker, peněženka nebo penzijní společnost. Prázdné pole převezme hodnotu z minulého měsíce.</div>
+    <div>${list.map(a=>{ const p=snapAt(a.id,prevMonth(CUR_MONTH)), cv=(S.snaps[a.id]||{})[CUR_MONTH];
+      return `<div class="snaprow"><label for="snap-${a.id}" style="min-width:0"><div>${esc(a.name)}${ccyTag(a.cur)}</div><div class="muted">Říjen: ${esc(fmtA(p.value,a.cur))}</div></label><input class="txt num" id="snap-${a.id}" type="number" inputmode="decimal" placeholder="${p.value}" value="${cv!=null?cv:""}" aria-label="Hodnota ${esc(a.name)} v ${a.cur}"></div>`; }).join("")}</div>
+  </div><div class="foot"><button type="button" class="btn" data-act="snap-save">Uložit listopadové hodnoty</button></div>`;
+  openSheet();
+}
+function saveSnap(){
+  const before=snapState(); let ch=0;
+  ACCOUNTS.filter(a=>a.kind==="invest").forEach(a=>{ const v=parseFloat($("snap-"+a.id).value); S.snaps[a.id]=S.snaps[a.id]||{}; if (!isNaN(v)){ S.snaps[a.id][CUR_MONTH]=v; ch++; } });
+  closeSheet(); save(); render(); toast(ch?`Uloženo ${ch} hodnot za listopad`:"Beze změny", ch?before:null);
+}
+
+const ACT = {
+  "go": v=>{ UI.view=v; render(); $("views").scrollTop=0; },
+  "plan": v=>{ UI.view="plan"; UI.planTab=v; render(); $("views").scrollTop=0; },
+  "ptab": v=>{ UI.planTab=v; render(); },
+  "acct": v=>{ UI.view="account"; UI.acct=v; render(); $("views").scrollTop=0; },
+  "open-add": ()=>openAdd(null), "open-snap": ()=>openSnap(), "close-sheet": ()=>closeSheet(),
+  "edit-tx": v=>{ const t=S.tx.find(x=>x.id===v); if (t) openAdd(t); },
+  "key": v=>keyIn(v),
+  "qa-kind": v=>{ syncText(); QA.kind=v; if (v!=="transfer"){ const c=QA.cat?catById(QA.cat):null; if (!c||!!c.income!==(v==="income")) QA.cat=null; } renderSheet(); },
+  "qa-cat": v=>{ syncText(); QA.cat=v; renderSheet(); },
+  "qa-morecats": ()=>{ syncText(); QA.showAllCats=true; renderSheet(); },
+  "qa-newcat": ()=>{ syncText(); const id="c"+Date.now(); S.cats.push({id,name:"Nová kategorie "+(S.cats.length+1),g:"NK"}); QA.cat=id; QA.showAllCats=true; renderSheet(); toast("V aplikaci byste ji tady pojmenoval. Přidán zástupný název."); },
+  "qa-acct": v=>{ syncText(); QA.acct=v; renderSheet(); },
+  "qa-to": v=>{ syncText(); QA.to=v; renderSheet(); },
+  "qa-date": v=>{ syncText(); QA.date=v; renderSheet(); },
+  "qa-save": ()=>saveQA(),
+  "qa-delete": ()=>{ const before=snapState(); S.tx=S.tx.filter(t=>t.id!==QA.editId); closeSheet(); save(); render(); toast("Transakce smazána",before); },
+  "snap-save": ()=>saveSnap(),
+  "undo": ()=>{ if (undoState){ S=JSON.parse(undoState); undoState=null; save(); render(); $("toast").classList.remove("on"); } },
+  "confirm": v=>{ const [rid,m]=v.split("|"), r=RECURRING.find(x=>x.id===rid), before=snapState(); S.n=(S.n||S.tx.length)+1;
+    const t={id:"t"+S.n,date:m+"-"+pad(Math.min(r.day,daysIn(m))),kind:r.kind,acct:r.acct,amount:r.amount,title:r.title,rec:r.id};
+    if (r.kind==="transfer"){ t.to=r.to; t.toAmount=r.amount; } else t.cat=r.cat;
+    S.tx.push(t); S.confirmed[rid+"|"+m]=true; save(); render(); toast(`Zapsáno: ${r.title}`,before); },
+  "cal-day": v=>{ UI.calDay=v; render(); }, "cal-prev": ()=>{ UI.calMonth=prevMonth(UI.calMonth); render(); }, "cal-next": ()=>{ UI.calMonth=nextMonth(UI.calMonth); render(); },
+  "range": v=>{ UI.range=+v; render(); }, "tcat": v=>{ UI.trendCat=v; render(); }, "facct": v=>{ UI.fAcct=v; render(); },
+  "edit-bud": v=>{ UI.editBud=v; render(); },
+  "device": v=>{ $("device").classList.toggle("wide",v==="wide"); document.querySelectorAll("[data-act=device]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===v)); render(); },
+  "theme": v=>setTheme(v),
+  "theme-flip": ()=>setTheme(isDark()?"light":"dark"),
+  "reset": ()=>{ try{ localStorage.removeItem("mv-cs-v1"); }catch(e){} S=seed(); closeSheet(); render(); toast("Ukázková data obnovena"); }
+};
+document.addEventListener("click", e=>{ const el=e.target.closest("[data-act]"); if (!el) return; const f=ACT[el.dataset.act]; if (f) f(el.dataset.v);
+  if (el.closest(".about")){ const ab=document.querySelector(".about"); if (ab) ab.remove(); } });
+document.addEventListener("input", e=>{
+  if (e.target.id==="searchInput"){ UI.q=e.target.value; const pos=e.target.selectionStart; render(); const s=$("searchInput"); if (s){ s.focus(); s.setSelectionRange(pos,pos); } }
+  if (e.target.id==="qaDate" && QA && e.target.value) QA.date=e.target.value;
+});
+function commitBud(el){ if (!el||!UI.editBud) return; const v=parseFloat(el.value); if (!isNaN(v)&&v>=0) S.budgets[el.dataset.cat]=toBase(v,DISP); UI.editBud=null; save(); render(); }
+document.addEventListener("focusout", e=>{ if (e.target.id==="budInput") commitBud(e.target); });
+document.addEventListener("keydown", e=>{
+  if (e.target.id==="budInput"){ if (e.key==="Enter") commitBud(e.target); if (e.key==="Escape"){ UI.editBud=null; render(); } return; }
+  if (!$("sheet").classList.contains("on")) return;
+  if (e.key==="Escape"){ closeSheet(); return; }
+  if (!QA){ if (e.key==="Enter"&&sheetMode==="snap") saveSnap(); return; }
+  if (e.key==="Enter"){ e.preventDefault(); saveQA(); return; }
+  if (e.target.tagName==="INPUT") return;
+  if (/^\d$/.test(e.key)||e.key==="."||e.key===","||e.key==="Backspace"){ e.preventDefault(); keyIn(e.key); }
+});
+$("curSel").value=DISP;
+$("curSel").addEventListener("change", e=>{ DISP=e.target.value; try{ localStorage.setItem("mv-cs-disp",DISP);}catch(err){} render(); if (QA) renderSheet(); });
+$("aboutBtn").addEventListener("click", ()=>{
+  const d=document.createElement("div"); d.className="about"; d.innerHTML=`<div class="card">${document.querySelector(".brief-body").innerHTML}<button type="button" class="btn">Zavřít</button></div>`;
+  d.querySelectorAll(".wide-only").forEach(x=>x.remove());
+  const sel=d.querySelector("select"); if (sel){ sel.removeAttribute("id"); sel.value=DISP; sel.addEventListener("change",ev=>{ $("curSel").value=ev.target.value; $("curSel").dispatchEvent(new Event("change")); }); sel.addEventListener("click",ev=>ev.stopPropagation()); }
+  d.addEventListener("click", ev=>{ if (ev.target===d||ev.target.classList.contains("btn")) d.remove(); });
+  document.body.appendChild(d);
+});
+
+const tip=$("tip");
+function showTip(html,cx,cy){ tip.innerHTML=html; tip.classList.add("on"); const r=tip.getBoundingClientRect(); let x=cx+14,y=cy-r.height-12;
+  if (x+r.width>innerWidth-8) x=cx-r.width-14; if (x<8) x=8; if (y<8) y=cy+18; tip.style.left=x+"px"; tip.style.top=y+"px"; }
+function hideTip(){ tip.classList.remove("on"); document.querySelectorAll(".xh.on").forEach(l=>l.classList.remove("on")); }
+function onPointer(e){
+  const hit=e.target.closest&&e.target.closest(".hit[data-chart]");
+  if (hit){ const c=CHARTS[hit.dataset.chart]; if (!c) return; const box=hit.ownerSVGElement.getBoundingClientRect(), vx=(e.clientX-box.left)/box.width*c.W;
+    let best=0,bd=1e9; c.xs.forEach((x,j)=>{ const d=Math.abs(x-vx); if (d<bd){bd=d;best=j;} });
+    const xh=document.getElementById(hit.dataset.chart+"-xh"); if (xh){ xh.setAttribute("x1",c.xs[best]); xh.setAttribute("x2",c.xs[best]); xh.classList.add("on"); }
+    showTip(c.rows[best],e.clientX,e.clientY); return; }
+  const t=e.target.closest&&e.target.closest("[data-tip]"); if (t){ showTip(t.dataset.tip,e.clientX,e.clientY); return; }
+  hideTip();
+}
+document.addEventListener("pointermove", onPointer);
+document.addEventListener("pointerdown", e=>{ if (e.pointerType!=="mouse") onPointer(e); });
+$("views").addEventListener("scroll", hideTip, {passive:true});
+
+let rzT=null; window.addEventListener("resize", ()=>{ clearTimeout(rzT); rzT=setTimeout(render,120); });
+
+/* ---------- design system page ---------- */
+const MARK = (px) => `<svg class="mv" width="${px}" height="${px}" aria-hidden="true"><use href="#mv-mark"/></svg>`;
+const T_BRAND = [
+  ["Violet","--v","#5b5bf7","Hlavní barva značky, první řada grafů"],["Pink","--p","#ec4899","Druhá řada, zvýraznění"],["Cyan","--c","#22d3ee","Třetí řada, průběh, příjmy v grafech"],
+  ["Orchid","--vp","#f389fc","Violet přes pink, jen v logu a záři"],["Sky","--vc","#71e3fe","Violet přes cyan, čára grafu v tmavém"],["Mist","","#eedff8","Pink přes cyan, jen v logu"],
+  ["Night","","#0b0918","Pozadí tmavého vzhledu a dlaždice ikony"],["Lavender","","#e9e4ff","Světlá dlaždice ikony"]];
+const T_UI = [
+  ["--bg","#f3f1fb","#0b0918","Pozadí aplikace"],["--surface","#ffffff","#17142c","Listy, vstupy"],["--surface-2","#f1effa","#211d3c","Klávesnice, stopy pruhů"],
+  ["--glass","rgba(255,255,255,.72)","rgba(28,24,54,.66)","Karty, navigace (s rozmazáním 14–20 px)"],["--line","#e4e0f3","#2e2950","Oddělovače, rámečky"],
+  ["--ink","#16122b","#f1eefc","Hlavní text, částky"],["--ink-2","#5b5675","#b3add0","Doplňkový text"],["--ink-3","#8f8aa8","#827ca3","Popisky, osy grafů"],
+  ["--accent","#6d4dff","#a48bff","Odkazy, aktivní položka navigace"],["--accent-soft","#ece7ff","#2a2350","Pozadí vybrané položky"]];
+const T_SEM = [["--pos","#0b7a32","#3fcf6e","Příjem, zaplaceno, růst"],["--neg","#c33131","#f27272","Dluh, přečerpaný rozpočet"],["--warn","#9a6200","#e8b04a","Splatné, rychlejší tempo, ukázková data"]];
+const T_CH = [["--s1","#5b5bf7","#7c7dff","Řada 1: hotovost, tento měsíc, příjmy"],["--s2","#ec4899","#f0609f","Řada 2: investice, průměr, výdaje"],["--s3","#0ab3d0","#22d3ee","Řada 3: bitcoin, kreditní karta"],["--s4","#b49cff","#c4b5fd","Řada 4: penzijní spoření"]];
+const hx = h => `<span class="ds-hex"><i class="ds-dot" style="background:${h}"></i><code>${h}</code></span>`;
+const tokTable = (rows) => `<div class="ds-table"><table><thead><tr><th>Token</th><th>Světlý</th><th>Tmavý</th><th>Použití</th></tr></thead><tbody>${rows.map(r=>`<tr><td><code style="color:var(--ink)">${r[0]}</code></td><td>${hx(r[1])}</td><td>${hx(r[2])}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table></div>`;
+const TYPE = [["3xl","40 / 700","Sora","Částka při zadávání","2 450 Kč"],["2xl","34 / 700","Sora","Čisté jmění","2 023 342 Kč"],["xl","24 / 700","Sora","Nadpis obrazovky","Přehled"],
+  ["lg","19 / 600","Plus Jakarta","Čísla v kartách","16 801 Kč"],["md","15 / 400–600","Plus Jakarta","Text, názvy transakcí","Velký nákup · Potraviny"],["sm","13 / 400","Plus Jakarta","Popisky, vedlejší text","Uplynulo 87 % měsíce"],["xs","11 / 600","Plus Jakarta","Štítky, osy, VERZÁLKY","ČISTÉ JMĚNÍ"]];
+function dsChart(){
+  const W=720,H=180,L=8,R=8,T=10,B=20,n=8; const ser=[[30,34,33,38,41,43,46,50],[20,22,25,24,28,30,29,33],[8,10,9,13,12,15,18,17],[4,5,5,6,7,7,8,9]];
+  const x=j=>L+(W-L-R)*j/(n-1), y=v=>T+(H-T-B)*(1-v/110); let g="";
+  [0,1,2,3].forEach(k=>{ g+=`<line x1="${L}" x2="${W-R}" y1="${T+(H-T-B)*k/3}" y2="${T+(H-T-B)*k/3}" stroke="var(--line)"/>`; });
+  const cum=ser.map((_,i)=>ser[0].map((_,j)=>ser.slice(0,i+1).reduce((s,a)=>s+a[j],0)));
+  ["var(--s1)","var(--s2)","var(--s3)","var(--s4)"].forEach((c,i)=>{ const top=cum[i].map((v,j)=>`${x(j)},${y(v)}`), bot=(i?cum[i-1]:cum[0].map(()=>0)).map((v,j)=>`${x(j)},${y(v)}`).reverse();
+    g+=`<polygon points="${top.concat(bot).join(" ")}" fill="${c}" fill-opacity=".85" stroke="var(--surface)" stroke-width="1.5" stroke-linejoin="round"/>`; });
+  return `<svg class="ds-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Ukázka vrstveného grafu ve čtyřech barvách řad">${g}</svg>`;
+}
+function renderDS(){
+  $("ds").innerHTML = `<div class="ds-bar"><div class="ds-bar-in"><a class="ds-back" href="#">${ICON.back} Zpět na prototyp</a>
+      <div class="seg theme-seg" role="group" aria-label="Vzhled"><button type="button" data-act="theme" data-v="system" aria-pressed="${THEME==="system"}">Podle systému</button><button type="button" data-act="theme" data-v="light" aria-pressed="${THEME==="light"}">Světlý</button><button type="button" data-act="theme" data-v="dark" aria-pressed="${THEME==="dark"}">Tmavý</button></div></div></div>
+  <main class="ds-main">
+    <div class="ds-head">
+      <div class="brand" style="font-size:22px"><span class="tile" style="width:40px;height:40px">${MARK(26)}</span>moneyverse</div>
+      <h1>Design systém</h1>
+      <p>Malý a praktický: značka, barvy, písmo, mezery a komponenty, ze kterých je postavený prototyp. Všechno na této stránce používá stejné tokeny a třídy jako aplikace, takže přepínač vzhledu nahoře ukazuje skutečný světlý i tmavý stav.</p>
+      <nav class="ds-toc" aria-label="Obsah"><a href="#ds-brand" data-ds-jump>Značka</a><a href="#ds-color" data-ds-jump>Barvy</a><a href="#ds-type" data-ds-jump>Písmo</a><a href="#ds-space" data-ds-jump>Mezery a rohy</a><a href="#ds-surf" data-ds-jump>Plochy</a><a href="#ds-comp" data-ds-jump>Komponenty</a><a href="#ds-chart" data-ds-jump>Grafy</a></nav>
+    </div>
+
+    <section class="ds-sec" id="ds-brand"><header><h2>Značka</h2><p>Glass trio: tři překrývající se kruhy jako účty, karty a investice, které se skládají do jednoho celku. Značka je ve světlém i tmavém stejná, mění se jen podklad.</p></header>
+      <div class="ds-grid">
+        <div class="card ds-stack"><div class="ds-label">Ikona aplikace (PWA)</div>
+          <div class="ds-tiles">
+            <div class="ds-fig"><span class="ds-tile l" style="width:96px;height:96px">${MARK(62)}</span>Světlá</div>
+            <div class="ds-fig"><span class="ds-tile d" style="width:96px;height:96px">${MARK(62)}</span>Tmavá</div>
+            <div class="ds-fig"><span class="ds-tile l" style="width:32px;height:32px">${MARK(20)}</span>32</div>
+            <div class="ds-fig"><span class="ds-tile d" style="width:32px;height:32px">${MARK(20)}</span>32</div>
+          </div>
+          <p class="ds-note">Značka zabírá 66 % dlaždice, takže zůstává v bezpečné zóně maskovatelné ikony. Rohy dlaždice 22,5 %.</p></div>
+        <div class="card ds-stack"><div class="ds-label">Logo s názvem</div>
+          <div class="ds-lock"><div class="on-l">${MARK(30)}moneyverse</div><div class="on-d">${MARK(30)}moneyverse</div></div>
+          <ul class="ds-rules"><li>Název vždy malými písmeny, Plus Jakarta Sans 800, prostrkání −0,04 em.</li><li>Mezera mezi značkou a názvem = 0,4 × výška značky. Volný prostor kolem = půl kruhu.</li><li>Nejmenší značka 16 px. Kruhy neměnit, neotáčet a nepřebarvovat.</li></ul></div>
+      </div>
+    </section>
+
+    <section class="ds-sec" id="ds-color"><header><h2>Barvy</h2><p>Barvy značky pocházejí z loga a jsou stejné v obou vzhledech. Barvy rozhraní a stavů mají vlastní hodnotu pro světlý a tmavý vzhled.</p></header>
+      <div class="card ds-stack"><h3>Značka</h3><div class="ds-sw">${T_BRAND.map(b=>`<div><i style="background:${b[2]}"></i><b>${b[0]}</b><code>${b[1]?b[1]+" · ":""}${b[2]}</code><span>${b[3]}</span></div>`).join("")}</div>
+        <p class="ds-note"><b>Přechody:</b> hlavní <code>--grad</code> violet → pink na tlačítkách, vybraných volbách a kartě čistého jmění. <code>--grad-cool</code> violet → cyan na pruzích průběhu.</p></div>
+      <div class="card ds-stack"><h3>Rozhraní</h3>${tokTable(T_UI)}</div>
+      <div class="ds-grid">
+        <div class="card ds-stack"><h3>Stavy</h3>${tokTable(T_SEM)}<p class="ds-note">Stavové barvy se nepoužívají jako ozdoba. Zelená vždy znamená příjem nebo hotovo, červená dluh nebo přečerpání.</p></div>
+        <div class="card ds-stack"><h3>Řady grafů</h3>${tokTable(T_CH)}</div>
+      </div>
+    </section>
+
+    <section class="ds-sec" id="ds-type"><header><h2>Písmo</h2><p>Sora pro nadpisy a velká čísla, Plus Jakarta Sans pro všechno ostatní. Čísla vždy s tabulkovými číslicemi, aby částky lícovaly.</p></header>
+      <div class="ds-faces">
+        <div class="card ds-face"><div class="ds-label">Nadpisy a velká čísla</div><div class="big" style="font-family:var(--font-display);font-weight:700">Sora</div><span class="muted">600 a 700 · tabulkové číslice</span></div>
+        <div class="card ds-face"><div class="ds-label">Text a ovládání</div><div class="big" style="font-family:var(--font-body);font-weight:600">Plus Jakarta</div><span class="muted">400, 500, 600, 700 · 800 jen v logu</span></div>
+      </div>
+      <div class="card ds-type">${TYPE.map(t=>`<div><span class="meta"><b>--fs-${t[0]}</b>${t[1]} · ${t[2]}<br>${t[3]}</span><span class="smp num" style="font-size:var(--fs-${t[0]});font-family:${t[2]==="Sora"?"var(--font-display)":"var(--font-body)"};font-weight:${t[1].split(" / ")[1].slice(0,3)};${t[0]==="xs"?"letter-spacing:.08em;":""}${/xl/.test(t[0])?"letter-spacing:-.03em;":""}">${t[4]}</span></div>`).join("")}</div>
+      <p class="ds-note"><b>Váhy:</b> 400 doplňkový text · 500 názvy a ovládání · 600 nadpisy a částky · 700 jen klíčová čísla.</p>
+    </section>
+
+    <section class="ds-sec" id="ds-space"><header><h2>Mezery a rohy</h2><p>Šest kroků mezer. Karty mají vnitřní okraj 20 px na telefonu a 24 px na počítači, sekce jsou od sebe 16 / 24 px.</p></header>
+      <div class="ds-grid">
+        <div class="card ds-space">${[1,2,3,4,5,6].map(k=>`<div><code>--sp-${k}</code><span style="display:flex;align-items:center;gap:10px"><i style="width:${[4,8,12,16,24,32][k-1]*3}px"></i><span class="muted">${[4,8,12,16,24,32][k-1]} px</span></span></div>`).join("")}</div>
+        <div class="card ds-stack"><div class="ds-radii">${[["12","Vstupy, tlačítka"],["16","Klávesnice"],["22","Karty"],["28","Spodní list"],["999","Štítky, přepínače"]].map(r=>`<div><i style="border-radius:${Math.min(+r[0],32)}px"></i><b style="color:var(--ink)">${r[0]} px</b>${r[1]}</div>`).join("")}</div></div>
+      </div>
+    </section>
+
+    <section class="ds-sec" id="ds-surf"><header><h2>Plochy</h2><p>Tři úrovně: barevné pozadí s rozmazanými skvrnami, skleněné karty nad ním a jedna výrazná karta pro hlavní číslo obrazovky.</p></header>
+      <div class="ds-grid">
+        <div class="card"><div class="ds-label">Skleněná karta · .card</div><p class="ds-note" style="margin-top:8px">Poloprůhledná plocha, rámeček <code>--glass-line</code>, rozmazání 14 px, stín <code>--shadow</code>. Pro většinu obsahu.</p></div>
+        <div class="hero-card ds-mini-hero" style="position:relative;overflow:hidden"><div class="eyebrow" style="color:rgba(255,255,255,.78)">Hlavní karta · .hero-card</div><div class="hero-num num md" style="color:#fff">2 023 342 Kč</div><p class="ds-note" style="color:rgba(255,255,255,.8)">Jedna na obrazovku. Ve světlém přechod značky, v tmavém noční plocha se září tří kruhů.</p></div>
+        <div class="banner"><p><b>Upozornění · .banner</b> Jemný přechod violet → cyan pro výzvu k akci.</p><button type="button" class="btn">Zadat</button></div>
+      </div>
+    </section>
+
+    <section class="ds-sec" id="ds-comp"><header><h2>Komponenty</h2><p>Živé ukázky tříd z aplikace.</p></header>
+      <div class="ds-grid">
+        <div class="card ds-stack"><div class="ds-label">Tlačítka</div>
+          <div class="ds-row"><button type="button" class="btn">Uložit výdaj</button><button type="button" class="btn ghost">Zadat hodnoty</button><button type="button" class="btn danger">Smazat</button><button type="button" class="btn" disabled>Neaktivní</button></div>
+          <div class="ds-row"><button type="button" class="iconbtn" aria-label="Ukázka ikonového tlačítka">${ICON.moon}</button><button type="button" class="iconbtn" aria-label="Ukázka ikonového tlačítka">${ICON.list}</button><button type="button" class="linkbtn">Textový odkaz</button></div></div>
+        <div class="card ds-stack"><div class="ds-label">Volby</div>
+          <div class="seg" role="group" aria-label="Ukázka přepínače"><button type="button" aria-pressed="true">Výdaj</button><button type="button" aria-pressed="false">Příjem</button><button type="button" aria-pressed="false">Převod</button></div>
+          <div class="chips"><button type="button" class="chip" aria-pressed="true"><span class="k">PO</span>Potraviny</button><button type="button" class="chip" aria-pressed="false"><span class="k">RE</span>Restaurace</button><button type="button" class="chip" aria-pressed="false">Účet v EUR<span class="ccy">EUR</span></button></div></div>
+        <div class="card ds-stack"><div class="ds-label">Stavy a štítky</div>
+          <div class="ds-row"><span class="pill ok">64 %</span><span class="pill warn">Rychlejší tempo</span><span class="pill over">${ICON.warn} o 1 200 Kč přes</span><span class="sample">Ukázka</span></div>
+          <div class="ds-row"><span class="delta up">▲ 19 258 Kč · 1,0 %</span><span class="delta down">▼ 2 100 Kč</span></div>
+          <div class="ds-row"><span class="state done">${ICON.check} Zaplaceno</span><span class="state due">${ICON.clock} Splatné</span><span class="state next">Naplánováno</span></div></div>
+        <div class="card ds-stack"><div class="ds-label">Průběh rozpočtu</div>
+          <div><div class="bar"><i style="width:62%"></i></div><div class="muted" style="margin-top:4px">V pořádku</div></div>
+          <div><div class="bar"><i class="warn" style="width:88%"></i></div><div class="muted" style="margin-top:4px">Rychlejší tempo než měsíc</div></div>
+          <div><div class="bar"><i class="over" style="width:100%"></i></div><div class="muted" style="margin-top:4px">Přečerpáno</div></div></div>
+        <div class="card ds-stack"><div class="ds-label">Řádek transakce</div>
+          <div class="list">
+            <div class="tx"><span class="glyph" aria-hidden="true" style="--h:188">PO</span><span style="min-width:0"><div class="t">Velký nákup</div><div class="m">Potraviny · Běžný účet</div></span><span class="amt">−1 284 Kč</span></div>
+            <div class="tx"><span class="glyph" aria-hidden="true" style="--h:176">MZ</span><span style="min-width:0"><div class="t">Výplata</div><div class="m">Mzda · Běžný účet</div></span><span class="amt in">+80 000 Kč</span></div>
+            <div class="tx"><span class="glyph" aria-hidden="true" style="--h:328">RE</span><span style="min-width:0"><div class="t">Večeře</div><div class="m">Restaurace · Účet v EUR</div></span><span class="amt">−86,40 €<span class="orig">≈ 2 160 Kč</span></span></div>
+          </div>
+          <p class="ds-note">Ikona kategorie je dvoupísmenná zkratka na přechodu z odstínu kategorie. Odstíny se drží kolem violet, pink a cyan.</p></div>
+        <div class="card ds-stack"><div class="ds-label">Vstupy</div>
+          <div class="field"><label for="ds-in1">Co (nepovinné)</label><input class="txt" id="ds-in1" placeholder="např. Káva s Janou" autocomplete="off"></div>
+          <div class="fxnote">≈ 2 160 Kč v souhrnech a grafech</div>
+          <div class="amount-disp expense num" style="font-size:var(--fs-3xl)">2 450 <span class="cur">Kč</span></div></div>
+      </div>
+    </section>
+
+    <section class="ds-sec" id="ds-chart"><header><h2>Grafy</h2><p>Čtyři řady v pořadí s1 až s4, vrstvy oddělené 1,5 px linkou v barvě plochy. Osy a mřížka v <code>--ink-3</code> a <code>--line</code>. Na hlavní kartě je čára bílá ve světlém a Sky v tmavém.</p></header>
+      <div class="card">${dsChart()}
+        <div class="legend"><span><i style="background:var(--s1)"></i>Řada 1</span><span><i style="background:var(--s2)"></i>Řada 2</span><span><i style="background:var(--s3)"></i>Řada 3</span><span><i style="background:var(--s4)"></i>Řada 4</span><span><i class="dash"></i>Součet nebo průměr</span></div></div>
+    </section>
+  </main>`;
+}
+function route(){
+  const on = location.hash==="#design-system";
+  $("ds").hidden = !on; document.querySelector(".shell").hidden = on;
+  if (on){ const ab=document.querySelector(".about"); if (ab) ab.remove(); renderDS(); $("ds").scrollTop=0; }
+}
+window.addEventListener("hashchange", route);
+document.addEventListener("click", e=>{ const a=e.target.closest&&e.target.closest("a[data-ds-jump]"); if (!a) return; e.preventDefault(); const t=document.getElementById(a.getAttribute("href").slice(1)); if (t) t.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"}); });
+render();
+route();
+})();
+</script>
+
+</body></html>
