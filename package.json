@@ -2,6 +2,7 @@
   "name": "moneyverse",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "engines": {
     "node": "26.x"
   },
@@ -13,21 +14,32 @@
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm build"
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "invite:create": "node --env-file-if-exists=.env.local scripts/invite.ts"
   },
   "dependencies": {
+    "@better-auth/passkey": "^1.7.28",
+    "@libsql/client": "^0.18.0",
+    "better-auth": "^1.7.28",
+    "drizzle-orm": "^0.45.4",
     "next": "16.4.6",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@types/node": "^26.6.10",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
     "prettier": "3.10.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.1.2"
   },
   "packageManager": "pnpm@12.9.1"
 }

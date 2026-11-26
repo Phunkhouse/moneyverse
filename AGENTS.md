@@ -44,8 +44,15 @@ Node 26 (`.nvmrc`, `engines`) and pnpm (pinned in `packageManager`); run `nvm us
 
 - `pnpm install --frozen-lockfile`: install exactly what the lockfile says.
 - `pnpm dev`: development server. `pnpm build`: production build. `pnpm start`: serve the build.
-- `pnpm format:check` (Prettier check; `pnpm format` writes), `pnpm lint` (ESLint), `pnpm typecheck` (`next typegen && tsc --noEmit`).
-- `pnpm verify`: runs `format:check`, `lint`, `typecheck` and `build` in order and changes no files. Add `test` to it in the PR that adds the first tests.
+- `pnpm format:check` (Prettier check; `pnpm format` writes), `pnpm lint` (ESLint, including the `src/server/` import boundary), `pnpm typecheck` (`next typegen && tsc --noEmit`).
+- `pnpm test`: Vitest. Database tests run on a fresh, migrated libSQL file each, so they need no services.
+- `pnpm verify`: runs `format:check`, `lint`, `typecheck`, `test` and `build` in order and changes no files.
+- `pnpm db:generate`: writes a migration in `drizzle/` after a schema change (`src/server/db/schema.ts`). Never `drizzle-kit push` on real data.
+- `pnpm db:migrate`: applies the migrations to `DATABASE_URL` (default `file:.data/dev.db`).
+- `pnpm invite:create --email <email> --name <name>` (or `--existing`): creates a single-use invite and prints its link once (`.env.local` or the shell's environment).
+- **Production is owner-run only.** Never run `db:migrate` or `invite:create` against production, and never ask for, read or print production values; give the owner the command from `docs/runbook.md` instead.
+
+Code layout: `src/server/` is framework-free (database, auth, later the money rules) with relative `.ts` imports, so Node runs the scripts in `scripts/` directly; the app reaches it through `src/app/_lib/`. Every page and server action that touches a user's data calls `requireUser()` first and scopes queries by that user's id.
 
 ## Changes
 

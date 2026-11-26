@@ -6,7 +6,6 @@ The single home for work not yet started, when the project keeps its backlog in 
 
 MVP build order, one PR at a time ([SPEC](SPEC.md#planning-and-open-questions)):
 
-- Database, sign-in and first deploy: Drizzle on libSQL, migrations, invite-only passkey sign-in, user scoping, Vercel and Turso, runbook. AC-12, H-3.
 - Design tokens, app shell, theme, logo and manifest, Czech catalogue and formatters, kit part 1, `/dev/kit`. AC-14 layout, AC-16.
 - Money rules: balances, transfers, net worth, carried snapshots, currency conversion, ČNB rates. AC-2, AC-5, AC-8, AC-9, AC-15.
 - Accounts and categories screens. R-4, R-7.

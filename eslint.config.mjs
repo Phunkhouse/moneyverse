@@ -6,6 +6,34 @@ export default defineConfig([
   ...nextVitals,
   ...nextTs,
   globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
-  // If the project creates a framework-free src/server layer, add a
-  // no-restricted-imports rule for next, react and UI-layer imports here.
+  {
+    // src/server is framework-free: business rules, database and auth. The operator scripts
+    // import it under plain Node, and the app reaches it only through src/app/_lib.
+    files: ['src/server/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                'next',
+                'next/*',
+                'react',
+                'react/*',
+                'react-dom',
+                'server-only',
+              ],
+              message: 'src/server must not depend on Next.js or React.',
+            },
+            {
+              group: ['@/*', '../app/*', '../../app/*'],
+              message:
+                'src/server uses relative imports and never imports the app.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ])
