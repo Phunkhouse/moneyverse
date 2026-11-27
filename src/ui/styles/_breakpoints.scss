@@ -1,0 +1,14 @@
+// From 760 px the bottom bar becomes a sidebar and sheets become dialogs (docs/design/README.md).
+$wide: 760px;
+
+@mixin wide {
+  @media (min-width: $wide) {
+    @content;
+  }
+}
+
+@mixin narrow {
+  @media (max-width: ($wide - 0.02px)) {
+    @content;
+  }
+}

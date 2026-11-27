@@ -1,0 +1,148 @@
+@use '../../../ui/styles/breakpoints' as bp;
+
+.nav {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: center;
+  min-height: var(--bottom-bar);
+  padding: 6px max(6px, env(safe-area-inset-left, 0px))
+    calc(8px + env(safe-area-inset-bottom, 0px))
+    max(6px, env(safe-area-inset-right, 0px));
+  border-top: 1px solid var(--glass-line);
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  @include bp.wide {
+    position: sticky;
+    inset: 0 auto auto;
+    height: 100dvh;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 4px;
+    padding: 20px 12px;
+    border-top: 0;
+    border-right: 1px solid var(--glass-line);
+  }
+}
+
+.brand {
+  display: none;
+
+  @include bp.wide {
+    display: flex;
+    order: -2;
+    padding: 0 8px 16px;
+  }
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 48px;
+  justify-content: center;
+  padding: 6px 0;
+  border-radius: 10px;
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--w-name);
+  text-decoration: none;
+
+  svg {
+    width: 22px;
+    height: 22px;
+    flex: none;
+  }
+
+  &[aria-current='page'] {
+    color: var(--accent);
+    font-weight: var(--w-head);
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--ink);
+    }
+  }
+
+  @include bp.wide {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 10px;
+    min-height: 0;
+    padding: 9px 10px;
+    font-size: var(--fs-md);
+
+    &[aria-current='page'] {
+      background: var(--accent-soft);
+    }
+  }
+}
+
+.add {
+  justify-self: center;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin-top: -22px;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: var(--grad);
+  color: #fff;
+  box-shadow: 0 12px 24px -10px rgba(168, 85, 247, 0.9);
+
+  svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  // Not built yet (quick add comes with the transactions PR): visible but inert.
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    filter: saturate(0.6);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  @include bp.wide {
+    order: -1;
+    justify-self: stretch;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    width: auto;
+    height: auto;
+    margin: 0 0 10px;
+    padding: 11px 12px;
+    border-radius: 14px;
+    font-size: var(--fs-sm);
+    font-weight: var(--w-head);
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+// The add button's text is read on phones and shown from 760 px.
+.addLabel {
+  @include bp.narrow {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+}

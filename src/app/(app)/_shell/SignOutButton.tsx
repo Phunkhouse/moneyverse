@@ -2,23 +2,24 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { authClient } from './_lib/auth-client.ts'
+import { Button } from '@/ui/kit/Button.tsx'
+import { cs } from '@/ui/messages.ts'
+import { authClient } from '../../_lib/auth-client.ts'
 
 export function SignOutButton() {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
   return (
-    <button
-      type="button"
-      aria-busy={busy}
+    <Button
+      variant="ghost"
+      busy={busy}
       onClick={async () => {
-        if (busy) return
         setBusy(true)
         await authClient.signOut()
         router.replace('/prihlaseni')
       }}
     >
-      Odhlásit se
-    </button>
+      {cs.auth.signOut}
+    </Button>
   )
 }

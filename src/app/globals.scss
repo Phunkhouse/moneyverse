@@ -1,0 +1,276 @@
+// Tokens, resets and document defaults only; components style themselves in SCSS Modules
+// (ADR 0002). Values are copied from the prototype's final token layers
+// (docs/design/prototype/moneyverse-prototype.html: base, "Modern pass", type, spacing, brand).
+
+@use '../ui/styles/breakpoints' as bp;
+
+@mixin dark-tokens {
+  color-scheme: dark;
+  --bg: #0b0918;
+  --panel: rgba(22, 18, 44, 0.62);
+  --surface: #17142c;
+  --surface-2: #211d3c;
+  --line: #2e2950;
+  --ink: #f1eefc;
+  --ink-2: #b3add0;
+  --ink-3: #827ca3;
+  --accent: #a48bff;
+  --accent-ink: #ffffff;
+  --accent-soft: #2a2350;
+  --pos: #3fcf6e;
+  --neg: #f27272;
+  --warn: #e8b04a;
+  --warn-soft: #3a2e14;
+  --neg-soft: #3d1d20;
+  --glass: rgba(28, 24, 54, 0.66);
+  --glass-line: rgba(255, 255, 255, 0.07);
+  --shadow: 0 1px 1px rgba(0, 0, 0, 0.3), 0 16px 40px -18px rgba(0, 0, 0, 0.7);
+  --blob1: rgba(110, 80, 255, 0.3);
+  --blob2: rgba(236, 72, 153, 0.18);
+  --blob3: rgba(34, 211, 238, 0.14);
+  --s1: #7c7dff;
+  --s2: #f0609f;
+  --s3: #22d3ee;
+  --s4: #c4b5fd;
+  --hero-bg: linear-gradient(160deg, #1c1838 0%, #0b0918 100%);
+  --hero-glow:
+    radial-gradient(
+      300px 240px at 95% -10%,
+      rgba(91, 91, 247, 0.55),
+      transparent 70%
+    ),
+    radial-gradient(
+      260px 220px at 105% 105%,
+      rgba(236, 72, 153, 0.38),
+      transparent 70%
+    ),
+    radial-gradient(
+      280px 220px at -5% 115%,
+      rgba(34, 211, 238, 0.3),
+      transparent 70%
+    );
+  --hero-shadow:
+    0 24px 48px -22px rgba(0, 0, 0, 0.8),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --hero-line: #71e3fe;
+  --mark-tile: linear-gradient(160deg, #1c1838, #0b0918);
+  --hero-sheen: 0.18;
+}
+
+:root {
+  color-scheme: light;
+
+  // Surfaces and ink
+  --bg: #f3f1fb;
+  --panel: rgba(255, 255, 255, 0.62);
+  --surface: #ffffff;
+  --surface-2: #f1effa;
+  --line: #e4e0f3;
+  --ink: #16122b;
+  --ink-2: #5b5675;
+  --ink-3: #8f8aa8;
+
+  // Roles
+  --accent: #6d4dff;
+  --accent-ink: #ffffff;
+  --accent-soft: #ece7ff;
+  --pos: #0b7a32;
+  --neg: #c33131;
+  --warn: #9a6200;
+  --warn-soft: #fdf1dc;
+  --neg-soft: #fbe5e5;
+
+  // Brand: Glass trio and the colours its overlaps make
+  --v: #5b5bf7;
+  --p: #ec4899;
+  --c: #22d3ee;
+  --vp: #f389fc;
+  --vc: #71e3fe;
+  --g1: var(--v);
+  --g2: #a24ff0;
+  --g3: var(--p);
+  --g4: var(--c);
+  --grad: linear-gradient(135deg, var(--g1) 0%, var(--g2) 52%, var(--g3) 100%);
+  --grad-cool: linear-gradient(90deg, var(--v), var(--c));
+  --grad-warm: linear-gradient(90deg, #f59e0b, #f97316);
+  --grad-hot: linear-gradient(90deg, #f43f5e, #e11d48);
+
+  // Glass
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-line: rgba(255, 255, 255, 0.9);
+  --shadow:
+    0 1px 1px rgba(40, 20, 90, 0.04), 0 12px 32px -16px rgba(60, 30, 140, 0.28);
+  --blob1: rgba(124, 92, 255, 0.28);
+  --blob2: rgba(236, 72, 153, 0.2);
+  --blob3: rgba(34, 211, 238, 0.22);
+
+  // Chart series
+  --s1: #5b5bf7;
+  --s2: #ec4899;
+  --s3: #0ab3d0;
+  --s4: #b49cff;
+
+  // Hero card
+  --hero-bg: linear-gradient(135deg, #5b5bf7 0%, #a24ff0 55%, #ec4899 100%);
+  --hero-glow:
+    radial-gradient(
+      260px 220px at 100% 100%,
+      rgba(34, 211, 238, 0.55),
+      transparent 70%
+    ),
+    radial-gradient(
+      220px 200px at 0% 0%,
+      rgba(255, 255, 255, 0.18),
+      transparent 70%
+    );
+  --hero-shadow: 0 20px 40px -18px rgba(91, 91, 247, 0.65);
+  --hero-line: #ffffff;
+  --mark-tile: linear-gradient(135deg, #ffffff, #e9e4ff);
+  --hero-sheen: 1;
+
+  // Type: Sora for display, Plus Jakarta Sans for text (fonts set by the root layout)
+  --font-display: var(--font-sora), var(--font-jakarta), system-ui, sans-serif;
+  --font-body:
+    var(--font-jakarta), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fs-xs: 11px;
+  --fs-sm: 13px;
+  --fs-md: 15px;
+  --fs-lg: 19px;
+  --fs-xl: 24px;
+  --fs-2xl: 34px;
+  --fs-3xl: 40px;
+  --w-text: 400;
+  --w-name: 500;
+  --w-head: 600;
+  --w-key: 700;
+
+  // Spacing and radii
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --card-pad: 20px;
+  --r-sm: 8px;
+  --r-control: 12px;
+  --r-card: 22px;
+  --r-sheet: 28px;
+  --r-pill: 999px;
+
+  // Layout
+  --sidebar: 220px;
+  --bottom-bar: 72px;
+
+  @include bp.wide {
+    --card-pad: var(--sp-5);
+  }
+}
+
+// The theme script in the root layout sets data-theme before the first paint; without it, the
+// system preference applies ("Podle systému").
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include dark-tokens;
+  }
+}
+
+:root[data-theme='dark'] {
+  @include dark-tokens;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  font-weight: var(--w-text);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+// Soft mesh behind everything; a fixed layer instead of background-attachment, which iOS ignores.
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(420px 320px at 100% 0%, var(--blob1), transparent 70%),
+    radial-gradient(380px 300px at 0% 100%, var(--blob3), transparent 70%),
+    radial-gradient(600px 400px at 60% 60%, var(--blob2), transparent 75%);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+// Visually hidden but read by screen readers.
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

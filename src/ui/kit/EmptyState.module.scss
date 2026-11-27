@@ -1,0 +1,34 @@
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-6) var(--sp-4);
+  text-align: center;
+
+  h2 {
+    font-size: var(--fs-lg);
+    font-weight: var(--w-key);
+  }
+
+  p {
+    max-width: 42ch;
+    font-size: var(--fs-sm);
+    color: var(--ink-2);
+  }
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: var(--sp-2);
+  border-radius: 18px;
+  background: var(--accent-soft);
+  color: var(--accent);
+
+  svg {
+    width: 26px;
+    height: 26px;
+  }
+}

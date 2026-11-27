@@ -1,0 +1,29 @@
+// Both states are rendered; CSS shows the one that matches the theme the inline script set,
+// so the server HTML is right before hydration.
+.toDark {
+  display: contents;
+}
+
+.toLight {
+  display: none;
+}
+
+@mixin dark {
+  .toDark {
+    display: none;
+  }
+
+  .toLight {
+    display: contents;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme='light'])) {
+    @include dark;
+  }
+}
+
+:global(:root[data-theme='dark']) {
+  @include dark;
+}

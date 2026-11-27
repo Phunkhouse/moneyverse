@@ -1,0 +1,38 @@
+.page {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: max(var(--sp-5), env(safe-area-inset-top, 0px))
+    max(var(--sp-4), env(safe-area-inset-right, 0px))
+    max(var(--sp-5), env(safe-area-inset-bottom, 0px))
+    max(var(--sp-4), env(safe-area-inset-left, 0px));
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  width: min(100%, 420px);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+
+  h1 {
+    font-size: var(--fs-xl);
+    font-weight: var(--w-key);
+    letter-spacing: -0.02em;
+  }
+}
+
+.lead {
+  color: var(--ink-2);
+}
+
+.foot {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  text-align: center;
+}

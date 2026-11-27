@@ -1,0 +1,32 @@
+@use '../../../ui/styles/breakpoints' as bp;
+
+.shell {
+  min-height: 100dvh;
+  padding-bottom: calc(var(--bottom-bar) + env(safe-area-inset-bottom, 0px));
+
+  @include bp.wide {
+    display: grid;
+    grid-template-columns: var(--sidebar) minmax(0, 1fr);
+    padding-bottom: 0;
+  }
+}
+
+.main {
+  min-width: 0;
+}
+
+.skip {
+  position: absolute;
+  left: var(--sp-4);
+  top: -100px;
+  z-index: 50;
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-control);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-weight: var(--w-head);
+
+  &:focus {
+    top: var(--sp-4);
+  }
+}

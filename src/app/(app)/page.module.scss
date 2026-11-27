@@ -1,0 +1,19 @@
+.settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+
+.account {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.muted {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}

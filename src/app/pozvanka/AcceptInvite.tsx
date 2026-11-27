@@ -2,6 +2,9 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { Banner } from '@/ui/kit/Banner.tsx'
+import { Button } from '@/ui/kit/Button.tsx'
+import { cs } from '@/ui/messages.ts'
 import { authClient } from '../_lib/auth-client.ts'
 
 export function AcceptInvite() {
@@ -33,9 +36,7 @@ export function AcceptInvite() {
       createSession: true,
     })
     if (result?.error) {
-      setError(
-        'Přístupový klíč se nepodařilo vytvořit. Pozvánka mohla vypršet nebo už byla použita.',
-      )
+      setError(cs.auth.inviteFailed)
       setBusy(false)
       return
     }
@@ -43,19 +44,13 @@ export function AcceptInvite() {
   }
 
   if (!ready) return null
-  if (!token) {
-    return (
-      <p role="alert">
-        Odkaz pozvánky je neúplný. Otevřete celý odkaz, který jste dostali.
-      </p>
-    )
-  }
+  if (!token) return <Banner tone="error">{cs.auth.inviteIncomplete}</Banner>
   return (
     <>
-      <button type="button" onClick={accept} aria-busy={busy}>
-        Vytvořit přístupový klíč
-      </button>
-      {error && <p role="alert">{error}</p>}
+      <Button size="large" block busy={busy} onClick={accept}>
+        {cs.auth.inviteButton}
+      </Button>
+      {error && <Banner tone="error">{error}</Banner>}
     </>
   )
 }
