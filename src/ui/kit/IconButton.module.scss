@@ -1,0 +1,21 @@
+@use 'states';
+
+.iconButton {
+  @include states.control-states;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--glass-line);
+  border-radius: 50%;
+  background: var(--glass);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}

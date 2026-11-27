@@ -28,10 +28,16 @@ describe('proxy matcher', () => {
   const matches = (path: string) =>
     new RegExp(`^${config.matcher[0]}$`).test(path)
 
-  it.each(['/', '/ucty', '/prihlaseni-x', '/pozvankaXYZ', '/api/other'])(
-    'runs on %s',
-    (path) => expect(matches(path)).toBe(true),
-  )
+  it.each([
+    '/',
+    '/ucty',
+    '/plan',
+    '/dev/kit',
+    '/prihlaseni-x',
+    '/pozvankaXYZ',
+    '/api/other',
+    '/iconsX',
+  ])('runs on %s', (path) => expect(matches(path)).toBe(true))
 
   it.each([
     '/prihlaseni',
@@ -39,5 +45,7 @@ describe('proxy matcher', () => {
     '/api/auth/get-session',
     '/_next/static/chunks/app.js',
     '/icon.svg',
+    '/icons/icon-192.png',
+    '/manifest.webmanifest',
   ])('skips %s', (path) => expect(matches(path)).toBe(false))
 })

@@ -6,17 +6,17 @@ The single home for work not yet started, when the project keeps its backlog in 
 
 MVP build order, one PR at a time ([SPEC](SPEC.md#planning-and-open-questions)):
 
-- Design tokens, app shell, theme, logo and manifest, Czech catalogue and formatters, kit part 1, `/dev/kit`. AC-14 layout, AC-16.
 - Money rules: balances, transfers, net worth, carried snapshots, currency conversion, ČNB rates. AC-2, AC-5, AC-8, AC-9, AC-15.
 - Accounts and categories screens. R-4, R-7.
 - Quick add and transaction list with edit, delete and undo; Playwright and axe. AC-1, AC-3, AC-4. Then H-1.
 - Monthly investment values. AC-6, then H-4.
 - Dashboard and charts. AC-7, R-10 to R-12.
-- Export and re-import; PWA and phone checks. AC-13, AC-14.
+- Export and re-import; PWA and phone checks. AC-13, AC-14. Check the installed app's launch screen in dark mode: the manifest's `background_color` and `theme_color` are the light `#f3f1fb`, and a manifest cannot follow the system theme (PR #4 review).
 
 ## Later
 
 - Full Content-Security-Policy with nonces for scripts and styles; today's CSP covers only `frame-ancestors`, `base-uri`, `form-action` and `object-src` (`next.config.ts`). From the PR 1 review, 2026-11-26.
+- Nastavení screen as in the prototype: theme (Podle systému, Světlý, Tmavý), display currency for totals, sign-out. Replaces the temporary "Nastavení" card on Přehled. Owner, 2026-11-27, from PR #4.
 
 Proposed in the discovery brief; the owner orders them after H-1.
 

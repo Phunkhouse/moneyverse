@@ -1,0 +1,60 @@
+@use 'states';
+
+.button {
+  @include states.control-states;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 40px;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: var(--r-control);
+  font-size: var(--fs-sm);
+  font-weight: var(--w-head);
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.primary {
+  background: var(--grad);
+  color: #fff;
+  box-shadow: 0 8px 18px -10px rgba(124, 58, 237, 0.8);
+}
+
+.ghost {
+  background: var(--glass);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.danger {
+  background: var(--neg-soft);
+  color: var(--neg);
+}
+
+.large {
+  min-height: 48px;
+  padding: 13px 20px;
+  font-size: var(--fs-md);
+}
+
+.block {
+  width: 100%;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

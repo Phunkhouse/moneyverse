@@ -1,0 +1,35 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) 20px;
+  border: 1px solid var(--glass-line);
+  border-radius: 20px;
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--g1) 14%, transparent),
+    color-mix(in srgb, var(--g4) 16%, transparent)
+  );
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-sm);
+
+  b {
+    font-weight: var(--w-head);
+  }
+}
+
+.warn {
+  background: var(--warn-soft);
+  border-color: transparent;
+  color: var(--warn);
+}
+
+.error {
+  background: var(--neg-soft);
+  border-color: transparent;
+  color: var(--neg);
+}

@@ -1,15 +1,18 @@
 import type { Metadata } from 'next'
+import { cs } from '@/ui/messages.ts'
+import { AuthPanel } from '../_components/AuthPanel.tsx'
 import { SignIn } from './SignIn.tsx'
 
-export const metadata: Metadata = { title: 'Přihlášení · moneyverse' }
+export const metadata: Metadata = { title: cs.auth.signInTitle }
 
 export default function SignInPage() {
   return (
-    <main>
-      <h1>moneyverse</h1>
-      <p>Přihlaste se přístupovým klíčem uloženým v tomto zařízení.</p>
+    <AuthPanel
+      title={cs.auth.signInTitle}
+      lead={cs.auth.signInLead}
+      foot={cs.auth.inviteOnly}
+    >
       <SignIn />
-      <p>Nemáte účet? Moneyverse je jen na pozvánku.</p>
-    </main>
+    </AuthPanel>
   )
 }

@@ -18,7 +18,8 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "invite:create": "node --env-file-if-exists=.env.local scripts/invite.ts"
+    "invite:create": "node --env-file-if-exists=.env.local scripts/invite.ts",
+    "icons:render": "node scripts/render-icons.ts"
   },
   "dependencies": {
     "@better-auth/passkey": "^1.7.28",
@@ -38,6 +39,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
     "prettier": "3.10.1",
+    "sass": "^1.108.2",
     "typescript": "^5",
     "vitest": "^5.1.2"
   },

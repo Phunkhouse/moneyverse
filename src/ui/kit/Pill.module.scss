@@ -1,0 +1,35 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-xs);
+  font-weight: var(--w-head);
+  white-space: nowrap;
+}
+
+.neutral {
+  color: var(--ink-3);
+  background: var(--surface-2);
+}
+
+.accent {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.positive {
+  color: var(--pos);
+  background: color-mix(in srgb, var(--pos) 12%, transparent);
+}
+
+.warn {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.negative {
+  color: var(--neg);
+  background: var(--neg-soft);
+}

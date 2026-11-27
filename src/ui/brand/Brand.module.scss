@@ -1,0 +1,22 @@
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  text-transform: lowercase;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.tile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 28%;
+  background: var(--mark-tile);
+  box-shadow:
+    0 6px 14px -8px rgba(60, 30, 140, 0.5),
+    inset 0 0 0 1px var(--glass-line);
+}

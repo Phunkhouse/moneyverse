@@ -2,6 +2,9 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { Banner } from '@/ui/kit/Banner.tsx'
+import { Button } from '@/ui/kit/Button.tsx'
+import { cs } from '@/ui/messages.ts'
 import { authClient } from '../_lib/auth-client.ts'
 
 export function SignIn() {
@@ -15,7 +18,7 @@ export function SignIn() {
     setError(null)
     const result = await authClient.signIn.passkey()
     if (result?.error) {
-      setError('Přihlášení se nepovedlo. Zkuste to znovu.')
+      setError(cs.auth.signInFailed)
       setBusy(false)
       return
     }
@@ -24,10 +27,10 @@ export function SignIn() {
 
   return (
     <>
-      <button type="button" onClick={signIn} aria-busy={busy}>
-        Přihlásit se přístupovým klíčem
-      </button>
-      {error && <p role="alert">{error}</p>}
+      <Button size="large" block busy={busy} onClick={signIn}>
+        {cs.auth.signInButton}
+      </Button>
+      {error && <Banner tone="error">{error}</Banner>}
     </>
   )
 }
