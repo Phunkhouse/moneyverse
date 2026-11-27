@@ -85,7 +85,7 @@ AC-10 (budget overspending, R-14) and AC-11 (recurring payments, R-15, R-16) bel
 | --- | --- | --- |
 | Framework | Next.js 16 (App Router, `src/`, TypeScript), Node 26, pnpm | decided, [ADR 0001](decisions/0001-application-stack.md) |
 | Database | Turso (libSQL) with Drizzle ORM; a local libSQL file for development and tests | decided, D-4, [ADR 0001](decisions/0001-application-stack.md) |
-| Hosting | Vercel Hobby on a subdomain; production deploys only from `main` | proposal, checked by H-3 in the first feature PR |
+| Hosting | Vercel Hobby at money.david-krapka.eu (`fra1`), Turso free plan; production deploys only from `main` | in use since 2026-11-27; H-3 partly checked ([assumptions O-04](assumptions.md)) |
 | Sign-in | Better Auth with passkeys, invite-only; invites from `pnpm invite:create` | decided, [ADR 0004](decisions/0004-invite-only-passkey-sign-in.md) |
 | UI | Own component kit with SCSS Modules; own SVG charts | decided, [ADR 0002](decisions/0002-custom-ui-kit.md) |
 | Language | Czech only: a typed message catalogue plus `Intl` formatters for `cs-CZ`; no i18n library yet | decided by the owner, 2026-11-26 |
