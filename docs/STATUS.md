@@ -13,7 +13,7 @@ Build the MVP in [SPEC.md](SPEC.md) (D-3), one PR at a time in the order under "
 - Done and merged: project setup; database and invite-only passkey sign-in (PR #1); first deploy recorded (PR #2); esbuild override, Dependabot alert #1 fixed (PR #3).
 - Deployed 2026-11-27 at https://money.david-krapka.eu (Vercel Hobby `fra1`, Turso free plan). The owner's passkey works on the Mac and the phone. The WebAuthn ceremony has no automated test.
 - In review (PR #4, branch `feat/app-shell`): design tokens from the prototype, light, dark and "Podle systému" themes without a flash, Sora and Plus Jakarta Sans self-hosted, app shell (bottom bar on phones, sidebar from 760 px), the four tabs as empty screens, Plán as "coming later", the add button visible but inactive until quick add, restyled sign-in and invite pages, Czech catalogue and formatters with tests, kit part 1 and `/dev/kit` (404 in production), PWA manifest and PNG icons.
-- The theme choice and sign-out sit in a temporary "Nastavení" card on Přehled until a settings screen exists (proposed for the backlog).
+- The theme choice and sign-out sit in a temporary "Nastavení" card on Přehled until the Nastavení screen in BACKLOG "Later" is built.
 - H-3 partly checked: Turso's free limits recorded ([O-04](assumptions.md)); Vercel limits and idle behavior still open.
 - Production holds no financial data yet, and there is no backup.
 

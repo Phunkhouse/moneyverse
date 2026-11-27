@@ -16,6 +16,7 @@ MVP build order, one PR at a time ([SPEC](SPEC.md#planning-and-open-questions)):
 ## Later
 
 - Full Content-Security-Policy with nonces for scripts and styles; today's CSP covers only `frame-ancestors`, `base-uri`, `form-action` and `object-src` (`next.config.ts`). From the PR 1 review, 2026-11-26.
+- Nastavení screen as in the prototype: theme (Podle systému, Světlý, Tmavý), display currency for totals, sign-out. Replaces the temporary "Nastavení" card on Přehled. Owner, 2026-11-27, from PR #4.
 
 Proposed in the discovery brief; the owner orders them after H-1.
 
