@@ -190,6 +190,42 @@ describe('storing rates', () => {
     ).rejects.toThrow('returned')
   })
 
+  it('starts a year on 1 January from the previous year’s last list', async () => {
+    const year = (y: number, days: string[]) => ({
+      rates: days.flatMap((validFor) => [
+        {
+          validFor,
+          amount: 1,
+          currencyCode: 'EUR',
+          rate: y === 2025 ? 24.1 : 24.2,
+        },
+        { validFor, amount: 1, currencyCode: 'USD', rate: 21.1 },
+      ]),
+    })
+    const fetch = async (url: string) =>
+      url.endsWith('2025')
+        ? year(2025, ['2025-12-31'])
+        : year(2026, ['2026-01-02'])
+    await backfillYear(db, 2025, '2026-01-03', { fetch })
+    await backfillYear(db, 2026, '2026-01-03', { fetch })
+    const book = await loadRateBook(db)
+    expect(book.lookup('EUR', '2026-01-01')).toMatchObject({
+      validFor: '2025-12-31',
+      estimated: false,
+    })
+    expect(book.lookup('EUR', '2026-01-02')).toMatchObject({
+      validFor: '2026-01-02',
+      estimated: false,
+    })
+  })
+
+  it('caps a first run at seven requests', async () => {
+    const cnb = fakeCnb(true)
+    await syncRates(db, '2026-11-30', { fetch: cnb.fetch })
+    expect(cnb.requested).toHaveLength(7)
+    expect(cnb.requested[0]).toBe('2026-11-24')
+  })
+
   it('backfills a year and fills the days between lists', async () => {
     const fetch = async (url: string) => {
       expect(url).toContain('daily-year?year=2025')

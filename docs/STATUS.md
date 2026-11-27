@@ -14,6 +14,7 @@ Build the MVP in [SPEC.md](SPEC.md) (D-3), one PR at a time in the order under "
 - Deployed at https://money.david-krapka.eu (Vercel Hobby `fra1`, Turso free plan). The owner's passkey works on the Mac and the phone; the WebAuthn ceremony has no automated test.
 - In review (PR #5, branch `feat/money-rules`): the ledger in `src/server/money/` ([ADR 0005](decisions/0005-ledger-data-model.md)):
   - Accounts of seven types, categories, idempotent transactions with transfers that keep both amounts, monthly values with carried months.
+  - Archived accounts and categories take no new entries; edits of existing ones still work.
   - Month-end balances, net worth by kind of account, and spending per category against earlier months, all in CZK at the day's ČNB rate, marked when estimated.
   - ČNB rates through a daily Vercel Cron and `pnpm rates:backfill`.
   - A favicon (`src/app/favicon.ico`). The site had no linked icon since PR #4, because `metadata.icons` hid the file icons. The Apple icon is now `src/app/apple-icon.png`.
@@ -36,12 +37,12 @@ After PR #5 is merged: the accounts and categories screens (R-4, R-7), BACKLOG "
 
 ## Last verified
 
-- Command: `pnpm verify` (format:check, lint, typecheck, 109 tests, build); `pnpm db:generate` shows no drift.
+- Command: `pnpm verify` (format:check, lint, typecheck, 113 tests, build), including the PR #5 review fixes; `pnpm db:generate` shows no drift.
 - Live checks on 2026-11-27:
   - Rate sync against the ČNB API into the local database: four days stored; the 26 November EUR rate of 24,455 matches ČNB.
   - `/api/cron/rates` on `pnpm dev`: 401 with a wrong secret, 200 with the right one.
   - `/favicon.ico`, `/icon.svg` and `/apple-icon.png` are linked in the page head and served.
-- Revision: branch `feat/money-rules` on `main` at `450eb1b`, changes uncommitted at the time.
+- Revision: branch `feat/money-rules` at `f69cc52` plus the review fixes, uncommitted at the time.
 - Working tree: the PR #5 changes only.
 - Result: passed.
 - Not run:

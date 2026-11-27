@@ -4,6 +4,9 @@ import { todayInPrague } from '@/server/money/calendar.ts'
 import { syncRates } from '@/server/money/rates.ts'
 import { getDb } from '../../../_lib/db.ts'
 
+// Seven ČNB requests of at most 8 s each fit; 60 s is allowed on every Vercel plan.
+export const maxDuration = 60
+
 /**
  * Daily ČNB rates, called by Vercel Cron (vercel.json) with `Authorization: Bearer $CRON_SECRET`.
  * Safe to run twice: rates are upserted. Public data only; returns no user data.

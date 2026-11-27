@@ -30,6 +30,6 @@ The MVP needs accounts of seven types, own categories, expenses, income and tran
 
 ## Consequences
 
-- Deleting an account with transactions fails (foreign key); accounts are archived instead.
+- Deleting an account with transactions fails (foreign key); accounts are archived instead. Archived accounts and categories take no new transactions, but transactions already using them can still be edited.
 - Changing an account's currency is not supported; it would rewrite history.
 - If Vercel Cron stops, conversions after the last checked day are marked estimated rather than wrong; Hobby runs the job once a day, somewhere within the scheduled hour.

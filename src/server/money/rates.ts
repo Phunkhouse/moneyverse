@@ -7,7 +7,7 @@
 //   GET https://api.cnb.cz/cnbapi/exrates/daily-year?year=YYYY
 //     → { rates: [{ validFor, amount, currencyCode, rate }] }
 // `rate` is CZK for `amount` units, with three decimals.
-import { max } from 'drizzle-orm'
+import { lt, max } from 'drizzle-orm'
 import type { Db } from '../db/client.ts'
 import { exchangeRate, exchangeRateDay } from '../db/schema.ts'
 import type { Rate } from './arithmetic.ts'
@@ -140,7 +140,8 @@ export type FetchJson = (url: string) => Promise<unknown>
 export const fetchJson: FetchJson = async (url) => {
   const response = await fetch(url, {
     headers: { accept: 'application/json' },
-    signal: AbortSignal.timeout(10_000),
+    // With at most 7 days a run, the cron stays within its 60-second limit (route maxDuration).
+    signal: AbortSignal.timeout(8_000),
   })
   if (!response.ok) {
     throw new Error(`ČNB answered ${response.status} for ${url}`)
@@ -178,7 +179,7 @@ async function storeDay(db: Db, day: Day, validFor: Day) {
 export async function syncRates(
   db: Db,
   today: Day,
-  { fetch = fetchJson, maxDays = 10 } = {},
+  { fetch = fetchJson, maxDays = 7 } = {},
 ): Promise<{ days: Day[] }> {
   const [{ last }] = await db
     .select({ last: max(exchangeRateDay.day) })
@@ -226,12 +227,19 @@ export async function backfillYear(
   await storeRates(db, rates)
   const listDays = [...new Set(rates.map((r) => r.validFor))].sort()
   if (listDays.length === 0) return { lists: 0, days: 0 }
+  // Days before the year's first list (1 January, a holiday) take the previous year's last list,
+  // when it is stored (back-fill years in order).
+  const [{ previous }] = await db
+    .select({ previous: max(exchangeRate.validFor) })
+    .from(exchangeRate)
+    .where(lt(exchangeRate.validFor, `${year}-01-01`))
+  const start = previous ? `${year}-01-01` : listDays[0]
   const end = `${year}-12-31` < today ? `${year}-12-31` : addDays(today, -1)
   let days = 0
-  let index = 0
-  for (let day = listDays[0]; day <= end; day = addDays(day, 1)) {
+  let index = -1
+  for (let day = start; day <= end; day = addDays(day, 1)) {
     while (index + 1 < listDays.length && listDays[index + 1] <= day) index++
-    await storeDay(db, day, listDays[index])
+    await storeDay(db, day, index >= 0 ? listDays[index] : previous!)
     days++
   }
   return { lists: listDays.length, days }

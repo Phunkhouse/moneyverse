@@ -127,10 +127,14 @@ export async function updateAccount(
   if (changes.openedOn !== undefined)
     set.openedOn = assertDay(changes.openedOn, 'openedOn')
   if (changes.archived !== undefined) set.archived = changes.archived === true
+  if (Object.keys(set).length === 0) {
+    throw new MoneyError('INVALID', 'Nothing to change')
+  }
+  const id = assertId(accountId, 'accountId')
   const [account] = await db
     .update(moneyAccount)
     .set(set)
-    .where(and(eq(moneyAccount.id, accountId), eq(moneyAccount.userId, userId)))
+    .where(and(eq(moneyAccount.id, id), eq(moneyAccount.userId, userId)))
     .returning()
   if (!account) throw new MoneyError('NOT_FOUND', 'Account not found')
   return account
@@ -146,12 +150,11 @@ async function getAccount(
   accountId: unknown,
   field: string,
 ) {
-  if (typeof accountId !== 'string')
-    throw new MoneyError('INVALID', `${field} is required`)
+  const id = assertId(accountId, field)
   const [account] = await db
     .select()
     .from(moneyAccount)
-    .where(and(eq(moneyAccount.id, accountId), eq(moneyAccount.userId, userId)))
+    .where(and(eq(moneyAccount.id, id), eq(moneyAccount.userId, userId)))
   // Another user's account is reported exactly like a missing one.
   if (!account) throw new MoneyError('NOT_FOUND', `${field}: account not found`)
   return account
@@ -213,8 +216,26 @@ export type TransactionInput =
       note?: string | null
     }
 
-/** Validates input against the user's own accounts and categories; returns the row to store. */
-async function validate(db: Db, userId: string, input: TransactionInput) {
+/**
+ * Validates input against the user's own accounts and categories; returns the row to store.
+ * Archived accounts and categories take no new entries; `keep` lists the ones an edited
+ * transaction already uses, which stay allowed so old entries can still be corrected.
+ */
+async function validate(
+  db: Db,
+  userId: string,
+  input: TransactionInput,
+  keep: ReadonlySet<string> = new Set(),
+) {
+  const usable = <T extends { id: string; archived: boolean }>(
+    row: T,
+    field: string,
+  ) => {
+    if (row.archived && !keep.has(row.id)) {
+      throw new MoneyError('INVALID', `${field} is archived`)
+    }
+    return row
+  }
   const kind = assertOneOf(
     input.kind,
     ['expense', 'income', 'transfer'] as const,
@@ -224,7 +245,10 @@ async function validate(db: Db, userId: string, input: TransactionInput) {
   const amountMinor = assertMinor(input.amountMinor, 'amountMinor', {
     positive: true,
   })
-  const account = await getAccount(db, userId, input.accountId, 'accountId')
+  const account = usable(
+    await getAccount(db, userId, input.accountId, 'accountId'),
+    'accountId',
+  )
   const common = {
     kind,
     date,
@@ -234,7 +258,10 @@ async function validate(db: Db, userId: string, input: TransactionInput) {
     note: optionalText(input.note, 'note'),
   }
   if (input.kind === 'transfer') {
-    const to = await getAccount(db, userId, input.toAccountId, 'toAccountId')
+    const to = usable(
+      await getAccount(db, userId, input.toAccountId, 'toAccountId'),
+      'toAccountId',
+    )
     if (to.id === account.id) {
       throw new MoneyError('INVALID', 'A transfer needs two different accounts')
     }
@@ -258,15 +285,14 @@ async function validate(db: Db, userId: string, input: TransactionInput) {
       toAmountMinor,
     }
   }
-  if (typeof input.categoryId !== 'string') {
-    throw new MoneyError('INVALID', 'categoryId is required')
-  }
+  const categoryId = assertId(input.categoryId, 'categoryId')
   const [found] = await db
     .select()
     .from(category)
-    .where(and(eq(category.id, input.categoryId), eq(category.userId, userId)))
+    .where(and(eq(category.id, categoryId), eq(category.userId, userId)))
   if (!found)
     throw new MoneyError('NOT_FOUND', 'categoryId: category not found')
+  usable(found, 'categoryId')
   if (found.kind !== kind) {
     throw new MoneyError('INVALID', `An ${kind} needs an ${kind} category`)
   }
@@ -331,15 +357,25 @@ export async function updateTransaction(
   id: string,
   input: TransactionInput,
 ): Promise<Transaction> {
-  const row = await validate(db, userId, input)
+  const txId = assertId(id, 'id')
+  const [existing] = await db
+    .select()
+    .from(moneyTransaction)
+    .where(
+      and(eq(moneyTransaction.id, txId), eq(moneyTransaction.userId, userId)),
+    )
+  if (!existing) throw new MoneyError('NOT_FOUND', 'Transaction not found')
+  const keep = new Set(
+    [existing.accountId, existing.toAccountId, existing.categoryId].filter(
+      (value): value is string => value !== null,
+    ),
+  )
+  const row = await validate(db, userId, input, keep)
   const [updated] = await db
     .update(moneyTransaction)
     .set(row)
     .where(
-      and(
-        eq(moneyTransaction.id, assertId(id, 'id')),
-        eq(moneyTransaction.userId, userId),
-      ),
+      and(eq(moneyTransaction.id, txId), eq(moneyTransaction.userId, userId)),
     )
     .returning()
   if (!updated) throw new MoneyError('NOT_FOUND', 'Transaction not found')
@@ -412,7 +448,7 @@ export async function deleteMonthValue(
     .where(
       and(
         eq(monthValue.userId, userId),
-        eq(monthValue.accountId, input.accountId),
+        eq(monthValue.accountId, assertId(input.accountId, 'accountId')),
         eq(monthValue.month, assertMonth(input.month, 'month')),
       ),
     )

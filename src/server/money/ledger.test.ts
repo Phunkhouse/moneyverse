@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { Db } from '../db/client.ts'
-import { moneyTransaction } from '../db/schema.ts'
+import { eq } from 'drizzle-orm'
+import { category, moneyTransaction } from '../db/schema.ts'
 import { createTestDb, createTestUser } from '../test/database.ts'
 import {
   createAccount,
   createCategory,
   createTransaction,
+  deleteMonthValue,
   deleteTransaction,
   listTransactions,
   setMonthValue,
@@ -28,6 +30,9 @@ beforeEach(async () => {
 afterEach(() => cleanup())
 
 const id = () => crypto.randomUUID()
+// Categories have no archive function yet (the categories PR adds it); set the flag directly.
+const archiveCategory = (categoryId: string) =>
+  db.update(category).set({ archived: true }).where(eq(category.id, categoryId))
 const checking = (userId = me, currency: 'CZK' | 'EUR' = 'CZK') =>
   createAccount(db, userId, {
     name: 'Běžný účet',
@@ -73,6 +78,19 @@ describe('accounts', () => {
     ).rejects.toThrow('minor')
   })
 
+  it('refuses an empty change and a malformed id with INVALID', async () => {
+    const account = await checking()
+    await expect(updateAccount(db, me, account.id, {})).rejects.toMatchObject({
+      code: 'INVALID',
+    })
+    await expect(
+      updateAccount(db, me, 'not-a-uuid', { name: 'X' }),
+    ).rejects.toMatchObject({ code: 'INVALID' })
+    await expect(
+      deleteMonthValue(db, me, { accountId: 'not-a-uuid', month: '2026-10' }),
+    ).rejects.toMatchObject({ code: 'INVALID' })
+  })
+
   it('does not let one user change another user’s account', async () => {
     const theirs = await checking(other)
     await expect(
@@ -80,6 +98,43 @@ describe('accounts', () => {
     ).rejects.toMatchObject({
       code: 'NOT_FOUND',
     })
+  })
+})
+
+describe('archived accounts and categories', () => {
+  it('take no new entries, but edits of existing ones still work', async () => {
+    const account = await checking()
+    const food = await createCategory(db, me, {
+      kind: 'expense',
+      name: 'Jídlo',
+    })
+    const txId = id()
+    const input = {
+      kind: 'expense' as const,
+      date: '2026-11-26',
+      accountId: account.id,
+      amountMinor: 100,
+      categoryId: food.id,
+    }
+    await createTransaction(db, me, txId, input)
+    await updateAccount(db, me, account.id, { archived: true })
+    await archiveCategory(food.id)
+
+    await expect(createTransaction(db, me, id(), input)).rejects.toThrow(
+      'archived',
+    )
+    const edited = await updateTransaction(db, me, txId, {
+      ...input,
+      amountMinor: 150,
+    })
+    expect(edited.amountMinor).toBe(150)
+
+    // Moving an entry onto another archived account is still refused.
+    const old = await checking()
+    await updateAccount(db, me, old.id, { archived: true })
+    await expect(
+      updateTransaction(db, me, txId, { ...input, accountId: old.id }),
+    ).rejects.toThrow('archived')
   })
 })
 
