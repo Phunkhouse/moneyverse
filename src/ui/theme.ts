@@ -6,6 +6,9 @@ export type ThemeChoice = 'system' | 'light' | 'dark'
 
 export const THEME_STORAGE_KEY = 'mv-theme'
 
+/** Fired on window when the choice changes in this tab. */
+export const THEME_CHANGE_EVENT = 'mv-theme-change'
+
 export const themeScript = `(function(){try{var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}})()`
 
 export function readThemeChoice(): ThemeChoice {
@@ -30,8 +33,6 @@ export function applyThemeChoice(choice: ThemeChoice): void {
   }
   window.dispatchEvent(new Event(THEME_CHANGE_EVENT))
 }
-
-export const THEME_CHANGE_EVENT = 'mv-theme-change'
 
 export function isDarkNow(): boolean {
   const attr = document.documentElement.getAttribute('data-theme')
