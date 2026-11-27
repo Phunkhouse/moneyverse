@@ -30,4 +30,8 @@ All in the prototype: Přehled (dashboard with net worth hero), Rychlé zadání
 
 ## Open design questions
 
-- Budgets and the recurring calendar are drawn in the prototype but are backlog items, not MVP scope. Until they are built, the Plán tab needs an MVP state: hide it, or show it as coming later. Owner to decide before the app shell PR.
+None open.
+
+## Decided
+
+- **Plán tab in the MVP** (owner, 2026-11-27): shown as "coming later". The tab stays in the navigation; it opens a short screen saying budgets and the payment calendar are coming, without sample data or controls. It becomes the real screen when R-14 or R-15 is built.

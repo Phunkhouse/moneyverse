@@ -12,16 +12,16 @@ Build the MVP in [SPEC.md](SPEC.md) (D-3), one PR at a time in the order under "
 
 - Done: project setup; database and invite-only passkey sign-in (PR #1, merged). AC-12 is covered by tests for sign-up and sessions; the per-user data tests come with the first financial tables.
 - Deployed 2026-11-27 at https://money.david-krapka.eu (Vercel Hobby `fra1`, Turso free plan), by the owner following the [runbook](runbook.md#first-deploy-done-2026-11-27). The owner's passkey was created on the Mac from an invite, and signing in worked on the Mac and on the phone. The WebAuthn ceremony is still not covered by an automated test.
+- The Plán tab is shown as "coming later" in the MVP (owner, 2026-11-27, [design](design/README.md#decided)).
 - H-3 partly checked: Turso's free limits recorded ([O-04](assumptions.md)); Vercel limits and idle behavior still open.
 - Production holds no financial data yet, and there is no backup.
 
 ## Next step
 
-Design tokens, app shell, theme, logo and manifest, Czech catalogue and formatters, kit part 1 and `/dev/kit` (BACKLOG "Next", first item). Needs the owner's answer on the Plán tab first.
+Design tokens, app shell, theme, logo and manifest, Czech catalogue and formatters, kit part 1 and `/dev/kit` (BACKLOG "Next", first item).
 
 ## Blockers and open questions
 
-- Owner, before the app shell PR: should the Plán tab (budgets, calendar; backlog items) be hidden in the MVP or shown as "coming later"? ([design](design/README.md#open-design-questions))
 - Owner, before the first real money entry: backups with a tested restore (runbook "Backup and restore"). Turso's 1-day point-in-time restore is not enough on its own.
 - Owner, if not done: branch protection on `main` requiring `check`.
 - On 2026-12-27: check H-3's idle rule (nothing slept or was deleted) and read Vercel Hobby's limits.
