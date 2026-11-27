@@ -6,7 +6,6 @@ The single home for work not yet started, when the project keeps its backlog in 
 
 MVP build order, one PR at a time ([SPEC](SPEC.md#planning-and-open-questions)):
 
-- Money rules: balances, transfers, net worth, carried snapshots, currency conversion, ČNB rates. AC-2, AC-5, AC-8, AC-9, AC-15.
 - Accounts and categories screens. R-4, R-7.
 - Quick add and transaction list with edit, delete and undo; Playwright and axe. AC-1, AC-3, AC-4. Then H-1.
 - Monthly investment values. AC-6, then H-4.

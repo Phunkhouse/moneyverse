@@ -19,7 +19,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "invite:create": "node --env-file-if-exists=.env.local scripts/invite.ts",
-    "icons:render": "node scripts/render-icons.ts"
+    "icons:render": "node scripts/render-icons.ts",
+    "rates:backfill": "node --env-file-if-exists=.env.local scripts/rates-backfill.ts"
   },
   "dependencies": {
     "@better-auth/passkey": "^1.7.28",

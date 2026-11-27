@@ -3,15 +3,29 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { migrate } from 'drizzle-orm/libsql/migrator'
 import { createAuth } from '../auth/auth.ts'
-import { createDb } from '../db/client.ts'
+import { createDb, type Db } from '../db/client.ts'
+import { user } from '../db/schema.ts'
 
 export const TEST_BASE_URL = 'http://localhost:3000'
 
-/** A fresh, migrated libSQL file and an auth instance on it. Call `cleanup` after the test. */
-export async function createTestAuth(options: { rateLimit?: boolean } = {}) {
+/** A fresh, migrated libSQL file. Call `cleanup` after the test. */
+export async function createTestDb() {
   const dir = await mkdtemp(path.join(tmpdir(), 'moneyverse-test-'))
   const db = createDb(`file:${path.join(dir, 'test.db')}`)
   await migrate(db, { migrationsFolder: 'drizzle' })
+  return { db, cleanup: () => rm(dir, { recursive: true, force: true }) }
+}
+
+/** Inserts an invented user and returns its id. */
+export async function createTestUser(db: Db, name = 'Testovací uživatel') {
+  const id = crypto.randomUUID()
+  await db.insert(user).values({ id, name, email: `${id}@example.test` })
+  return id
+}
+
+/** A fresh, migrated libSQL file and an auth instance on it. Call `cleanup` after the test. */
+export async function createTestAuth(options: { rateLimit?: boolean } = {}) {
+  const { db, cleanup } = await createTestDb()
   const auth = createAuth({
     db,
     baseURL: TEST_BASE_URL,
@@ -23,7 +37,7 @@ export async function createTestAuth(options: { rateLimit?: boolean } = {}) {
     db,
     auth,
     internalAdapter,
-    cleanup: () => rm(dir, { recursive: true, force: true }),
+    cleanup,
   }
 }
 

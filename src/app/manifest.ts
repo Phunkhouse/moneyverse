@@ -2,7 +2,8 @@ import type { MetadataRoute } from 'next'
 import { cs } from '@/ui/messages.ts'
 
 // PWA manifest only, no service worker (offline entry is R-5, later). Icons: public/icons/,
-// rendered by `pnpm icons:render`.
+// rendered by `pnpm icons:render`;
+// the favicon and Apple icon are file icons in src/app.
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: '/',

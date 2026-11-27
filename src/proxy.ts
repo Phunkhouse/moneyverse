@@ -12,9 +12,10 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // Everything except the sign-in and invite pages, the auth API, Next's assets, the icons and
-  // the manifest (browsers fetch those without cookies).
+  // the manifest (browsers fetch those without cookies), and cron routes, which check their own
+  // secret (Vercel Cron does not follow redirects).
   // Each exception matches a whole path segment, so `/prihlaseni-x` is still covered.
   matcher: [
-    '/((?!(?:prihlaseni|pozvanka|api/auth|_next/static|_next/image|icon\\.svg|favicon\\.ico|icons|manifest\\.webmanifest)(?:/|$)).*)',
+    '/((?!(?:prihlaseni|pozvanka|api/auth|api/cron|_next/static|_next/image|icon\\.svg|apple-icon\\.png|favicon\\.ico|icons|manifest\\.webmanifest)(?:/|$)).*)',
   ],
 }

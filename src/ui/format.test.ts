@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { CURRENCIES as SERVER_CURRENCIES } from '../server/money/types.ts'
 import {
+  CURRENCIES,
   formatDate,
   formatDayLong,
   formatMoney,
@@ -78,5 +80,11 @@ describe('dates', () => {
     expect(todayInPrague(new Date('2026-11-26T23:30:00Z'))).toBe('2026-11-27')
     // 21:30 UTC on 30 June is 23:30 in Prague (CEST, UTC+2): still the 30th.
     expect(todayInPrague(new Date('2026-06-30T21:30:00Z'))).toBe('2026-06-30')
+  })
+})
+
+describe('currencies', () => {
+  it('matches the money rules in src/server', () => {
+    expect([...CURRENCIES]).toEqual([...SERVER_CURRENCIES])
   })
 })
