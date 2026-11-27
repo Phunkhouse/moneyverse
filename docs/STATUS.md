@@ -15,6 +15,7 @@ Build the MVP in [SPEC.md](SPEC.md) (D-3), one PR at a time in the order under "
 - The Plán tab is shown as "coming later" in the MVP (owner, 2026-11-27, [design](design/README.md#decided)).
 - H-3 partly checked: Turso's free limits recorded ([O-04](assumptions.md)); Vercel limits and idle behavior still open.
 - Production holds no financial data yet, and there is no backup.
+- Dependabot alert #1 (esbuild 0.18 under drizzle-kit, dev-only) is fixed by a scoped pnpm override to esbuild ^0.25.0 (PR #3); the alert should close once it merges.
 
 ## Next step
 
@@ -29,8 +30,8 @@ Design tokens, app shell, theme, logo and manifest, Czech catalogue and formatte
 
 ## Last verified
 
-- Command: `pnpm verify` (format:check, lint, typecheck, 32 tests, build) on PR #1's last commit `a804bb7`; hosted CI `check` passed on PR #1
-- Revision: `main` at `4816fd6` (PR #1 squash-merged; same tree as `a804bb7`)
-- Working tree: clean
+- Command: `pnpm db:generate` (no changes), `pnpm db:migrate` on the local file, `pnpm verify` (format:check, lint, typecheck, 32 tests, build)
+- Revision: branch `fix/esbuild-override` on `main` at `2af869f`, with the override in `pnpm-workspace.yaml` and `pnpm-lock.yaml` uncommitted at the time
+- Working tree: only those two files and this one changed
 - Result: passed. Production checked by the owner on 2026-11-27 (sign-in on Mac and phone).
-- Not run: an automated test of the WebAuthn ceremony; Vercel rollback
+- Not run: an automated test of the WebAuthn ceremony; Vercel rollback; hosted CI on this branch (runs on the PR)
