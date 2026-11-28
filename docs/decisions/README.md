@@ -11,3 +11,4 @@ Copy `template.md` to `0001-short-title.md` and increment numbers without renumb
 | [0003 Money and currencies](0003-money-and-currencies.md) | accepted |
 | [0004 Invite-only passkey sign-in](0004-invite-only-passkey-sign-in.md) | accepted |
 | [0005 Ledger data model and exchange rates](0005-ledger-data-model.md) | accepted |
+| [0006 Daily encrypted backups on Cloudflare R2](0006-cloud-backups.md) | accepted |
