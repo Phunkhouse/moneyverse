@@ -81,6 +81,8 @@ export default async function globalSetup() {
     categoryId: food.id,
     what: 'Pečivo',
   })
+  // Deliberate: created_at has millisecond precision, so the pause keeps the card's entry the
+  // newest and makes it the last used account that quick add pre-fills.
   await new Promise((resolve) => setTimeout(resolve, 5))
   await createTransaction(db, user.id, crypto.randomUUID(), {
     kind: 'expense',

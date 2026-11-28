@@ -94,6 +94,8 @@ export async function saveTransactionAction(
     const account = await findAccount(db, user.id, input.accountId)
     let undo: UndoOp
     if (payload.mode === 'update') {
+      // Read, then update, without a lock: two edits at the same moment could leave Undo with
+      // the older version. Acceptable for one user in the MVP; revisit with shared ledgers (R-20).
       const previous = await getTransaction(db, user.id, payload.id)
       await updateTransaction(db, user.id, payload.id, input)
       undo = { type: 'restore', id: previous.id, input: toInput(previous) }
