@@ -1,6 +1,10 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { accountsWithBalances, todayInPrague } from '@/app/_lib/money.ts'
+import {
+  accountsWithBalances,
+  monthValuesData,
+  todayInPrague,
+} from '@/app/_lib/money.ts'
 import { requireUser } from '@/app/_lib/session.ts'
 import {
   Banner,
@@ -13,6 +17,8 @@ import {
 import { AccountsIcon } from '@/ui/kit/icons.tsx'
 import { cs } from '@/ui/messages.ts'
 import { Screen } from '../_shell/Screen.tsx'
+import { MonthValuesButton } from '../_values/MonthValues.tsx'
+import valueStyles from '../_values/values.module.scss'
 import styles from './accounts.module.scss'
 import { AddAccount } from './AddAccount.tsx'
 import { DISPLAY_GROUPS } from './view.ts'
@@ -33,10 +39,11 @@ type Item = Awaited<ReturnType<typeof accountsWithBalances>>[number]
 
 async function Accounts() {
   const user = await requireUser()
-  const [items, today] = await Promise.all([
+  const [items, values] = await Promise.all([
     accountsWithBalances(user.id),
-    todayInPrague(),
+    monthValuesData(user.id),
   ])
+  const today = todayInPrague()
   if (items.length === 0) {
     return (
       <Card>
@@ -119,6 +126,17 @@ async function Accounts() {
           )
         })}
       </div>
+      {values.accounts.length > 0 && (
+        <Card>
+          <div className={valueStyles.cta}>
+            <div>
+              <b>{cs.values.cardTitle}</b>
+              <p className={styles.muted}>{cs.values.cardBody}</p>
+            </div>
+            <MonthValuesButton data={values} />
+          </div>
+        </Card>
+      )}
       {archived.length > 0 && (
         <Card>
           <details className={styles.archived}>

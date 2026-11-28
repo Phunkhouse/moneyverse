@@ -107,6 +107,33 @@ export const cs = {
     transfer: 'Převod',
     recent: 'Poslední transakce',
   },
+  values: {
+    title: 'Hodnoty investic',
+    enter: 'Zadat hodnoty',
+    enterShort: 'Zadat',
+    intro:
+      'Zadejte hodnotu každého účtu ke konci měsíce v jeho měně, jak ji ukazuje broker, peněženka nebo penzijní společnost. Prázdné pole převezme poslední hodnotu.',
+    month: 'Měsíc',
+    due: (month: string, count: number) =>
+      `Je čas zadat hodnoty investic za ${month.toLocaleLowerCase('cs-CZ')}. ${
+        count === 1 ? 'U 1 účtu zatím chybí.' : `U ${count} účtů zatím chybí.`
+      }`,
+    stored: (value: string) => `Uloženo: ${value}`,
+    carried: (value: string) => `Zatím převzato: ${value}`,
+    save: (month: string) =>
+      `Uložit hodnoty za ${month.toLocaleLowerCase('cs-CZ')}`,
+    saved: (count: number, month: string) =>
+      count === 0
+        ? 'Beze změny'
+        : `Uloženo ${count === 1 ? '1 hodnota' : count <= 4 ? `${count} hodnoty` : `${count} hodnot`} za ${month.toLocaleLowerCase('cs-CZ')}`,
+    none: 'Zatím žádné investiční účty. Brokerský účet, kryptoměnu, podílový fond nebo penzijní spoření přidáte v Účtech.',
+    cardTitle: 'Měsíční hodnoty investic',
+    cardBody:
+      'Portfolio, fondy, kryptoměny a penzijní spoření zadáváte ručně jednou za měsíc, každé ve své měně.',
+    history: 'Měsíční hodnoty',
+    carriedMark: 'převzato',
+    opening: 'počáteční hodnota',
+  },
   error: {
     title: 'Něco se pokazilo',
     body: 'Stránku se nepodařilo načíst. Zkuste to znovu; pokud chyba trvá, pošlete správci kód níže.',
@@ -176,10 +203,7 @@ export const cs = {
     balance: 'Zůstatek dnes',
     value: 'Hodnota k poslednímu zadání',
     carriedFrom: 'převzato z dřívějšího měsíce',
-    valueTracked:
-      'Hodnotu investičního účtu zadáváte jednou měsíčně; zadávání přijde s další verzí.',
     transactionsTitle: 'Transakce',
-    valuesTitle: 'Měsíční hodnoty',
     noTransactions: 'Zatím žádné transakce. Přidejte první tlačítkem +.',
     archivedNote:
       'Do archivovaného účtu nejde zapisovat nové transakce. Historie zůstává a účet se dál počítá do čistého jmění.',

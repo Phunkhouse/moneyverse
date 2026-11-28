@@ -4,17 +4,22 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import {
   accountsWithBalances,
+  monthValuesData,
   todayInPrague,
   transactionItems,
+  valueHistory,
 } from '@/app/_lib/money.ts'
 import { requireUser } from '@/app/_lib/session.ts'
-import { Card, EmptyState, Money, Pill } from '@/ui/kit/index.ts'
-import { BackIcon, ListIcon } from '@/ui/kit/icons.tsx'
+import { Card, Money, Pill } from '@/ui/kit/index.ts'
+import { BackIcon } from '@/ui/kit/icons.tsx'
 import { cs } from '@/ui/messages.ts'
 import { Screen } from '../../_shell/Screen.tsx'
 import styles from '../accounts.module.scss'
 import { openingForForm } from '../view.ts'
 import { TransactionList } from '../../_quickadd/TransactionList.tsx'
+import { MonthValuesButton } from '../../_values/MonthValues.tsx'
+import valueStyles from '../../_values/values.module.scss'
+import { formatMonthName } from '@/ui/format.ts'
 import { AccountActions } from './AccountActions.tsx'
 
 export const metadata: Metadata = { title: cs.accounts.detailTitle }
@@ -49,9 +54,11 @@ async function AccountDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   // Only the signed-in user's accounts are loaded, so another user's id is simply not found.
   // Only the signed-in user's rows are loaded, so another user's id is simply not found.
-  const [all, items] = await Promise.all([
+  const [all, items, values, history] = await Promise.all([
     accountsWithBalances(user.id),
     transactionItems(user.id, { accountId: id }),
+    monthValuesData(user.id),
+    valueHistory(user.id, id),
   ])
   const item = all.find((i) => i.account.id === id)
   if (!item) notFound()
@@ -113,10 +120,25 @@ async function AccountDetail({ params }: { params: Promise<{ id: string }> }) {
         </div>
       </Card>
       {valueTracked ? (
-        <Card>
-          <EmptyState icon={<ListIcon />} title={cs.accounts.valuesTitle}>
-            {cs.accounts.valueTracked}
-          </EmptyState>
+        <Card
+          title={cs.values.history}
+          action={
+            <MonthValuesButton data={values} label={cs.values.enterShort} />
+          }
+        >
+          <div className={valueStyles.history}>
+            {history.map((month) => (
+              <div key={month.month} className={valueStyles.row}>
+                <span>{formatMonthName(month.month)}</span>
+                <span
+                  className={month.carried ? valueStyles.carried : undefined}
+                >
+                  <Money minor={month.minor} currency={account.currency} />
+                  {month.carried && ` · ${cs.values.carriedMark}`}
+                </span>
+              </div>
+            ))}
+          </div>
         </Card>
       ) : (
         <Card title={cs.accounts.transactionsTitle}>

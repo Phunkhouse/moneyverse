@@ -6,6 +6,7 @@ import {
   formatDate,
   formatDayLong,
   formatDayShort,
+  formatMonthName,
   formatMoney,
   formatMonth,
   todayInPrague,
@@ -71,6 +72,7 @@ describe('dates', () => {
     expect(formatDayLong('2026-11-26')).toBe('Čtvrtek 26. listopadu')
     expect(formatMonth('2026-11-26')).toBe('listopad 2026')
     expect(plain(formatDayShort('2026-11-26'))).toBe('čt 26. listopadu')
+    expect(formatMonthName('2026-10')).toBe('Říjen')
   })
 
   it('rejects days that do not exist', () => {

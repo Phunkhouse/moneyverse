@@ -132,6 +132,17 @@ export function formatDayShort(day: IsoDate): string {
   return `${dayShortWeekday.format(date)} ${dayMonth.format(date)}`
 }
 
+const monthNameFormat = new Intl.DateTimeFormat(LOCALE, {
+  month: 'long',
+  timeZone: 'UTC',
+})
+
+/** `2026-10` → "Říjen": a month's name on its own, capitalised, for labels. */
+export function formatMonthName(month: string): string {
+  const text = monthNameFormat.format(parseIsoDate(`${month}-01` as IsoDate))
+  return text.charAt(0).toLocaleUpperCase(LOCALE) + text.slice(1)
+}
+
 /** `2026-11-26` → "listopad 2026". */
 export function formatMonth(day: IsoDate): string {
   return monthYear.format(parseIsoDate(day))
