@@ -13,10 +13,14 @@ import {
 import type { QuickAddData, TransactionItem } from '@/app/_lib/money.ts'
 import { Sheet, Toast } from '@/ui/kit/index.ts'
 import { cs } from '@/ui/messages.ts'
-import { undoAction, type UndoOp } from './actions.ts'
+import { undoAction } from './actions.ts'
 import { QuickAddForm } from './QuickAddForm.tsx'
 
-type Notice = { message: string; undo?: UndoOp }
+/**
+ * The app-wide toast. `undo` reverses the change and returns the message to show next; screens
+ * that close or disappear after saving (a banner, a sheet) still get their Undo.
+ */
+export type Notice = { message: string; undo?: () => Promise<string> }
 
 type Context = {
   /** Null until the user's accounts and categories have loaded. */
@@ -54,15 +58,10 @@ export function QuickAddProvider({ children }: { children: ReactNode }) {
   const notify = useCallback((next: Notice) => setNotice(next), [])
 
   const undo = () => {
-    const op = notice?.undo
-    if (!op) return
+    const run = notice?.undo
+    if (!run) return
     setNotice(null)
-    startUndo(async () => {
-      const result = await undoAction(op)
-      setNotice({
-        message: result.status === 'ok' ? cs.quickAdd.undone : result.message,
-      })
-    })
+    startUndo(async () => setNotice({ message: await run() }))
   }
 
   const value = useMemo(
@@ -82,16 +81,24 @@ export function QuickAddProvider({ children }: { children: ReactNode }) {
             key={session.key}
             data={data}
             edit={session.edit}
-            onSaved={(next) => {
+            onSaved={({ message, undo: op }) => {
               close()
-              setNotice(next)
+              setNotice({
+                message,
+                undo: async () => {
+                  const result = await undoAction(op)
+                  return result.status === 'ok'
+                    ? cs.quickAdd.undone
+                    : result.message
+                },
+              })
             }}
           />
         )}
       </Sheet>
       {notice && (
         <Toast
-          key={notice.message + (notice.undo?.id ?? '')}
+          key={notice.message + (notice.undo ? ':undo' : '')}
           message={notice.message}
           actionLabel={notice.undo ? cs.quickAdd.undo : undefined}
           onAction={undo}

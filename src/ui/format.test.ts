@@ -3,9 +3,11 @@ import { CURRENCIES as SERVER_CURRENCIES } from '../server/money/types.ts'
 import {
   CURRENCIES,
   currencySymbol,
+  formatAmount,
   formatDate,
   formatDayLong,
   formatDayShort,
+  formatMonthName,
   formatMoney,
   formatMonth,
   todayInPrague,
@@ -61,6 +63,15 @@ describe('formatMoney', () => {
   })
 })
 
+describe('formatAmount', () => {
+  it('shows a field value without the currency', () => {
+    expect(plain(formatAmount(31_250_000))).toBe('312 500')
+    expect(plain(formatAmount(140_050))).toBe('1 400,50')
+    expect(plain(formatAmount(-5))).toBe('-0,05')
+    expect(plain(formatAmount(0))).toBe('0')
+  })
+})
+
 describe('dates', () => {
   it('formats a day as 26. 11. 2026', () => {
     expect(plain(formatDate('2026-11-26'))).toBe('26. 11. 2026')
@@ -71,6 +82,7 @@ describe('dates', () => {
     expect(formatDayLong('2026-11-26')).toBe('Čtvrtek 26. listopadu')
     expect(formatMonth('2026-11-26')).toBe('listopad 2026')
     expect(plain(formatDayShort('2026-11-26'))).toBe('čt 26. listopadu')
+    expect(formatMonthName('2026-10')).toBe('Říjen')
   })
 
   it('rejects days that do not exist', () => {

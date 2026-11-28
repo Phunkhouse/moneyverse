@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import { connection } from 'next/server'
 import { Suspense } from 'react'
-import { Card, EmptyState } from '@/ui/kit/index.ts'
+import { Banner, Card, EmptyState } from '@/ui/kit/index.ts'
 import { HomeIcon, ListIcon } from '@/ui/kit/icons.tsx'
 import iconButton from '@/ui/kit/IconButton.module.scss'
-import { formatDayLong, todayInPrague } from '@/ui/format.ts'
+import { formatDayLong, formatMonthName, todayInPrague } from '@/ui/format.ts'
 import { cs } from '@/ui/messages.ts'
-import { transactionItems } from '../_lib/money.ts'
+import { monthValuesData, transactionItems } from '../_lib/money.ts'
+import { MonthValuesButton } from './_values/MonthValues.tsx'
 import { requireUser } from '../_lib/session.ts'
 import { TransactionList } from './_quickadd/TransactionList.tsx'
 import { Screen } from './_shell/Screen.tsx'
@@ -34,6 +35,9 @@ export default function OverviewPage() {
         </Suspense>
       }
     >
+      <Suspense fallback={null}>
+        <ValuesReminder />
+      </Suspense>
       <Suspense fallback={<p className={styles.muted}>{cs.common.loading}</p>}>
         <Recent />
       </Suspense>
@@ -59,6 +63,27 @@ async function Today() {
   // The date is per request, not baked into the static shell.
   await connection()
   return <>{formatDayLong(todayInPrague())}</>
+}
+
+/** W-5: once the month has turned, last month's investment values are due. */
+async function ValuesReminder() {
+  const user = await requireUser()
+  const data = await monthValuesData(user.id)
+  if (data.dueCount === 0) return null
+  return (
+    <Banner
+      action={
+        <MonthValuesButton
+          data={data}
+          label={cs.values.enterShort}
+          variant="primary"
+          month={data.months[0]}
+        />
+      }
+    >
+      {cs.values.due(formatMonthName(data.months[0]), data.dueCount)}
+    </Banner>
+  )
 }
 
 async function Recent() {

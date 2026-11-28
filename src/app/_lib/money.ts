@@ -1,8 +1,9 @@
 import 'server-only'
-import { todayInPrague, monthOf } from '@/server/money/calendar.ts'
+import { addMonths, monthOf, todayInPrague } from '@/server/money/calendar.ts'
 import {
   listAccounts,
   listCategories,
+  listMonthValues,
   listTransactions,
 } from '@/server/money/ledger.ts'
 import { loadRateBook } from '@/server/money/rates.ts'
@@ -172,4 +173,78 @@ export async function transactionItems(
         estimated: converted.estimated,
       }
     })
+}
+
+// ---- Monthly investment values (R-8, W-5) ----
+
+export type MonthValuesData = {
+  /** Last month (whose values are due once the month has turned) and this month. */
+  months: [string, string]
+  accounts: {
+    id: string
+    name: string
+    currency: 'CZK' | 'EUR' | 'USD'
+    /** Per month: the stored value, or null when the month carries an earlier one. */
+    values: Record<
+      string,
+      { stored: number | null; shown: number; carried: boolean }
+    >
+  }[]
+  /** Accounts without a value for last month (W-5 reminder). */
+  dueCount: number
+}
+
+export async function monthValuesData(
+  userId: string,
+): Promise<MonthValuesData> {
+  const today = todayInPrague()
+  const current = monthOf(today)
+  const previous = addMonths(current, -1)
+  const db = getDb()
+  const [series, stored] = await Promise.all([
+    monthEndBalances(db, userId, { from: previous, to: current, today }),
+    listMonthValues(db, userId),
+  ])
+  const storedValue = (accountId: string, month: string) =>
+    stored.find((v) => v.accountId === accountId && v.month === month)
+      ?.valueMinor ?? null
+  const accounts = series
+    .filter(
+      ({ account }) =>
+        VALUE_TRACKED_TYPES.has(account.type) && !account.archived,
+    )
+    .sort((a, b) => a.account.name.localeCompare(b.account.name, 'cs'))
+    .map(({ account, months }) => ({
+      id: account.id,
+      name: account.name,
+      currency: account.currency,
+      values: Object.fromEntries(
+        months.map((m) => [
+          m.month,
+          {
+            stored: storedValue(account.id, m.month),
+            shown: m.minor,
+            carried: m.carried,
+          },
+        ]),
+      ),
+    }))
+  const dueCount = accounts.filter(
+    (a) =>
+      a.values[previous] !== undefined && a.values[previous].stored === null,
+  ).length
+  return { months: [previous, current], accounts, dueCount }
+}
+
+/** One investment account's month-end values for the last 12 months, newest first. */
+export async function valueHistory(userId: string, accountId: string) {
+  const today = todayInPrague()
+  const current = monthOf(today)
+  const series = await monthEndBalances(getDb(), userId, {
+    from: addMonths(current, -11),
+    to: current,
+    today,
+  })
+  const found = series.find((s) => s.account.id === accountId)
+  return (found?.months ?? []).slice().reverse()
 }

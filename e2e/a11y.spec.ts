@@ -30,6 +30,16 @@ for (const width of [375, 1280]) {
       })
     }
 
+    test('the monthly values sheet has no axe violations', async ({ page }) => {
+      await page.goto('/ucty')
+      await page.getByRole('button', { name: 'Zadat hodnoty' }).click()
+      await expect(page.getByRole('dialog')).toBeVisible()
+      await page.waitForFunction(() =>
+        document.getAnimations().every((a) => a.playState !== 'running'),
+      )
+      await expectNoViolations(page)
+    })
+
     test('the quick add sheet has no axe violations', async ({ page }) => {
       await page.goto('/')
       const add = page.getByRole('button', { name: 'Přidat transakci' })
