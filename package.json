@@ -20,6 +20,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file-if-exists=.env.local scripts/db-migrate.ts",
     "db:migrate:prod": "node scripts/db-migrate.ts --production",
+    "db:backup": "node scripts/db-backup.ts",
+    "db:restore-check": "node scripts/db-restore-check.ts",
     "invite:create": "node --env-file-if-exists=.env.local scripts/invite.ts",
     "icons:render": "node scripts/render-icons.ts",
     "rates:backfill": "node --env-file-if-exists=.env.local scripts/rates-backfill.ts"
