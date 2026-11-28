@@ -14,7 +14,7 @@ Build the MVP in [SPEC.md](SPEC.md) (D-3), one PR at a time in the order under "
 - Deployed at https://money.david-krapka.eu. Production holds no financial data yet.
 - **Backups:** the first production backup was taken on 2026-11-28 with `pnpm db:backup`; it passed the local restore check.
 - **Restore drill, 2026-11-28 (owner):** the backup restored into Turso with every row, loaded through `turso db shell`. `turso db create --from-dump` had lost the user and passkey rows, so it is not used. **The risk trigger's "backups with a tested restore" is met.**
-- Merged or in review: PR #14 (`pnpm db:restore-drill`, restore through the Turso shell).
+- Merged PR #14: `pnpm db:restore-drill`, restore through the Turso shell.
 - In review (PR #15, branch `feat/cloud-backup`, [ADR 0006](decisions/0006-cloud-backups.md)): a Cloudflare Worker backs up production daily to R2, encrypted with the owner's public key, kept 30 days; `pnpm backup:keygen` and `pnpm backup:decrypt`. Needs the owner's one-time setup (runbook "Cloud backups").
 
 ## Next step
@@ -41,7 +41,7 @@ Then the owner picks new work from BACKLOG "Later".
   - `pnpm verify` passed: format:check, lint, typecheck, 171 tests and the build, including the Worker's tests (`workers/backup`) and the envelope tests.
   - A real SQLite dump of the local development database (invented data) was encrypted the way the Worker does and opened with `pnpm backup:decrypt`: no session rows, restore check passed, file mode 600.
   - CPU per run measured in Node: 0.35 ms for 50 kB and 1.24 ms for 2 MB (Workers Free allows 10 ms).
-- **Revision:** branch `feat/cloud-backup` on top of `fix/restore-drill` (`cdeecde`), changes uncommitted at the time.
+- **Revision:** branch `feat/cloud-backup` on `main` at `dbe3c6e`, changes uncommitted at the time.
 - **Working tree:** the PR #15 changes only.
 - **Result:** passed.
 - **Not run:**
