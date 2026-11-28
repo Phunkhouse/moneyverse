@@ -324,6 +324,70 @@ describe('foreign currency (AC-15)', () => {
 })
 
 describe('monthly flows (R-12)', () => {
+  it('leaves out an amount with no rate at all and says so', async () => {
+    const eur = await account('checking', 0, 'EUR')
+    const bank = await account('checking', 100_000)
+    const food = await createCategory(db, me, {
+      kind: 'expense',
+      name: 'Jídlo',
+    })
+    await save({
+      kind: 'expense',
+      date: '2026-11-03',
+      accountId: eur.id,
+      amountMinor: 1_000,
+      categoryId: food.id,
+    })
+    await save({
+      kind: 'expense',
+      date: '2026-11-04',
+      accountId: bank.id,
+      amountMinor: 5_000,
+      categoryId: food.id,
+    })
+    const { listAccounts, listTransactions } = await import('./ledger.ts')
+    const [november] = computeMonthlyFlows(
+      await listAccounts(db, me),
+      await listTransactions(db, me),
+      await loadRateBook(db),
+      ['2026-11'],
+    )
+    // Only the CZK expense is counted; the EUR one is flagged, not guessed.
+    expect(november).toMatchObject({
+      spentCzk: 5_000,
+      missingRate: true,
+      estimated: false,
+    })
+  })
+
+  it('marks a month converted at the last known rate as estimated', async () => {
+    const eur = await account('checking', 0, 'EUR')
+    const food = await createCategory(db, me, {
+      kind: 'expense',
+      name: 'Jídlo',
+    })
+    await storeEurRate('2026-11-02', 25_000)
+    await save({
+      kind: 'expense',
+      date: '2026-11-20',
+      accountId: eur.id,
+      amountMinor: 1_000,
+      categoryId: food.id,
+    })
+    const { listAccounts, listTransactions } = await import('./ledger.ts')
+    const [november] = computeMonthlyFlows(
+      await listAccounts(db, me),
+      await listTransactions(db, me),
+      await loadRateBook(db),
+      ['2026-11'],
+    )
+    expect(november).toMatchObject({
+      spentCzk: 25_000,
+      missingRate: false,
+      estimated: true,
+    })
+  })
+
   it('sums expenses and income per month in CZK, without transfers', async () => {
     const bank = await account('checking', 1_000_000)
     const eur = await account('checking', 0, 'EUR')

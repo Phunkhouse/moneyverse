@@ -28,12 +28,17 @@ export function Insights({ data }: { data: InsightsData }) {
   const months = data.months.slice(from)
   const labels = months.map(formatMonthShort)
   const tipLabels = months.map(formatMonthLong)
+  // data.months always holds at least the current month (monthsBetween(from, current) with
+  // from <= current), so the `.at(-1)!` below cannot be undefined.
   const nw = data.netWorth.slice(from)
   const flows = data.flows.slice(from)
   const comparison = data.comparison[range]
   const account =
     data.accounts.find((a) => a.id === accountId) ?? data.accounts[0]
   const current = formatMonthName(data.months.at(-1)!)
+  // The dashed line averages the earlier months shown here; the per-category comparison uses
+  // computeSpending's own window (up to 5 or 11 months from the first transaction). Both are
+  // labelled with their month counts, so the two averages may differ without either being wrong.
   const previousSpent = flows.slice(0, -1).map((f) => f.spent)
   const averageSpent = previousSpent.length
     ? Math.round(
@@ -61,7 +66,7 @@ export function Insights({ data }: { data: InsightsData }) {
         )}
       </div>
 
-      {nw.some((m) => m.missingRate) && (
+      {(nw.some((m) => m.missingRate) || flows.some((f) => f.missingRate)) && (
         <Banner tone="warn">{cs.charts.missingNote}</Banner>
       )}
 

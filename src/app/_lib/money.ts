@@ -277,7 +277,14 @@ export type InsightsData = {
     estimated: boolean
     missingRate: boolean
   }[]
-  flows: { month: string; spent: number; income: number; estimated: boolean }[]
+  flows: {
+    month: string
+    spent: number
+    income: number
+    estimated: boolean
+    /** Some EUR or USD entry had no rate at all and is left out of this month's sums. */
+    missingRate: boolean
+  }[]
   /** Active accounts' month-end balances in their own currency (null before they opened). */
   accounts: {
     id: string
@@ -346,6 +353,7 @@ export async function insightsData(userId: string): Promise<InsightsData> {
       spent: f.spentCzk,
       income: f.incomeCzk,
       estimated: f.estimated,
+      missingRate: f.missingRate,
     }),
   )
   const nameOf = new Map(categories.map((c) => [c.id, c.name]))

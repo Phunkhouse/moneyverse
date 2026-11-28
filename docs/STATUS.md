@@ -37,7 +37,7 @@ After PR #11 is merged: export and re-import, and the PWA and phone checks (AC-1
 ## Last verified
 
 - **Commands:**
-  - `pnpm verify` passed: format:check, lint, typecheck, 150 tests and the build.
+  - `pnpm verify` passed: format:check, lint, typecheck, 153 tests and the build, including the PR #11 review fixes.
   - `pnpm e2e` passed: 33 tests, including AC-7 (the Přehled chart's exact value for this month equals the net worth figure, via keyboard), hover values by kind on Grafy, and axe on every screen with data.
 - **Browser on `pnpm dev`:** Přehled and Grafy at 1280 and 375 px with local invented data; the tooltip checked on hover.
 - **Revision:** branch `feat/dashboard-charts` on `main` at `35b905e`, changes uncommitted at the time.

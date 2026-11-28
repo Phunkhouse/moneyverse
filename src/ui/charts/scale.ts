@@ -1,11 +1,20 @@
 // Pure helpers for the SVG charts (ADR 0002: own charts).
 
 /** About `count` round tick values covering [min, max], always including both ends. */
+/** The smallest range an axis spans, in minor units (100 Kč), so flat or empty charts stay readable. */
+const MIN_SPAN = 10_000
+
 export function niceTicks(min: number, max: number, count = 4): number[] {
-  if (min === max) {
-    const pad = Math.abs(min) || 100
-    min -= pad
-    max += pad
+  if (max - min < MIN_SPAN) {
+    const middle = (min + max) / 2
+    const keepPositive = min >= 0
+    min = middle - MIN_SPAN / 2
+    max = middle + MIN_SPAN / 2
+    // A chart of amounts that are never negative should not grow a negative axis.
+    if (keepPositive && min < 0) {
+      max -= min
+      min = 0
+    }
   }
   const raw = (max - min) / count
   const power = 10 ** Math.floor(Math.log10(raw))

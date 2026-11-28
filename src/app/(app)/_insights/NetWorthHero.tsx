@@ -9,6 +9,7 @@ import styles from './insights.module.scss'
 
 /** Přehled's gradient card: net worth now, the change against last month, and 12 months (R-10). */
 export function NetWorthHero({ data }: { data: InsightsData }) {
+  // Always present: insightsData covers at least the current month.
   const now = data.netWorth.at(-1)!
   const before = data.netWorth.at(-2)
   const delta = before ? now.total - before.total : null

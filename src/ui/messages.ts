@@ -252,7 +252,8 @@ export const cs = {
     compositionNote:
       'Měsíce bez zadané hodnoty investic používají poslední hodnotu. Účty v EUR a USD jsou přepočtené kurzem ČNB ke konci měsíce.',
     estimatedNote: 'Některé částky jsou přepočtené posledním známým kurzem.',
-    missingNote: 'Některý účet v cizí měně nejde přepočítat, chybí kurz ČNB.',
+    missingNote:
+      'Některé částky v EUR nebo USD nejde přepočítat, protože chybí kurz ČNB. Součty a grafy je zatím nezahrnují.',
     spendingByMonth: 'Výdaje po měsících',
     spending: 'Výdaje',
     average: (n: number) => `Průměr ${n === 1 ? '1 měsíce' : `${n} měsíců`}`,
