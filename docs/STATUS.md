@@ -12,15 +12,13 @@ Build the MVP in [SPEC.md](SPEC.md) (D-3), one PR at a time in the order under "
 
 - Done and merged: PRs #1 to #7 (sign-in, app shell, money rules and ČNB rates, accounts and categories, quick add with Undo and the transaction list, Playwright and axe).
 - Deployed at https://money.david-krapka.eu. On 2026-11-28 every app screen failed after PR #7 because the PR #5 and #6 migrations had gone to the local file. The owner migrated Turso: 3 migrations, `name_key` present, the site works again.
-- In review (PR #8, branch `fix/hardening`):
-  - `pnpm db:migrate:prod` refuses to run without the Turso URL and token in the terminal, and checks every table after migrating. `pnpm db:migrate` is local-only.
-  - Czech error pages: inside the app shell, keeping the navigation; at the root; and `global-error`. Each shows the error code that matches the Vercel log.
-  - The quick add loader fails softly, so the + button stays disabled and the page still loads.
+- Merged PR #8: `pnpm db:migrate:prod` with table checks, Czech error pages, and a soft-failing quick add loader.
+- In review (PR #9, branch `fix/migrate-prod-credentials`): `pnpm db:migrate:prod` asks the logged-in Turso CLI for the URL and a one-day token when the terminal has neither, so a new terminal needs no exports for migrations. Variables already set in the terminal still win; setting only one of them is refused.
 - Production holds no financial data yet, and there is no backup.
 
 ## Next step
 
-After PR #8 is merged: monthly investment values (AC-6), BACKLOG "Next", first item. The owner can run the AC-1, AC-3 and AC-4 walkthrough on the phone now.
+After PR #9 is merged: monthly investment values (AC-6), BACKLOG "Next", first item. The owner can run the AC-1, AC-3 and AC-4 walkthrough on the phone now.
 
 ## Blockers and open questions
 
@@ -36,15 +34,8 @@ After PR #8 is merged: monthly investment values (AC-6), BACKLOG "Next", first i
 
 ## Last verified
 
-- **Commands:**
-  - `pnpm verify` passed: format:check, lint, typecheck, 141 tests and the build.
-  - `pnpm e2e` passed: 26 tests.
-  - Ran `pnpm db:migrate` locally: migrated, all 12 tables found.
-  - Ran each refusal: a remote URL with `db:migrate`, and `db:migrate:prod` without the production variables.
-- **Reproduction of the incident:** a production build against a local database with only the auth migration.
-  - `/plan` and `/grafy` load, with quick add disabled.
-  - `/ucty` and `/` show the Czech error inside the shell, with the navigation, and a code matching the server log.
-- **Revision:** branch `fix/hardening` on `main` at `25c35ef`, changes uncommitted at the time.
-- **Working tree:** the PR #8 changes only.
-- **Result:** passed.
-- **Not run:** `db:migrate:prod` against Turso (the owner's command; it should report 3 migrations and all tables present).
+- Command: `pnpm verify` (format:check, lint, typecheck, 144 tests, build) after the PR #9 change; the production migrate path with no Turso CLI available refuses with the `turso auth login` hint.
+- Revision: branch `fix/migrate-prod-credentials` on `main` at `55ccbc6`, changes uncommitted at the time
+- Working tree: the PR #9 changes only
+- Result: passed
+- Not run: `pnpm db:migrate:prod` through the real Turso CLI (it creates a production token; the owner's command). Expected: "Using the Turso CLI login…", then 3 migrations and all tables present.

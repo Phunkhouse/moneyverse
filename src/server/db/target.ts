@@ -42,6 +42,56 @@ export function migrationTarget(
   return { url, authToken }
 }
 
+export const PRODUCTION_DATABASE = 'moneyverse'
+
+/** Runs the Turso CLI and returns its trimmed standard output; throws if it fails. */
+export type RunTurso = (args: string[]) => string
+
+/**
+ * The production target for `pnpm db:migrate:prod`. Variables set in the terminal win; when
+ * neither is set, the Turso CLI (already logged in on the owner's machine) supplies the URL and a
+ * token that expires after one day, the shortest the CLI offers. Setting only one is an error, so
+ * a half-configured terminal never mixes two databases.
+ */
+export function productionTarget(
+  env: Record<string, string | undefined>,
+  runTurso: RunTurso,
+): { url: string; authToken: string; source: 'terminal' | 'turso-cli' } {
+  const url = env.DATABASE_URL?.trim()
+  const token = env.DATABASE_AUTH_TOKEN?.trim()
+  if (url || token) {
+    return {
+      ...migrationTarget('production', env),
+      authToken: token!,
+      source: 'terminal',
+    }
+  }
+  let cliUrl: string
+  let cliToken: string
+  try {
+    cliUrl = runTurso(['db', 'show', PRODUCTION_DATABASE, '--url'])
+    cliToken = runTurso([
+      'db',
+      'tokens',
+      'create',
+      PRODUCTION_DATABASE,
+      '--expiration',
+      '1d',
+    ])
+  } catch {
+    throw new Error(
+      'The Turso CLI could not provide the database URL and a token. Check `turso auth login`, ' +
+        'or set DATABASE_URL and DATABASE_AUTH_TOKEN in this terminal (docs/runbook.md).',
+    )
+  }
+  if (!cliUrl.startsWith('libsql://') || !cliToken || /\s/.test(cliToken)) {
+    throw new Error(
+      'The Turso CLI returned something unexpected. Nothing was migrated.',
+    )
+  }
+  return { url: cliUrl, authToken: cliToken, source: 'turso-cli' }
+}
+
 /** The tables the current schema expects, for the check after migrating. */
 export const EXPECTED_TABLES = [
   'user',
