@@ -50,7 +50,7 @@ Node 26 (`.nvmrc`, `engines`) and pnpm (pinned in `packageManager`); run `nvm us
 - `pnpm e2e`: Playwright with axe (`e2e/`) against a production build on port 3100 and the separate database `.data/e2e.db`, with an invented user and session from `e2e/global-setup.ts`. Needs Chromium once: `pnpm exec playwright install chromium`. CI runs it in the `e2e` job.
 - `pnpm db:generate`: writes a migration in `drizzle/` after a schema change (`src/server/db/schema.ts`). Never `drizzle-kit push` on real data.
 - `pnpm db:migrate`: applies the migrations to the local file (`DATABASE_URL`, default `file:.data/dev.db`; a remote URL is refused) and checks the tables.
-- `pnpm db:migrate:prod`: applies them to Turso; refuses unless `DATABASE_URL` (`libsql://…`) and `DATABASE_AUTH_TOKEN` are set in that terminal, then checks every table exists. Owner only.
+- `pnpm db:migrate:prod`: applies them to Turso and checks every table exists. Uses `DATABASE_URL` and `DATABASE_AUTH_TOKEN` if both are set in the terminal; otherwise asks the logged-in Turso CLI for the URL and a token valid for one day. Owner only.
 - `pnpm invite:create --email <email> --name <name>` (or `--existing`): creates a single-use invite and prints its link once (`.env.local` or the shell's environment).
 - `pnpm icons:render`: re-renders the app icons (`public/icons/`, `src/app/apple-icon.png`, `src/app/favicon.ico`) from the brand mark (`scripts/render-icons.ts`); run after a logo change and commit them.
 - `pnpm rates:backfill --year <YYYY>`: loads whole years of ČNB rates into `DATABASE_URL` (repeatable).

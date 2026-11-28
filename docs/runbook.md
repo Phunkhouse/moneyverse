@@ -32,7 +32,7 @@ Done once by the owner; kept here for a rebuild or a move. Steps 2, 3, 5 and 7 w
    export BETTER_AUTH_SECRET="$(openssl rand -base64 32)" BETTER_AUTH_URL="https://money.david-krapka.eu"
    ```
 
-4. **Migrate:** `pnpm db:migrate:prod`, in the same terminal as step 3. It refuses to run unless `DATABASE_URL` is a `libsql://` URL and `DATABASE_AUTH_TOKEN` is set, prints `Migrating PRODUCTION database: moneyverse-….turso.io`, and ends with `✓ N migrations applied; all … tables present.` (Since 2026-11-28. Before that, plain `pnpm db:migrate` silently migrated the local file when the variables were missing: on the first deploy, and again for PRs #5 and #6, which broke every screen after PR #7.)
+4. **Migrate:** `pnpm db:migrate:prod`. In any terminal where the Turso CLI is logged in, it asks the CLI for the database URL and a token valid for one day (the CLI's shortest), so step 3's variables are not needed for this step; if both are set in the terminal, it uses them instead. It prints `Migrating PRODUCTION database: moneyverse-….turso.io` and ends with `✓ N migrations applied; all … tables present.` (Since 2026-11-28. Before that, plain `pnpm db:migrate` silently migrated the local file when the variables were missing: on the first deploy, and again for PRs #5 and #6, which broke every screen after PR #7.)
 5. **Vercel:** import `Phunkhouse/moneyverse` (framework Next.js). Settings → Environment Variables, **Production** only: `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (copy each with `echo "$NAME"`, then clear the terminal). Settings → Domains: add the domain and create the CNAME record Vercel shows at the domain's DNS provider (with Cloudflare: DNS only, not proxied). Redeploy after setting the variables.
 6. **Check:** the site redirects to `/prihlaseni` and responses carry the security headers from `next.config.ts`.
 7. **Invite yourself** in the same terminal, open the link on the device that should hold the passkey, create it, and check you land signed in:
@@ -46,7 +46,7 @@ Done once by the owner; kept here for a rebuild or a move. Steps 2, 3, 5 and 7 w
 
 ## Deploy
 
-Merging to `main` deploys to production automatically. If the PR adds a file in `drizzle/`, run `pnpm db:migrate:prod` (steps 3 and 4 of the first deploy) **before** merging and check that it ends with all tables present; the PR says so in an `IMPORTANT` block. Check a deploy by opening the site and signing in.
+Merging to `main` deploys to production automatically. If the PR adds a file in `drizzle/`, run `pnpm db:migrate:prod` **before** merging (any terminal with the Turso CLI logged in) and check that it ends with all tables present; the PR says so in an `IMPORTANT` block. Check a deploy by opening the site and signing in.
 
 ## Exchange rates
 
