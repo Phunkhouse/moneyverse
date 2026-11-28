@@ -33,3 +33,8 @@
   font-weight: var(--w-key);
   letter-spacing: -0.02em;
 }
+
+.links {
+  display: inline-flex;
+  gap: var(--sp-3);
+}

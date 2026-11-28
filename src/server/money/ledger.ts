@@ -56,7 +56,8 @@ export function nameKey(name: string): string {
   return name.normalize('NFC').toLocaleLowerCase('cs-CZ').replace(/\s+/g, ' ')
 }
 
-function optionalText(value: unknown, field: string): string | null {
+/** Optional free text (what, note): trimmed, empty becomes null, at most 500 characters. */
+export function optionalText(value: unknown, field: string): string | null {
   if (value === undefined || value === null) return null
   if (typeof value !== 'string' || value.length > MAX_TEXT) {
     throw new MoneyError(

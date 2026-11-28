@@ -6,7 +6,7 @@ The single home for work not yet started, when the project keeps its backlog in 
 
 MVP build order, one PR at a time ([SPEC](SPEC.md#planning-and-open-questions)):
 
-- Export and re-import; PWA and phone checks. AC-13, AC-14. Check the installed app's launch screen in dark mode: the manifest's `background_color` and `theme_color` are the light `#f3f1fb`, and a manifest cannot follow the system theme (PR #4 review).
+- Owner walkthrough on the phone and a computer ([walkthrough.md](walkthrough.md)): AC-1, AC-3, AC-4, AC-6, AC-7, AC-14, AC-16. Includes the dark-mode launch screen check (the manifest's colours are the light `#f3f1fb`; a manifest cannot follow the system theme, PR #4 review).
 
 ## Later
 

@@ -11,7 +11,13 @@ import {
   createTransaction,
 } from '../src/server/money/ledger.ts'
 import { todayInPrague } from '../src/server/money/calendar.ts'
-import { E2E_DB_FILE, E2E_ENV, E2E_STATE, E2E_URL } from './env.ts'
+import {
+  E2E_DB_FILE,
+  E2E_ENV,
+  E2E_STATE,
+  E2E_STATE_EMPTY,
+  E2E_URL,
+} from './env.ts'
 
 export default async function globalSetup() {
   await mkdir('.data', { recursive: true })
@@ -34,16 +40,30 @@ export default async function globalSetup() {
     },
     { method: 'e2e-setup' },
   )
-  const session = await internalAdapter.createSession(user.id)
-  // Better Auth signs the cookie as `${token}.${base64(HMAC-SHA256(secret, token))}`.
-  const signature = createHmac('sha256', E2E_ENV.BETTER_AUTH_SECRET)
-    .update(session.token)
-    .digest('base64')
-  const cookie = encodeURIComponent(`${session.token}.${signature}`)
-  const check = await auth.api.getSession({
-    headers: new Headers({ cookie: `better-auth.session_token=${cookie}` }),
-  })
-  if (!check) throw new Error('e2e session cookie is not accepted')
+  const cookie = await signedSession(user.id)
+  const emptyUser = await internalAdapter.createUser(
+    {
+      email: 'e2e-empty@example.test',
+      name: 'Prázdný uživatel',
+      emailVerified: false,
+    },
+    { method: 'e2e-setup' },
+  )
+  await writeState(E2E_STATE_EMPTY, await signedSession(emptyUser.id))
+
+  async function signedSession(userId: string) {
+    const session = await internalAdapter.createSession(userId)
+    // Better Auth signs the cookie as `${token}.${base64(HMAC-SHA256(secret, token))}`.
+    const signature = createHmac('sha256', E2E_ENV.BETTER_AUTH_SECRET)
+      .update(session.token)
+      .digest('base64')
+    const value = encodeURIComponent(`${session.token}.${signature}`)
+    const check = await auth.api.getSession({
+      headers: new Headers({ cookie: `better-auth.session_token=${value}` }),
+    })
+    if (!check) throw new Error('e2e session cookie is not accepted')
+    return value
+  }
 
   const today = todayInPrague()
   const bank = await createAccount(db, user.id, {
@@ -93,8 +113,12 @@ export default async function globalSetup() {
     what: 'Oběd',
   })
 
+  await writeState(E2E_STATE, cookie)
+}
+
+async function writeState(path: string, cookie: string) {
   await writeFile(
-    E2E_STATE,
+    path,
     JSON.stringify({
       cookies: [
         {

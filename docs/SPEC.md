@@ -43,7 +43,7 @@ Status words: **confirmed** (by whom, date), **decided** (link), **assumption**,
 The owner opens the app from the home screen, types the amount on a keypad that is ready immediately, taps a category (most used and recent first) and saves; the last used account and today's date are already filled in. What and note are optional. A wrong entry is undone from the confirmation, or edited or deleted later; a missing category is created in place.
 
 - [ ] **AC-1** From the home screen, an expense with amount and category is saved in 3 taps after typing the amount, with today's date and the last used account filled in; walkthrough (R-1)
-- [ ] **AC-2** A credit card payment moves money from checking to the card, changes both balances, and does not appear in spending totals; test (R-2)
+- [x] **AC-2** A credit card payment moves money from checking to the card, changes both balances, and does not appear in spending totals; test (R-2) — Covered by `src/server/money/reports.test.ts` (credit card payment), with the screens since PR #7 (Claude Code, 2026-11-28).
 - [ ] **AC-3** Right after saving, Undo removes the entry; later, editing or deleting it updates balances and charts; walkthrough (R-3)
 - [ ] **AC-4** A missing category can be created during entry without leaving it; walkthrough (R-4)
 
@@ -51,7 +51,7 @@ The owner opens the app from the home screen, types the amount on a keypad that 
 
 When the month turns, the app shows that values are due. One screen lists every investment account with last month's value; the owner types the new values and net worth updates. A skipped month carries the last value forward, marked as carried.
 
-- [ ] **AC-5** All seven account types can be created, and each appears in net worth with the right sign (debt negative); test (R-7)
+- [x] **AC-5** All seven account types can be created, and each appears in net worth with the right sign (debt negative); test (R-7) — Covered by `ledger.test.ts` and `reports.test.ts` (all seven types, debt negative), with the Účty screen since PR #6.
 - [ ] **AC-6** All investment values for a month are entered on one screen; a skipped month carries the last value forward and is marked as carried; walkthrough (R-8)
 
 ### W-6 Review
@@ -59,13 +59,13 @@ When the month turns, the app shows that values are due. One screen lists every 
 The dashboard shows net worth and its trend and this month's spending; from there the owner drills into composition, balance over time and category comparisons. With little history, charts say how many months they cover.
 
 - [ ] **AC-7** Net worth shows per month for the last 12 months, split by kind of account, with exact values on hover or tap; walkthrough against hand-calculated totals (R-10)
-- [ ] **AC-8** Each account shows its month-end balance over time; test (R-11)
-- [ ] **AC-9** Spending per category this month is shown next to the average of the previous months; transfers are excluded; test (R-12)
+- [x] **AC-8** Each account shows its month-end balance over time; test (R-11) — Covered by `reports.test.ts` (month-end balances); shown on Grafy since PR #11.
+- [x] **AC-9** Spending per category this month is shown next to the average of the previous months; transfers are excluded; test (R-12) — Covered by `reports.test.ts` (category vs. average, transfers excluded); shown on Přehled and Grafy since PR #11.
 
 ### All screens
 
 - [ ] **AC-12** Without logging in, no page or data endpoint returns financial data, and sign-up without an invite fails; test (R-17)
-- [ ] **AC-13** One action downloads all accounts, transactions, snapshots and budgets in a file that can be imported again; test (R-18)
+- [x] **AC-13** One action downloads all accounts, transactions, snapshots and budgets in a file that can be imported again; test (R-18) — Covered by `transfer-file.test.ts` (round trip, empty-ledger rule, all or nothing) and `e2e/export-import.spec.ts` (PR #12). Budgets are not built yet (R-14); they join the file when they are.
 - [ ] **AC-14** The app installs to a phone home screen and is usable at 375 px and 1280 px wide; walkthrough (R-24)
 - [ ] **AC-15** An expense on a EUR account keeps its EUR amount, counts in CZK totals and budgets at that day's rate, and a CZK to EUR transfer records both amounts; if no rate is available, the last known rate is used and marked; test (R-23)
 - [ ] **AC-16** Every screen is in Czech, with amounts like 1 234,50 Kč and dates like 26. 11. 2026; walkthrough (R-25)

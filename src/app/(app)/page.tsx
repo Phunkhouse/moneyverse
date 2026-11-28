@@ -53,7 +53,12 @@ export default function OverviewPage() {
       {/* Temporary home for the settings until the Nastavení screen exists. */}
       <Card
         title={cs.overview.settings}
-        action={<Link href="/kategorie">{cs.categories.link}</Link>}
+        action={
+          <span className={styles.links}>
+            <Link href="/kategorie">{cs.categories.link}</Link>
+            <Link href="/data">{cs.data.link}</Link>
+          </span>
+        }
       >
         <div className={styles.settings}>
           <ThemeSwitch />

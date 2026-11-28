@@ -16,7 +16,15 @@ async function expectNoViolations(page: Page) {
   expect(summary).toEqual([])
 }
 
-const screens = ['/', '/ucty', '/kategorie', '/transakce', '/plan', '/grafy']
+const screens = [
+  '/',
+  '/ucty',
+  '/kategorie',
+  '/transakce',
+  '/plan',
+  '/grafy',
+  '/data',
+]
 
 for (const width of [375, 1280]) {
   test.describe(`${width} px`, () => {
