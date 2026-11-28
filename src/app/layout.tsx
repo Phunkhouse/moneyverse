@@ -24,7 +24,6 @@ export const metadata: Metadata = {
   applicationName: cs.app.name,
   appleWebApp: { capable: true, title: cs.app.name, statusBarStyle: 'default' },
   formatDetection: { telephone: false },
-  icons: { apple: '/icons/apple-touch-icon.png' },
 }
 
 export const viewport: Viewport = {

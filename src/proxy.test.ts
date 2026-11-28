@@ -37,14 +37,18 @@ describe('proxy matcher', () => {
     '/pozvankaXYZ',
     '/api/other',
     '/iconsX',
+    '/api/cronx',
   ])('runs on %s', (path) => expect(matches(path)).toBe(true))
 
   it.each([
     '/prihlaseni',
     '/pozvanka',
     '/api/auth/get-session',
+    '/api/cron/rates',
     '/_next/static/chunks/app.js',
     '/icon.svg',
+    '/apple-icon.png',
+    '/favicon.ico',
     '/icons/icon-192.png',
     '/manifest.webmanifest',
   ])('skips %s', (path) => expect(matches(path)).toBe(false))

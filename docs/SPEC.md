@@ -76,7 +76,7 @@ AC-10 (budget overspending, R-14) and AC-11 (recurring payments, R-15, R-16) bel
 
 - **Stored:** the owner's accounts, categories, transactions, monthly investment values, exchange rates and sign-in data (users, passkeys, sessions, hashed invites, rate-limit counters). No bank credentials, ever (RK-1). Personal financial data: every query is scoped to the signed-in user on the server, and an owner id is on every record (A-9).
 - **Money:** amounts are integer minor units in the account's own currency; totals, conversions and net worth are computed on the server ([ADR 0003](decisions/0003-money-and-currencies.md)). Saving a transaction is idempotent, so a double tap cannot create two.
-- **External input:** daily ČNB exchange rates (proposal: fetched by a daily cron, parsed and validated on the server). Form input is validated on the server. Sign-in: passkeys only, invites single use and hashed, rate limits on the auth API, security headers on every response ([ADR 0004](decisions/0004-invite-only-passkey-sign-in.md)).
+- **External input:** daily ČNB exchange rates, fetched by a daily Vercel Cron secured with `CRON_SECRET`, parsed and validated on the server ([ADR 0005](decisions/0005-ledger-data-model.md)). Form input is validated on the server. Sign-in: passkeys only, invites single use and hashed, rate limits on the auth API, security headers on every response ([ADR 0004](decisions/0004-invite-only-passkey-sign-in.md)).
 - **Public repository:** only invented data in seeds, fixtures, tests and CI output (see `AGENTS.md`).
 
 ## Technical approach
@@ -90,7 +90,7 @@ AC-10 (budget overspending, R-14) and AC-11 (recurring payments, R-15, R-16) bel
 | UI | Own component kit with SCSS Modules; own SVG charts | decided, [ADR 0002](decisions/0002-custom-ui-kit.md) |
 | Language | Czech only: a typed message catalogue plus `Intl` formatters for `cs-CZ`; no i18n library yet | decided by the owner, 2026-11-26 |
 | PWA | Web manifest and icons only; a service worker waits for offline entry (R-5) | decided by the owner, 2026-11-26 |
-| Exchange rates | ČNB daily rates, stored per day | proposal (tech plan) |
+| Exchange rates | ČNB JSON API, fetched daily by Vercel Cron, stored per day | decided, [ADR 0005](decisions/0005-ledger-data-model.md) |
 | Tests | Vitest, with database tests on a migrated libSQL file each; Playwright with axe from the quick-add flow on | Vitest in use; Playwright a proposal |
 | Checks | `pnpm verify` locally; the `check` job in CI on every PR | decided, see `AGENTS.md` |
 

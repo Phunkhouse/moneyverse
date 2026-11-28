@@ -48,6 +48,11 @@ Done once by the owner; kept here for a rebuild or a move. Steps 2, 3, 5 and 7 w
 
 Merging to `main` deploys to production automatically. If the PR adds a file in `drizzle/`, run `pnpm db:migrate` against production (steps 3 and 4 of the first deploy, checking the `url:` line) **before** merging; the PR says so in an `IMPORTANT` block. Check a deploy by opening the site and signing in.
 
+## Exchange rates
+
+- **Daily:** Vercel Cron calls `/api/cron/rates` once a day at 15:00 UTC (Hobby runs it somewhere in that hour; `vercel.json`). It needs `CRON_SECRET` in Vercel's Production environment variables; without it the route answers 503 and conversions after the last checked day are marked estimated. Check a run in the Vercel project's Cron Jobs or logs.
+- **History:** `pnpm rates:backfill --year 2025 --year 2026` loads whole years from ČNB. Safe to repeat. Against production, the owner runs it with `DATABASE_URL` and `DATABASE_AUTH_TOKEN` set as in step 3 of the first deploy. Verified locally 2026-11-27 (sync of the current week against the live ČNB API); the backfill against ČNB itself is unverified.
+
 ## Roll back
 
 In Vercel, promote the previous production deployment (Deployments → ⋯ → Promote to Production). Unverified. A rollback does not undo a database migration: migrations must stay compatible with the previous release, or the rollback needs a new migration.
@@ -68,6 +73,7 @@ Names only; never values. None is ever committed or printed in CI.
 | `DATABASE_AUTH_TOKEN` | same | Turso auth token |
 | `BETTER_AUTH_SECRET` | Vercel (Production), owner's shell for invites | Signs cookies and hashes; changing it signs everyone out |
 | `BETTER_AUTH_URL` | Vercel (Production), owner's shell for invites | The app's origin; also the passkey relying party |
+| `CRON_SECRET` | Vercel (Production) | Authorizes Vercel Cron on `/api/cron/rates`; letters and digits, e.g. `openssl rand -hex 24` |
 | `CLAUDE_CODE_OAUTH_TOKEN` | GitHub Actions repository secret | `@claude review`; set 2026-11-26 |
 
 Production values set in Vercel on 2026-11-27. The first deploy may have created more than one Turso token (a shell was closed and the values set again). To revoke them all, invalidate the database's tokens in Turso (CLI `turso db tokens invalidate moneyverse`, unverified), then put a new token in Vercel and redeploy.
