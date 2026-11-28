@@ -56,6 +56,9 @@ Node 26 (`.nvmrc`, `engines`) and pnpm (pinned in `packageManager`); run `nvm us
 - `pnpm db:backup`: dumps production through the logged-in Turso CLI to a dated SQL file outside the repository (no sessions), then restore-checks it. Owner only.
 - `pnpm db:restore-check <file.sql>`: restores a backup into a throwaway local database and checks tables, migrations and row counts.
 - `pnpm db:restore-drill <file.sql>`: restores a backup into a temporary Turso database through the shell, compares every table's rows with the file, and destroys it. Owner only.
+- `pnpm backup:keygen`: creates the cloud backup key pair (private key under `~/Documents/moneyverse-backups`, never overwritten). Owner only, once.
+- `pnpm backup:decrypt <file.sql.enc> [--key <jwk>]`: decrypts a cloud backup, strips sessions and runs the local restore check.
+- `workers/backup/`: the daily backup Worker (ADR 0006); tests run with `pnpm test`; the owner deploys it with `pnpm dlx wrangler@4.162.0 deploy` (runbook "Cloud backups"), never CI.
 - `pnpm rates:backfill --year <YYYY>`: loads whole years of ČNB rates into `DATABASE_URL` (repeatable).
 - **Production is owner-run only.** Never run `db:migrate:prod`, `db:backup`, `db:restore-drill`, `invite:create` or `rates:backfill` against production, and never ask for, read or print production values; give the owner the command from `docs/runbook.md` instead.
 

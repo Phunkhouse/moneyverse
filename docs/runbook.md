@@ -94,6 +94,29 @@ pnpm db:backup
 - **When:** weekly while the app is in use, and before every `pnpm db:migrate:prod`.
 - **Where:** keep the folder on the Mac's encrypted disk (FileVault on), and a second copy somewhere off the Mac that is encrypted, such as an encrypted disk image on an external drive or in your own cloud storage. Keep at least the last 4 weekly files. (Proposal; the owner chooses the second place.)
 
+**Cloud backups** ([ADR 0006](decisions/0006-cloud-backups.md)): a Cloudflare Worker backs up production every day at 02:30 UTC to the private R2 bucket `moneyverse-backups`, encrypted with your public key; R2 deletes them after 30 days. The manual `pnpm db:backup` above stays as a fallback.
+
+*Setup, once* (commands with `pnpm dlx wrangler@4.162.0`, shortened to `wrangler` below; run from `workers/backup/` unless noted):
+
+1. Cloudflare dashboard: open R2 and enable it (it may ask for a payment method even for the free tier).
+2. `wrangler login`
+3. `wrangler r2 bucket create moneyverse-backups`
+4. `wrangler r2 bucket lifecycle add moneyverse-backups expire-30-days --expire-days 30`, then `wrangler r2 bucket lifecycle list moneyverse-backups` shows the rule.
+5. In the repository root: `pnpm backup:keygen`. It writes the private key to `~/Documents/moneyverse-backups/backup-private-key.jwk`. **Copy that file's contents into your password manager now**; without it no cloud backup can be opened.
+6. Secrets (each command asks for the value; paste it, nothing is echoed):
+   - `turso db show moneyverse --http-url | wrangler secret put TURSO_DATABASE_URL`
+   - `turso db tokens create moneyverse --read-only | wrangler secret put TURSO_READ_TOKEN` (read-only; it cannot change the database)
+   - `wrangler secret put BACKUP_PUBLIC_KEY < ~/Documents/moneyverse-backups/backup-public-key.jwk`
+7. `wrangler deploy`
+8. After the first 02:30 UTC run: Cloudflare dashboard → Workers → moneyverse-backup → Logs (or Cron Events) shows "Stored moneyverse-….sql.enc". Then check it as below.
+
+*Check or restore a cloud backup:*
+
+1. `wrangler r2 object list moneyverse-backups --remote` (or the dashboard's R2 bucket view) to pick a file.
+2. `wrangler r2 object get moneyverse-backups/<file> --remote --file ~/Documents/moneyverse-backups/<file>`
+3. In the repository root: `pnpm backup:decrypt ~/Documents/moneyverse-backups/<file>`. It writes the `.sql` next to it (without sessions) and runs the local restore check.
+4. `pnpm db:restore-drill ~/Documents/moneyverse-backups/<file without .enc>` for the full Turso drill, or the restore steps below.
+
 **Check an older file** any time: `pnpm db:restore-check <file.sql>`.
 
 **Restore drill:** `pnpm db:restore-drill <file.sql>` restores a backup into a temporary Turso database (`moneyverse-restore-drill`) the same way as a real restore, compares every table's row count with the file, and destroys the temporary database. Run it after the first backup, after any change to the schema, and every few months.
