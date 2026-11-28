@@ -176,7 +176,9 @@ export const category = sqliteTable(
     kind: text('kind', { enum: ['expense', 'income'] }).notNull(),
     name: text('name').notNull(),
     // The name folded for comparison in code (lower case in Czech, NFC): SQLite's lower() only
-    // folds ASCII, so "Jídlo" and "JÍDLO" would otherwise both be allowed.
+    // folds ASCII, so "Jídlo" and "JÍDLO" would otherwise both be allowed. Every insert or
+    // rename must set it through nameKey() in src/server/money/ledger.ts (seeds and imports too);
+    // the '' default exists only for the migration.
     nameKey: text('name_key').notNull().default(''),
     archived: integer('archived', { mode: 'boolean' }).notNull().default(false),
     createdAt: createdAt(),

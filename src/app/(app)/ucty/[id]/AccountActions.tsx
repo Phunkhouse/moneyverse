@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Button, Sheet } from '@/ui/kit/index.ts'
+import type { FormState } from '@/app/_lib/forms.ts'
+import { Banner, Button, Sheet } from '@/ui/kit/index.ts'
 import { cs } from '@/ui/messages.ts'
 import styles from '../accounts.module.scss'
 import { AccountForm } from '../AccountForm.tsx'
@@ -30,6 +31,7 @@ type Props = {
 export function AccountActions({ today, account }: Props) {
   const [editing, setEditing] = useState(false)
   const [archiving, startArchiving] = useTransition()
+  const [result, setResult] = useState<FormState | null>(null)
   return (
     <div className={styles.actions}>
       <Button variant="ghost" onClick={() => setEditing(true)}>
@@ -39,13 +41,18 @@ export function AccountActions({ today, account }: Props) {
         variant="ghost"
         busy={archiving}
         onClick={() =>
-          startArchiving(() =>
-            setAccountArchivedAction(account.id, !account.archived),
-          )
+          startArchiving(async () => {
+            setResult(
+              await setAccountArchivedAction(account.id, !account.archived),
+            )
+          })
         }
       >
         {account.archived ? cs.common.unarchive : cs.common.archive}
       </Button>
+      {result?.status === 'error' && (
+        <Banner tone="error">{result.message}</Banner>
+      )}
       <Sheet
         open={editing}
         onClose={() => setEditing(false)}

@@ -50,6 +50,7 @@ export const cs = {
     nameRequired: 'Vyplňte název (nejvýš 80 znaků).',
     amountInvalid: 'Zadejte částku jako 1\u00a0234,50.',
     dateInvalid: 'Zadejte platné datum.',
+    debtPositive: 'Dluh zadejte jako kladné číslo.',
   },
   notFound: {
     title: 'Stránka neexistuje',

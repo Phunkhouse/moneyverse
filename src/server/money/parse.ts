@@ -20,5 +20,5 @@ export function parseAmount(text: unknown): number | null {
   const minor = Number(whole) * 100 + Number(fraction.padEnd(2, '0'))
   if (!Number.isSafeInteger(minor))
     throw new MoneyError('INVALID', 'Amount is out of range')
-  return sign === '-' ? -minor : minor
+  return sign === '-' ? 0 - minor : minor
 }

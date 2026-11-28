@@ -37,16 +37,17 @@ After PR #6 is merged: quick add and the transaction list with Playwright and ax
 
 ## Last verified
 
-- Command: `pnpm verify` (format:check, lint, typecheck, 130 tests, build); `pnpm db:generate` shows no drift.
+- Command: `pnpm verify` (format:check, lint, typecheck, 133 tests, build), including the PR #6 review fixes; `pnpm db:generate` shows no drift.
 - Browser on `pnpm dev`, with an invented local user and a session minted in the local database:
   - At 375 px: created an account and a credit card (stored as −9 500 Kč); edited with an invalid amount (error shown, typed values kept), then with a valid one (sheet closed, page refreshed).
   - At 1280 px: account groups, EUR and USD rows with the CZK value, a carried fund value, archiving.
   - Categories: created; "ÍDLO" refused next to "Jídlo"; archived.
   - An unknown account id shows the Czech 404 inside the shell.
-- Revision: branch `feat/accounts-categories` on `main` at `b0d12e4`, changes uncommitted at the time.
+- Revision: branch `feat/accounts-categories` at `9094a1f` plus the review fixes, uncommitted at the time.
 - Working tree: the PR #6 changes only.
 - Result: passed.
 - Not run:
+  - The review fixes in the browser (negative card debt, archive errors); they are covered by unit tests only.
   - axe and Playwright (planned for the next PR).
   - The screens while signed in with a real passkey.
   - The migration on Turso.

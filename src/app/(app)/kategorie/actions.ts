@@ -77,8 +77,13 @@ async function renameCategory_(
 export async function setCategoryArchivedAction(
   categoryId: string,
   archived: boolean,
-) {
+): Promise<FormState> {
   const user = await requireUser()
-  await updateCategory(getDb(), user.id, categoryId, { archived })
+  try {
+    await updateCategory(getDb(), user.id, categoryId, { archived })
+  } catch (error) {
+    return formError(error)
+  }
   refresh()
+  return { status: 'ok' }
 }

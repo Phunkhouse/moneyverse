@@ -3,7 +3,12 @@
 import { refresh } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { isDay } from '@/server/money/calendar.ts'
-import { createAccount, updateAccount } from '@/server/money/ledger.ts'
+import {
+  createAccount,
+  findAccount,
+  openingFromForm,
+  updateAccount,
+} from '@/server/money/ledger.ts'
 import { parseAmount } from '@/server/money/parse.ts'
 import {
   ACCOUNT_TYPES,
@@ -45,11 +50,17 @@ function readFields(
   if (Object.keys(fields).length > 0) {
     return { status: 'error', message: cs.forms.invalid, fields }
   }
-  return {
-    name,
-    openingBalanceMinor: type === 'credit_card' ? -opening : opening,
-    openedOn,
+  let openingBalanceMinor: number
+  try {
+    openingBalanceMinor = openingFromForm(type, opening)
+  } catch {
+    return {
+      status: 'error',
+      message: cs.forms.invalid,
+      fields: { opening: cs.forms.debtPositive },
+    }
   }
+  return { name, openingBalanceMinor, openedOn }
 }
 
 const isState = (value: AccountFields | FormState): value is FormState =>
@@ -96,13 +107,12 @@ async function updateAccount_(
   formData: FormData,
 ): Promise<FormState> {
   const user = await requireUser()
-  const type = text(formData, 'type') as AccountType
-  if (!ACCOUNT_TYPES.includes(type))
-    return { status: 'error', message: cs.forms.invalid }
-  const fields = readFields(formData, type)
-  if (isState(fields)) return fields
   try {
-    await updateAccount(getDb(), user.id, text(formData, 'id'), fields)
+    // The type comes from the stored account, never from the form: it decides the card's sign.
+    const account = await findAccount(getDb(), user.id, text(formData, 'id'))
+    const fields = readFields(formData, account.type)
+    if (isState(fields)) return fields
+    await updateAccount(getDb(), user.id, account.id, fields)
   } catch (error) {
     return formError(error)
   }
@@ -113,8 +123,13 @@ async function updateAccount_(
 export async function setAccountArchivedAction(
   accountId: string,
   archived: boolean,
-) {
+): Promise<FormState> {
   const user = await requireUser()
-  await updateAccount(getDb(), user.id, accountId, { archived })
+  try {
+    await updateAccount(getDb(), user.id, accountId, { archived })
+  } catch (error) {
+    return formError(error)
+  }
   refresh()
+  return { status: 'ok' }
 }

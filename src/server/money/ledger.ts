@@ -149,6 +149,11 @@ export async function listAccounts(db: Db, userId: string) {
   return db.select().from(moneyAccount).where(eq(moneyAccount.userId, userId))
 }
 
+/** One of the user's accounts; another user's account is NOT_FOUND, like a missing one. */
+export async function findAccount(db: Db, userId: string, accountId: unknown) {
+  return getAccount(db, userId, accountId, 'accountId')
+}
+
 async function getAccount(
   db: Db,
   userId: string,
@@ -163,6 +168,20 @@ async function getAccount(
   // Another user's account is reported exactly like a missing one.
   if (!account) throw new MoneyError('NOT_FOUND', `${field}: account not found`)
   return account
+}
+
+/**
+ * The stored opening balance from what the form shows. A credit card's debt is typed as a positive
+ * number and stored negative; a negative number there would silently become an asset, so it is
+ * refused.
+ */
+export function openingFromForm(type: AccountType, typedMinor: number): number {
+  if (type !== 'credit_card') return typedMinor
+  if (typedMinor < 0) {
+    throw new MoneyError('INVALID', 'A card debt is typed as a positive number')
+  }
+  // `0 - x` rather than `-x`, so a zero debt is 0 and not -0.
+  return 0 - typedMinor
 }
 
 // ---- Categories ----

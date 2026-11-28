@@ -11,6 +11,7 @@ describe('parseAmount', () => {
     ['+12', 1_200],
     ['0,01', 1],
     ['  42  ', 4_200],
+    ['-0', 0],
   ])('reads %j as %i minor units', (text, minor) => {
     expect(parseAmount(text)).toBe(minor)
   })

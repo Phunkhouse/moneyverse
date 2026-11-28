@@ -179,6 +179,7 @@ function EditForm({
 }) {
   const [state, action, pending] = useActionState(renameCategoryAction, idle)
   const [archiving, startArchiving] = useTransition()
+  const [archiveError, setArchiveError] = useState<string | null>(null)
   useDone(state, onDone)
   return (
     <form action={action} className={styles.form} noValidate>
@@ -203,6 +204,7 @@ function EditForm({
       {state.status === 'error' && !state.fields && (
         <Banner tone="error">{state.message}</Banner>
       )}
+      {archiveError && <Banner tone="error">{archiveError}</Banner>}
       <Button type="submit" size="large" block busy={pending}>
         {cs.common.save}
       </Button>
@@ -212,8 +214,12 @@ function EditForm({
         busy={archiving}
         onClick={() =>
           startArchiving(async () => {
-            await setCategoryArchivedAction(category.id, !category.archived)
-            onDone()
+            const result = await setCategoryArchivedAction(
+              category.id,
+              !category.archived,
+            )
+            if (result.status === 'error') setArchiveError(result.message)
+            else onDone()
           })
         }
       >

@@ -80,7 +80,6 @@ export function AccountForm({ action, account, today, onDone }: Props) {
       />
       {account ? (
         <>
-          <input type="hidden" name="type" value={account.type} />
           <p className={styles.note}>
             {cs.accounts.types[account.type]} · {account.currency}.{' '}
             {cs.accounts.fields.fixedAfterCreate}
