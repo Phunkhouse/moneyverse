@@ -80,10 +80,30 @@ Production values set in Vercel on 2026-11-27. The first deploy may have created
 
 ## Backup and restore
 
-The app's own export (Přehled → Nastavení → Data, `/api/export`) gives each user a JSON file of their ledger that imports into an empty app (AC-13). It is a convenience for the user, not the operator's backup: it needs a signed-in user, does not include sign-in data, and is only as recent as its last download.
+Required before the first real money entry (risk trigger "has real users"). Turso's free plan keeps only 1 day of point-in-time history and cannot restore a deleted database, so it is not a backup on its own. Backups never go through GitHub (the repository is public) and never into this repository.
 
+**Back up** (owner, on the Mac with the Turso CLI logged in):
 
-Not set up. Production holds only the owner's account and passkey, no financial data yet. Before the first real entry, a scheduled backup and a tested restore must exist (risk trigger "has real users"). Turso's free plan includes point-in-time restore for 1 day and cannot restore a deleted database (plan page, 2026-11-27), so it is not a backup on its own. Backups must not go through GitHub Actions artifacts, because the repository is public.
+```sh
+pnpm db:backup
+```
+
+- It dumps the production database with `turso db shell moneyverse .dump` and leaves out live sessions, WebAuthn challenges and rate-limit counters (`TRANSIENT_TABLES` in `src/server/db/backup.ts`). The file holds no sign-in tokens, but it holds all financial data.
+- It saves `moneyverse-YYYY-MM-DDTHH-MM.sql` (readable by you only) to `$MONEYVERSE_BACKUP_DIR` or `~/Documents/moneyverse-backups`, and refuses a folder inside the repository.
+- It then **restores the file into a throwaway local database** and checks that every table exists and the migrations match the code. Only a file that passes counts as a backup; it prints row counts, never contents.
+- **When:** weekly while the app is in use, and before every `pnpm db:migrate:prod`.
+- **Where:** keep the folder on the Mac's encrypted disk (FileVault on), and a second copy somewhere off the Mac that is encrypted, such as an encrypted disk image on an external drive or in your own cloud storage. Keep at least the last 4 weekly files. (Proposal; the owner chooses the second place.)
+
+**Check an older file** any time: `pnpm db:restore-check <file.sql>`.
+
+**Restore into Turso** (unverified until the drill below has been done once):
+
+1. `turso db create moneyverse-restore --from-dump <file.sql>` in a location near Frankfurt.
+2. `DATABASE_URL="$(turso db show moneyverse-restore --url)" DATABASE_AUTH_TOKEN="$(turso db tokens create moneyverse-restore)" pnpm db:migrate:prod`: it should report nothing new to apply and all tables present.
+3. In Vercel, set `DATABASE_URL` and `DATABASE_AUTH_TOKEN` (Production) to the restored database, and redeploy.
+4. Sign in again with your passkey (sessions are not in backups).
+
+**Restore drill (once, before the first real entry):** run steps 1 and 2 with a database named `moneyverse-restore-drill`, check `turso db shell moneyverse-restore-drill "select count(*) from money_account"`, then `turso db destroy moneyverse-restore-drill`. Record the date here when done.
 
 ## Incidents
 
