@@ -1,0 +1,18 @@
+.money {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.negative {
+  color: var(--neg);
+}
+
+.positive {
+  color: var(--pos);
+}
+
+.estimated {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}

@@ -11,6 +11,7 @@ import {
   deleteTransaction,
   listTransactions,
   setMonthValue,
+  updateCategory,
   updateAccount,
   updateTransaction,
 } from './ledger.ts'
@@ -369,6 +370,20 @@ describe('categories and monthly values', () => {
       createCategory(db, me, { kind: 'expense', name: 'jídlo' }),
     ).rejects.toMatchObject({
       code: 'CONFLICT',
+    })
+    const other_ = await createCategory(db, me, {
+      kind: 'expense',
+      name: 'Doprava',
+    })
+    await expect(
+      updateCategory(db, me, other_.id, { name: 'JÍDLO' }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' })
+    expect(
+      (await updateCategory(db, me, other_.id, { name: 'MHD', archived: true }))
+        .archived,
+    ).toBe(true)
+    await expect(updateCategory(db, me, other_.id, {})).rejects.toMatchObject({
+      code: 'INVALID',
     })
     // The same name is fine for income and for another user.
     await createCategory(db, me, { kind: 'income', name: 'Jídlo' })

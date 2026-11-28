@@ -11,7 +11,7 @@ The MVP needs accounts of seven types, own categories, expenses, income and tran
 
 - **Tables** (`src/server/db/schema.ts`, migration `drizzle/0001_money.sql`):
   - `money_account`: type, currency, a signed opening balance and its day, archived.
-  - `category`: expense or income; names unique per user and kind, ignoring case.
+  - `category`: expense or income; names unique per user and kind, ignoring case. The comparison uses `name_key`, the name in Czech lower case computed by the app (migration 0002), because SQLite's `lower()` folds only ASCII letters.
   - `money_transaction`: one row per expense, income or transfer. The amount is always positive; the kind gives the direction. A transfer keeps both amounts (`amount_minor` out, `to_amount_minor` in), so cross-currency transfers record the bank's real rate.
   - `month_value`: one value per value-tracked account per month.
   - `exchange_rate` (ČNB list per `valid_for` day, rate as integer thousandths of CZK per `amount` units) and `exchange_rate_day` (which list applies to each checked calendar day).

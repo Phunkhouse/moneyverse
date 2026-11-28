@@ -51,6 +51,11 @@ function assertName(value: unknown, field: string): string {
   return name
 }
 
+/** How category names are compared: Czech lower case, composed form, single spaces. */
+export function nameKey(name: string): string {
+  return name.normalize('NFC').toLocaleLowerCase('cs-CZ').replace(/\s+/g, ' ')
+}
+
 function optionalText(value: unknown, field: string): string | null {
   if (value === undefined || value === null) return null
   if (typeof value !== 'string' || value.length > MAX_TEXT) {
@@ -172,20 +177,61 @@ export async function createCategory(
   try {
     const [created] = await db
       .insert(category)
-      .values({ id: crypto.randomUUID(), userId, kind, name })
+      .values({
+        id: crypto.randomUUID(),
+        userId,
+        kind,
+        name,
+        nameKey: nameKey(name),
+      })
       .returning()
     return created
   } catch (error) {
-    if (
-      String((error as { cause?: unknown })?.cause ?? error).includes('UNIQUE')
-    ) {
-      throw new MoneyError(
-        'CONFLICT',
-        'A category with this name already exists',
-      )
-    }
-    throw error
+    throw uniqueToConflict(error)
   }
+}
+
+/** Renames or archives a category; its kind cannot change (transactions depend on it). */
+export async function updateCategory(
+  db: Db,
+  userId: string,
+  categoryId: string,
+  changes: { name?: string; archived?: boolean },
+) {
+  const set: Partial<typeof category.$inferInsert> = {}
+  if (changes.name !== undefined) {
+    set.name = assertName(changes.name, 'name')
+    set.nameKey = nameKey(set.name)
+  }
+  if (changes.archived !== undefined) set.archived = changes.archived === true
+  if (Object.keys(set).length === 0) {
+    throw new MoneyError('INVALID', 'Nothing to change')
+  }
+  const id = assertId(categoryId, 'categoryId')
+  try {
+    const [updated] = await db
+      .update(category)
+      .set(set)
+      .where(and(eq(category.id, id), eq(category.userId, userId)))
+      .returning()
+    if (!updated) throw new MoneyError('NOT_FOUND', 'Category not found')
+    return updated
+  } catch (error) {
+    throw uniqueToConflict(error)
+  }
+}
+
+function uniqueToConflict(error: unknown) {
+  if (
+    !(error instanceof MoneyError) &&
+    String((error as { cause?: unknown })?.cause ?? error).includes('UNIQUE')
+  ) {
+    return new MoneyError(
+      'CONFLICT',
+      'A category with this name already exists',
+    )
+  }
+  return error
 }
 
 export async function listCategories(db: Db, userId: string) {

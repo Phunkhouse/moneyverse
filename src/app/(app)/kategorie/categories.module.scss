@@ -1,0 +1,41 @@
+@use '../../../ui/styles/breakpoints' as bp;
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.columns {
+  display: grid;
+  gap: var(--sp-4);
+
+  @include bp.wide {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--sp-5);
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.muted {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.archived {
+  summary {
+    cursor: pointer;
+    font-weight: var(--w-head);
+    color: var(--ink-2);
+  }
+}

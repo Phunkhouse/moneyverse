@@ -31,15 +31,24 @@ function isCurrent(pathname: string, href: string) {
     : pathname === href || pathname.startsWith(`${href}/`)
 }
 
+/**
+ * The navigation with the current tab marked. Reading the URL waits for the request on dynamic
+ * routes such as /ucty/[id], so AppShell renders it inside <Suspense> with NavBar as fallback.
+ */
+export function CurrentNav() {
+  return <NavBar pathname={usePathname()} />
+}
+
 /** Bottom bar with a raised add button on phones; a sidebar from 760 px. */
-export function Nav() {
-  const pathname = usePathname()
+export function NavBar({ pathname }: { pathname: string | null }) {
   const link = (item: Item) => (
     <Link
       key={item.href}
       href={item.href}
       className={styles.link}
-      aria-current={isCurrent(pathname, item.href) ? 'page' : undefined}
+      aria-current={
+        pathname && isCurrent(pathname, item.href) ? 'page' : undefined
+      }
     >
       {item.icon}
       {item.label}
@@ -60,10 +69,11 @@ export function Nav() {
       >
         <PlusIcon />
         <span className={styles.addLabel}>{cs.nav.add}</span>
-        <span id="nav-add-soon" hidden>
-          {cs.nav.addSoon}
-        </span>
       </button>
+      {/* Outside the button, so it describes the button without joining its name. */}
+      <span id="nav-add-soon" hidden>
+        {cs.nav.addSoon}
+      </span>
       {after.map(link)}
     </nav>
   )

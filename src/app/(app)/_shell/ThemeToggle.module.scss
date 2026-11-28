@@ -1,7 +1,7 @@
 // Both states are rendered; CSS shows the one that matches the theme the inline script set,
 // so the server HTML is right before hydration.
 .toDark {
-  display: contents;
+  display: inline-flex;
 }
 
 .toLight {
@@ -14,7 +14,7 @@
   }
 
   .toLight {
-    display: contents;
+    display: inline-flex;
   }
 }
 

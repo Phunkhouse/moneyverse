@@ -8,9 +8,15 @@ import {
   Button,
   Card,
   EmptyState,
+  Glyph,
   IconButton,
+  Money,
   Pill,
+  Row,
+  RowList,
   Segmented,
+  Select,
+  Sheet,
   TextField,
 } from '@/ui/kit/index.ts'
 import { ClockIcon, ListIcon, PlanIcon } from '@/ui/kit/icons.tsx'
@@ -49,6 +55,7 @@ const periods = [
 export function KitGallery() {
   const [period, setPeriod] = useState<'month' | 'quarter' | 'year'>('month')
   const [busy, setBusy] = useState(false)
+  const [sheet, setSheet] = useState(false)
   return (
     <main className={styles.page}>
       <div className={styles.head}>
@@ -194,6 +201,89 @@ export function KitGallery() {
             </div>
           </Card>
         </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2>Seznamy, částky a panel</h2>
+        <div className={styles.grid}>
+          <Card title="Řádky">
+            <RowList>
+              <li>
+                <Row
+                  lead={<Glyph name="Potraviny" seed="a" />}
+                  title="Potraviny"
+                  meta="Běžný účet · 26. 11. 2026"
+                  trail={<Money minor={-45_650} currency="CZK" tone="signed" />}
+                />
+              </li>
+              <li>
+                <Row
+                  lead={<Glyph name="Mzda a odměny" seed="b" />}
+                  title="Mzda a odměny"
+                  meta="Příjem"
+                  trail={
+                    <Money
+                      minor={4_250_000}
+                      currency="CZK"
+                      tone="signed"
+                      signed
+                    />
+                  }
+                />
+              </li>
+              <li>
+                <Row
+                  title="Účet v EUR"
+                  meta="Odkaz na podrobnosti"
+                  href="#"
+                  trail={<Money minor={140_000} currency="EUR" />}
+                  trailSub={
+                    <>
+                      ≈ <Money minor={3_420_900} currency="CZK" estimated />
+                    </>
+                  }
+                />
+              </li>
+            </RowList>
+          </Card>
+          <Card title="Výběr a panel">
+            <div className={styles.stack}>
+              <Select
+                label="Měna"
+                defaultValue="EUR"
+                options={[
+                  { value: 'CZK', label: 'CZK' },
+                  { value: 'EUR', label: 'EUR' },
+                  { value: 'USD', label: 'USD' },
+                ]}
+              />
+              <Select
+                label="S chybou"
+                error="Vyberte měnu."
+                options={[{ value: '', label: '—' }]}
+              />
+              <Button variant="ghost" onClick={() => setSheet(true)}>
+                Otevřít panel
+              </Button>
+            </div>
+          </Card>
+        </div>
+        <Sheet
+          open={sheet}
+          onClose={() => setSheet(false)}
+          title="Ukázkový panel"
+        >
+          <div className={styles.stack}>
+            <TextField
+              label="Název"
+              data-autofocus
+              placeholder="Fokus začíná tady"
+            />
+            <Button block onClick={() => setSheet(false)}>
+              Hotovo
+            </Button>
+          </div>
+        </Sheet>
       </section>
 
       <section className={styles.section}>

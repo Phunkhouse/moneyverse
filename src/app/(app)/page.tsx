@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { connection } from 'next/server'
 import { Suspense } from 'react'
 import { Card, EmptyState } from '@/ui/kit/index.ts'
@@ -26,7 +27,10 @@ export default function OverviewPage() {
         </EmptyState>
       </Card>
       {/* Temporary home for the settings until the Nastavení screen exists. */}
-      <Card title={cs.overview.settings}>
+      <Card
+        title={cs.overview.settings}
+        action={<Link href="/kategorie">{cs.categories.link}</Link>}
+      >
         <div className={styles.settings}>
           <ThemeSwitch />
           <Suspense

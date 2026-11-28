@@ -1,0 +1,135 @@
+@use '../../../ui/styles/breakpoints' as bp;
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+
+.note {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--sp-4) var(--sp-5);
+}
+
+.eyebrow {
+  font-size: var(--fs-xs);
+  font-weight: var(--w-head);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.hero {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: var(--w-key);
+  letter-spacing: -0.02em;
+}
+
+.figure {
+  margin-top: var(--sp-1);
+  font-size: var(--fs-lg);
+  font-weight: var(--w-head);
+}
+
+.groups {
+  display: grid;
+  gap: var(--sp-4);
+
+  @include bp.wide {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--sp-5);
+  }
+}
+
+.ccy {
+  margin-left: 6px;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: var(--w-key);
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  vertical-align: 1px;
+}
+
+.carried {
+  color: var(--warn);
+}
+
+.archived {
+  summary {
+    cursor: pointer;
+    font-weight: var(--w-head);
+    color: var(--ink-2);
+  }
+
+  &[open] summary {
+    margin-bottom: var(--sp-2);
+  }
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-sm);
+  font-weight: var(--w-head);
+  text-decoration: none;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.detail {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.big {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: var(--w-key);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.muted {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+}

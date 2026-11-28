@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react'
+import { Suspense, type ReactNode } from 'react'
 import { cs } from '@/ui/messages.ts'
 import styles from './AppShell.module.scss'
-import { Nav } from './Nav.tsx'
+import { CurrentNav, NavBar } from './Nav.tsx'
 
 export const MAIN_ID = 'obsah'
 
@@ -12,7 +12,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       <a className={styles.skip} href={`#${MAIN_ID}`}>
         {cs.shell.skipToContent}
       </a>
-      <Nav />
+      <Suspense fallback={<NavBar pathname={null} />}>
+        <CurrentNav />
+      </Suspense>
       <div className={styles.main} id={MAIN_ID} tabIndex={-1}>
         {children}
       </div>

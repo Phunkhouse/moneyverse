@@ -1,4 +1,4 @@
-// The UI kit, part 1 (ADR 0002). Every component is shown at /dev/kit.
+// The UI kit (ADR 0002). Every component is shown at /dev/kit.
 export { Banner } from './Banner.tsx'
 export { Button } from './Button.tsx'
 export { Card } from './Card.tsx'
@@ -7,3 +7,8 @@ export { IconButton } from './IconButton.tsx'
 export { Pill } from './Pill.tsx'
 export { Segmented } from './Segmented.tsx'
 export { TextField } from './TextField.tsx'
+export { Glyph, initials } from './Glyph.tsx'
+export { Money } from './Money.tsx'
+export { Row, RowList } from './Row.tsx'
+export { Select } from './Select.tsx'
+export { Sheet } from './Sheet.tsx'

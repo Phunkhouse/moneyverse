@@ -175,6 +175,9 @@ export const category = sqliteTable(
       .references(() => user.id, { onDelete: 'cascade' }),
     kind: text('kind', { enum: ['expense', 'income'] }).notNull(),
     name: text('name').notNull(),
+    // The name folded for comparison in code (lower case in Czech, NFC): SQLite's lower() only
+    // folds ASCII, so "Jídlo" and "JÍDLO" would otherwise both be allowed.
+    nameKey: text('name_key').notNull().default(''),
     archived: integer('archived', { mode: 'boolean' }).notNull().default(false),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -186,10 +189,10 @@ export const category = sqliteTable(
       table.userId,
       table.kind,
     ),
-    uniqueIndex('category_user_kind_name_unique').on(
+    uniqueIndex('category_user_kind_name_key_unique').on(
       table.userId,
       table.kind,
-      sql`lower(${table.name})`,
+      table.nameKey,
     ),
   ],
 )
