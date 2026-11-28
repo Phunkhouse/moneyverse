@@ -27,7 +27,6 @@ After PR #10 is merged: the dashboard and charts (AC-7, R-10 to R-12), BACKLOG "
 ## Blockers and open questions
 
 - **Owner, before the first real money entry, and so before H-1:** backups with a tested restore (runbook "Backup and restore").
-- **Owner:** confirm the contrast changes in `docs/design/README.md`.
 - **Owner, still unconfirmed:**
   - `turso db shell moneyverse "PRAGMA foreign_keys"` prints `1`.
   - `CRON_SECRET` is set in Vercel.
