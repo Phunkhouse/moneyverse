@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import type { MonthValuesData } from '@/app/_lib/money.ts'
-import { formatMoney, formatMonthName } from '@/ui/format.ts'
+import { formatAmount, formatMoney, formatMonthName } from '@/ui/format.ts'
 import {
   Banner,
   Button,
@@ -64,14 +64,6 @@ export function MonthValuesButton({
       </Sheet>
     </>
   )
-}
-
-function plain(minor: number) {
-  // The value as the field shows it: "312 500" or "1 400,50", without the currency.
-  const whole = Math.trunc(minor / 100)
-  const cents = Math.abs(minor % 100)
-  const grouped = new Intl.NumberFormat('cs-CZ').format(whole)
-  return cents ? `${grouped},${String(cents).padStart(2, '0')}` : grouped
 }
 
 function MonthValuesForm({
@@ -148,7 +140,7 @@ function MonthValuesForm({
             error={errors[account.id]}
             inputMode="decimal"
             autoComplete="off"
-            placeholder={plain(value.shown)}
+            placeholder={formatAmount(value.shown)}
             value={valueOf(account.id)}
             onChange={(event) =>
               setTyped((all) => ({

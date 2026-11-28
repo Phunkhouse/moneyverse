@@ -10,16 +10,16 @@ import {
   valueHistory,
 } from '@/app/_lib/money.ts'
 import { requireUser } from '@/app/_lib/session.ts'
+import { formatMonthName } from '@/ui/format.ts'
 import { Card, Money, Pill } from '@/ui/kit/index.ts'
 import { BackIcon } from '@/ui/kit/icons.tsx'
 import { cs } from '@/ui/messages.ts'
-import { Screen } from '../../_shell/Screen.tsx'
-import styles from '../accounts.module.scss'
-import { openingForForm } from '../view.ts'
 import { TransactionList } from '../../_quickadd/TransactionList.tsx'
+import { Screen } from '../../_shell/Screen.tsx'
 import { MonthValuesButton } from '../../_values/MonthValues.tsx'
 import valueStyles from '../../_values/values.module.scss'
-import { formatMonthName } from '@/ui/format.ts'
+import styles from '../accounts.module.scss'
+import { openingForForm } from '../view.ts'
 import { AccountActions } from './AccountActions.tsx'
 
 export const metadata: Metadata = { title: cs.accounts.detailTitle }
@@ -52,7 +52,6 @@ export default function AccountPage({ params }: PageProps<'/ucty/[id]'>) {
 async function AccountDetail({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser()
   const { id } = await params
-  // Only the signed-in user's accounts are loaded, so another user's id is simply not found.
   // Only the signed-in user's rows are loaded, so another user's id is simply not found.
   const [all, items, values, history] = await Promise.all([
     accountsWithBalances(user.id),

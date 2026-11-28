@@ -72,6 +72,26 @@ export function currencySymbol(currency: Currency): string {
   return SYMBOLS[currency]
 }
 
+const plainFormats = {
+  whole: new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 }),
+  cents: new Intl.NumberFormat(LOCALE, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }),
+}
+
+/**
+ * Minor units as a number without the currency, as a field shows it: 31250000 → "312 500",
+ * 140050 → "1 400,50". Whole amounts drop ",00".
+ */
+export function formatAmount(minor: number | bigint): string {
+  const value = BigInt(minor)
+  const whole = value % 10n ** BigInt(MINOR_DIGITS) === 0n
+  return (whole ? plainFormats.whole : plainFormats.cents).format(
+    minorToDecimal(value),
+  )
+}
+
 /** A calendar day as ISO `YYYY-MM-DD`; days carry no time zone. */
 export type IsoDate = `${number}-${number}-${number}`
 

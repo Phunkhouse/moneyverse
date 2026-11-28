@@ -39,7 +39,11 @@ export async function saveMonthValuesAction(
     assertMonth(month, 'month')
     const fields: Record<string, string> = {}
     const parsed: { accountId: string; valueMinor: number }[] = []
+    const seen = new Set<string>()
     for (const entry of entries) {
+      // One value per account: a repeated account (only a crafted request can send one) is ignored.
+      if (seen.has(entry.accountId)) continue
+      seen.add(entry.accountId)
       try {
         const valueMinor = parseAmount(entry.value)
         if (valueMinor !== null)
@@ -54,7 +58,8 @@ export async function saveMonthValuesAction(
     // Check every account first, so a bad entry cannot leave the month half saved.
     for (const { accountId } of parsed) {
       const account = await findAccount(db, user.id, accountId)
-      if (!VALUE_TRACKED.has(account.type)) {
+      // Archived accounts take no new values, as they take no new transactions (ADR 0005).
+      if (!VALUE_TRACKED.has(account.type) || account.archived) {
         return { status: 'error', message: cs.forms.invalid }
       }
     }
@@ -79,7 +84,11 @@ export async function saveMonthValuesAction(
   }
 }
 
-/** Reverses a save: restores the earlier values, or removes ones that did not exist. */
+/**
+ * Reverses a save: restores the earlier values, or removes ones that did not exist. It writes
+ * the snapshot taken at save time, so an edit of the same month made in between (another tab)
+ * is reverted too. Acceptable for one user with a short-lived toast; revisit with R-20.
+ */
 export async function undoMonthValuesAction(
   undo: ValuesUndo,
 ): Promise<{ status: 'ok' } | { status: 'error'; message: string }> {

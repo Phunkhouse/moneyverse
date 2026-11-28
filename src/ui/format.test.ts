@@ -3,6 +3,7 @@ import { CURRENCIES as SERVER_CURRENCIES } from '../server/money/types.ts'
 import {
   CURRENCIES,
   currencySymbol,
+  formatAmount,
   formatDate,
   formatDayLong,
   formatDayShort,
@@ -59,6 +60,15 @@ describe('formatMoney', () => {
     expect(() => formatMoney(Number.MAX_SAFE_INTEGER + 1, 'CZK')).toThrow(
       RangeError,
     )
+  })
+})
+
+describe('formatAmount', () => {
+  it('shows a field value without the currency', () => {
+    expect(plain(formatAmount(31_250_000))).toBe('312 500')
+    expect(plain(formatAmount(140_050))).toBe('1 400,50')
+    expect(plain(formatAmount(-5))).toBe('-0,05')
+    expect(plain(formatAmount(0))).toBe('0')
   })
 })
 
