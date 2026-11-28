@@ -96,14 +96,17 @@ pnpm db:backup
 
 **Check an older file** any time: `pnpm db:restore-check <file.sql>`.
 
-**Restore into Turso** (unverified until the drill below has been done once):
+**Restore drill:** `pnpm db:restore-drill <file.sql>` restores a backup into a temporary Turso database (`moneyverse-restore-drill`) the same way as a real restore, compares every table's row count with the file, and destroys the temporary database. Run it after the first backup, after any change to the schema, and every few months.
 
-1. `turso db create moneyverse-restore --from-dump <file.sql>` in a location near Frankfurt.
-2. `DATABASE_URL="$(turso db show moneyverse-restore --url)" DATABASE_AUTH_TOKEN="$(turso db tokens create moneyverse-restore)" pnpm db:migrate:prod`: it should report nothing new to apply and all tables present.
-3. In Vercel, set `DATABASE_URL` and `DATABASE_AUTH_TOKEN` (Production) to the restored database, and redeploy.
-4. Sign in again with your passkey (sessions are not in backups).
+- **2026-11-28 (owner):** the first backup restored with every row through the shell route below (user 1, passkey 1, exchange rates 12, migrations 3). `turso db create --from-dump` restored the tables but **lost the user and passkey rows**, so it is not used.
 
-**Restore drill (once, before the first real entry):** run steps 1 and 2 with a database named `moneyverse-restore-drill`, check `turso db shell moneyverse-restore-drill "select count(*) from money_account"`, then `turso db destroy moneyverse-restore-drill`. Record the date here when done.
+**Restore into Turso** (the route the drill uses):
+
+1. `turso db create moneyverse-restore` (an empty database, in the default group near Frankfurt).
+2. `turso db shell moneyverse-restore < <file.sql>`: loads the backup.
+3. `DATABASE_URL="$(turso db show moneyverse-restore --url)" DATABASE_AUTH_TOKEN="$(turso db tokens create moneyverse-restore --expiration 1d)" pnpm db:migrate:prod`: it should apply nothing new and report all tables present.
+4. Create a long-lived token for the app (`turso db tokens create moneyverse-restore`), set `DATABASE_URL` and `DATABASE_AUTH_TOKEN` (Production) in Vercel to the restored database, and redeploy.
+5. Sign in again with your passkey (sessions are not in backups).
 
 ## Incidents
 

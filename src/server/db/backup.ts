@@ -89,3 +89,16 @@ export async function checkDump(
     await rm(dir, { recursive: true, force: true })
   }
 }
+
+/** Rows per table that differ between the backup and a restored copy; empty when they match. */
+export function countDifferences(
+  expected: Record<string, number>,
+  actual: Record<string, number>,
+): string[] {
+  return Object.keys(expected)
+    .filter((table) => expected[table] !== actual[table])
+    .map(
+      (table) =>
+        `${table}: ${expected[table]} in the backup, ${actual[table] ?? 'none'} restored`,
+    )
+}

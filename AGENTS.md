@@ -55,8 +55,9 @@ Node 26 (`.nvmrc`, `engines`) and pnpm (pinned in `packageManager`); run `nvm us
 - `pnpm icons:render`: re-renders the app icons (`public/icons/`, `src/app/apple-icon.png`, `src/app/favicon.ico`) from the brand mark (`scripts/render-icons.ts`); run after a logo change and commit them.
 - `pnpm db:backup`: dumps production through the logged-in Turso CLI to a dated SQL file outside the repository (no sessions), then restore-checks it. Owner only.
 - `pnpm db:restore-check <file.sql>`: restores a backup into a throwaway local database and checks tables, migrations and row counts.
+- `pnpm db:restore-drill <file.sql>`: restores a backup into a temporary Turso database through the shell, compares every table's rows with the file, and destroys it. Owner only.
 - `pnpm rates:backfill --year <YYYY>`: loads whole years of ČNB rates into `DATABASE_URL` (repeatable).
-- **Production is owner-run only.** Never run `db:migrate:prod`, `db:backup`, `invite:create` or `rates:backfill` against production, and never ask for, read or print production values; give the owner the command from `docs/runbook.md` instead.
+- **Production is owner-run only.** Never run `db:migrate:prod`, `db:backup`, `db:restore-drill`, `invite:create` or `rates:backfill` against production, and never ask for, read or print production values; give the owner the command from `docs/runbook.md` instead.
 
 Code layout: `src/ui/` holds the design tokens' Sass helpers, the kit (`src/ui/kit/`, shown at `/dev/kit` in development), the Czech catalogue (`messages.ts`) and formatters (`format.ts`); global tokens are in `src/app/globals.scss`. `src/server/` is framework-free (database, auth, the money rules in `src/server/money/`) with relative `.ts` imports, so Node runs the scripts in `scripts/` directly; the app reaches it through `src/app/_lib/`. Every page and server action that touches a user's data calls `requireUser()` first and scopes queries by that user's id.
 
