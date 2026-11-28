@@ -80,6 +80,9 @@ Production values set in Vercel on 2026-11-27. The first deploy may have created
 
 ## Backup and restore
 
+The app's own export (Přehled → Nastavení → Data, `/api/export`) gives each user a JSON file of their ledger that imports into an empty app (AC-13). It is a convenience for the user, not the operator's backup: it needs a signed-in user, does not include sign-in data, and is only as recent as its last download.
+
+
 Not set up. Production holds only the owner's account and passkey, no financial data yet. Before the first real entry, a scheduled backup and a tested restore must exist (risk trigger "has real users"). Turso's free plan includes point-in-time restore for 1 day and cannot restore a deleted database (plan page, 2026-11-27), so it is not a backup on its own. Backups must not go through GitHub Actions artifacts, because the repository is public.
 
 ## Incidents

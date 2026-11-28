@@ -1,6 +1,11 @@
 // The Czech message catalogue (R-25). The interface is Czech only, so this is a plain object
 // rather than a translation library; amounts and dates go through ./format.ts.
 
+/** Czech counting: 1 účet, 2–4 účty, 0 or 5+ účtů. */
+function count(n: number, one: string, few: string, many: string) {
+  return `${n} ${n === 1 ? one : n >= 2 && n <= 4 ? few : many}`
+}
+
 export const cs = {
   app: {
     name: 'moneyverse',
@@ -133,6 +138,33 @@ export const cs = {
     history: 'Měsíční hodnoty',
     carriedMark: 'převzato',
     opening: 'počáteční hodnota',
+  },
+  data: {
+    title: 'Data',
+    subtitle: 'Záloha a obnovení',
+    exportTitle: 'Stáhnout všechna data',
+    exportBody:
+      'Jeden soubor JSON se všemi účty, kategoriemi, transakcemi a měsíčními hodnotami. Uložte si ho, kam chcete; dá se znovu nahrát.',
+    exportButton: 'Stáhnout soubor',
+    importTitle: 'Nahrát data ze souboru',
+    importBody:
+      'Nahraje soubor stažený z moneyverse. Jde to jen do prázdné aplikace (bez účtů, kategorií a transakcí), aby se data nezdvojila. Když je v souboru chyba, neuloží se nic.',
+    fileLabel: 'Soubor JSON',
+    importButton: 'Nahrát data',
+    noFile: 'Vyberte soubor.',
+    tooLarge: 'Soubor je větší než 5 MB.',
+    invalidFile:
+      'Tohle není platný soubor z moneyverse, nebo je poškozený. Nic se neuložilo.',
+    notEmpty:
+      'V aplikaci už jsou data. Nahrát soubor jde jen do prázdné aplikace, aby se nic nezdvojilo.',
+    imported: (s: {
+      accounts: number
+      categories: number
+      transactions: number
+      monthValues: number
+    }) =>
+      `Nahráno: ${count(s.accounts, 'účet', 'účty', 'účtů')}, ${count(s.categories, 'kategorie', 'kategorie', 'kategorií')}, ${count(s.transactions, 'transakce', 'transakce', 'transakcí')} a ${count(s.monthValues, 'měsíční hodnota', 'měsíční hodnoty', 'měsíčních hodnot')}.`,
+    link: 'Data',
   },
   error: {
     title: 'Něco se pokazilo',

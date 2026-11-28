@@ -26,6 +26,10 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  experimental: {
+    // Imports of an export file (AC-13) arrive through a server action; about ten years of data.
+    serverActions: { bodySizeLimit: '5mb' },
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]
   },

@@ -10,18 +10,24 @@ Build the MVP in [SPEC.md](SPEC.md) (D-3), one PR at a time in the order under "
 
 ## State
 
-- Done and merged: PRs #1 to #9 (sign-in, app shell, money rules and ČNB rates, accounts and categories, quick add with Undo and the transaction list, Playwright and axe, guarded production migrations and Czech error pages).
-- Deployed at https://money.david-krapka.eu. Production has all 3 migrations; `pnpm db:migrate:prod` gets the Turso URL and a one-day token from the logged-in CLI.
-- Merged PR #10: monthly investment values with the reminder (last month, owner's decision) and history.
-- In review (PR #11, branch `feat/dashboard-charts`): the dashboard and charts (AC-7, R-10 to R-12).
-  - **Přehled:** a net worth hero with the change against last month and a 12-month area chart, and spending this month by category against a 6-month average.
-  - **Grafy:** 6 or 12 months of net worth composition (cash, investments, a dashed total after debts, debts in the tooltip), spending by month against the average, this month against the average by category, a balance chart per account, and income against spending.
-  - **Own SVG charts** (`src/ui/charts/`): exact values on hover, tap or arrow keys, a crosshair, and a hidden table for screen readers.
+- Done and merged: PRs #1 to #11 (sign-in, app shell, money rules and ČNB rates, accounts and categories, quick add with Undo and the transaction list, guarded production migrations, monthly investment values, the dashboard and charts).
+- Deployed at https://money.david-krapka.eu.
+- In review (PR #12, branch `feat/export-import`): export and re-import (R-18, AC-13).
+  - **Export:** Přehled → Nastavení → Data downloads a versioned JSON file of the user's ledger (`/api/export`, which checks the session itself).
+  - **Import:** reads such a file into an empty ledger, all or nothing, with fresh ids and the ledger rules.
+  - **Walkthrough checklist** for the owner in `docs/walkthrough.md`.
+  - **Acceptance criteria:** AC-2, AC-5, AC-8, AC-9 and AC-13 are ticked in SPEC.md, on their tests.
+- **The MVP build order is complete with this PR.** What remains:
+  - The owner's walkthrough: AC-1, AC-3, AC-4, AC-6, AC-7, AC-14, AC-16.
+  - AC-12 and AC-15. They have tests, but their wording includes parts not built or not checked end to end: budgets (R-14), and every data endpoint without login.
+  - Backups before real data.
 - Production holds no financial data yet, and there is no backup.
 
 ## Next step
 
-After PR #11 is merged: export and re-import, and the PWA and phone checks (AC-13, AC-14), the last MVP item in BACKLOG "Next". H-4 (6 to 12 months of the owner's real values) can start once there is a backup.
+After PR #12 is merged:
+- **Owner:** backups with a tested restore, then the walkthrough ([walkthrough.md](walkthrough.md)), then H-1 (two weeks of daily use) and H-4 (6 to 12 months of real investment values).
+- **New work:** the owner picks the next items from BACKLOG "Later".
 
 ## Blockers and open questions
 
@@ -37,10 +43,11 @@ After PR #11 is merged: export and re-import, and the PWA and phone checks (AC-1
 ## Last verified
 
 - **Commands:**
-  - `pnpm verify` passed: format:check, lint, typecheck, 153 tests and the build, including the PR #11 review fixes.
-  - `pnpm e2e` passed: 33 tests, including AC-7 (the Přehled chart's exact value for this month equals the net worth figure, via keyboard), hover values by kind on Grafy, and axe on every screen with data.
-- **Browser on `pnpm dev`:** Přehled and Grafy at 1280 and 375 px with local invented data; the tooltip checked on hover.
-- **Revision:** branch `feat/dashboard-charts` on `main` at `35b905e`, changes uncommitted at the time.
-- **Working tree:** the PR #11 changes only.
+  - `pnpm verify` passed: format:check, lint, typecheck, 157 tests and the build.
+  - `pnpm e2e` passed: 39 tests, including AC-13 (download, import into a second empty invented user, refusal when not empty, refusal of a foreign file, 401 for a forged session) and axe on `/data`.
+- **Revision:** branch `feat/export-import` on `main` at `dc93193`, changes uncommitted at the time.
+- **Working tree:** the PR #12 changes only.
 - **Result:** passed.
-- **Not run:** the AC-7 walkthrough against hand-calculated totals with real data (owner, after backups).
+- **Not run:**
+  - The owner's walkthrough.
+  - An import with real data.
