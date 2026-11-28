@@ -10,29 +10,25 @@ Build the MVP in [SPEC.md](SPEC.md) (D-3), one PR at a time in the order under "
 
 ## State
 
-- **The MVP build order is complete:** PRs #1 to #12 are merged, the last being export and re-import (AC-13).
+- **The MVP build order is complete:** PRs #1 to #13 are merged, the last being backups.
 - Deployed at https://money.david-krapka.eu. Production holds no financial data yet.
-- In review (PR #13, branch `feat/backup-restore`):
-  - `pnpm db:backup`: dumps production through the Turso CLI to a dated file outside the repository, without sessions, challenges or rate limits, and restore-checks it.
-  - `pnpm db:restore-check`.
-  - The runbook's backup, restore and drill steps.
-- Acceptance criteria ticked: AC-2, AC-5, AC-8, AC-9, AC-13. The rest need the owner's walkthrough ([walkthrough.md](walkthrough.md)), except AC-12 and AC-15, which have tests but are not ticked (see SPEC).
+- **Backups:** the first production backup was taken on 2026-11-28 with `pnpm db:backup`; it passed the local restore check.
+- **Restore drill, 2026-11-28 (owner):** the backup restored into Turso with every row, loaded through `turso db shell`. `turso db create --from-dump` had lost the user and passkey rows, so it is not used. **The risk trigger's "backups with a tested restore" is met.**
+- In review (PR #14, branch `fix/restore-drill`): `pnpm db:restore-drill`, which repeats that drill and compares every table; the runbook's restore steps now use the shell route.
 
 ## Next step
 
-**Owner**, in order:
-1. After PR #13 is merged: run `pnpm db:backup`, do the restore drill (runbook "Backup and restore"), and set the weekly backup habit.
-2. The walkthrough on the phone and a computer.
-3. Start H-1 (two weeks of daily logging) and H-4 (6 to 12 months of real investment values).
+**Owner:**
+1. Keep taking weekly backups.
+2. Do the walkthrough ([walkthrough.md](walkthrough.md)) on the phone and a computer.
+3. Start H-1 (two weeks of daily logging) and H-4 (6 to 12 months of real investment values). Real entries can start now.
 
 Then the owner picks new work from BACKLOG "Later".
 
 ## Blockers and open questions
 
-- **Owner:** the backup and restore drill before the first real entry; it is not done until the drill is recorded in the runbook.
 - **Owner, still unconfirmed:**
   - `turso db shell moneyverse "PRAGMA foreign_keys"` prints `1`.
-  - `CRON_SECRET` is set in Vercel.
   - The `e2e` check is required in branch protection (optional).
 - **On 2026-12-27:** check H-3's idle rule and read Vercel Hobby's limits.
 - **Waiting for the owner or H-4:** O-14.
@@ -41,13 +37,10 @@ Then the owner picks new work from BACKLOG "Later".
 ## Last verified
 
 - **Commands:**
-  - `pnpm verify` passed: format:check, lint, typecheck, 166 tests and the build.
-  - `pnpm db:restore-check` on a real SQLite `.dump` of the local development database (invented data) passed: 3 migrations, all 12 tables present.
-  - `pnpm db:backup` passed with a stand-in `turso` command that printed that local dump: the file was saved with mode 600, had no session rows, and passed the restore check.
-  - The backup refuses a folder inside the repository.
-- **Revision:** branch `feat/backup-restore` on `main` at `82737ae`, changes uncommitted at the time.
-- **Working tree:** the PR #13 changes only.
+  - `pnpm verify` passed: format:check, lint, typecheck, 167 tests and the build.
+  - `pnpm db:restore-drill` with a stand-in `turso` command over local SQLite files: a full restore passed and the temporary database was destroyed. A restore that dropped the user row was reported ("user: 1 in the backup, 0 restored", exit 1).
+- **Owner, on production (2026-11-28):** `pnpm db:backup` passed; the manual shell-route drill restored user 1, passkey 1, exchange rates 12 and migrations 3.
+- **Revision:** branch `fix/restore-drill` on `main` at `8a6d856`, changes uncommitted at the time.
+- **Working tree:** the PR #14 changes only.
 - **Result:** passed.
-- **Not run:**
-  - `pnpm db:backup` against production through the real Turso CLI (the owner's command).
-  - The restore into Turso (the drill).
+- **Not run:** `pnpm db:restore-drill` through the real Turso CLI (the owner's command).

@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import type { Db } from './client.ts'
 import { createAccount } from '../money/ledger.ts'
 import { createTestDb, createTestUser } from '../test/database.ts'
-import { checkDump, stripTransientRows } from './backup.ts'
+import { checkDump, countDifferences, stripTransientRows } from './backup.ts'
 import { sql } from 'drizzle-orm'
 
 // A small stand-in for SQLite's `.dump` (which `turso db shell <db> .dump` produces): the schema
@@ -109,5 +109,16 @@ describe('checkDump', () => {
     await expect(checkDump('CREATE TABLE x (', 3)).rejects.toThrow(
       'does not restore',
     )
+  })
+})
+
+describe('countDifferences', () => {
+  it('names every table whose rows did not all come back', () => {
+    expect(
+      countDifferences({ user: 1, passkey: 1 }, { user: 1, passkey: 1 }),
+    ).toEqual([])
+    expect(
+      countDifferences({ user: 1, passkey: 1 }, { user: 0, passkey: 1 }),
+    ).toEqual(['user: 1 in the backup, 0 restored'])
   })
 })
