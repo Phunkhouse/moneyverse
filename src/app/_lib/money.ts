@@ -1,5 +1,10 @@
 import 'server-only'
-import { addMonths, monthOf, todayInPrague } from '@/server/money/calendar.ts'
+import {
+  addMonths,
+  monthOf,
+  monthsBetween,
+  todayInPrague,
+} from '@/server/money/calendar.ts'
 import {
   listAccounts,
   listCategories,
@@ -7,7 +12,14 @@ import {
   listTransactions,
 } from '@/server/money/ledger.ts'
 import { loadRateBook } from '@/server/money/rates.ts'
-import { convertToCzk, monthEndBalances } from '@/server/money/reports.ts'
+import {
+  computeMonthEndBalances,
+  computeMonthlyFlows,
+  computeNetWorth,
+  computeSpending,
+  convertToCzk,
+  monthEndBalances,
+} from '@/server/money/reports.ts'
 import {
   categoryScores,
   lastUsedAccountId,
@@ -247,4 +259,135 @@ export async function valueHistory(userId: string, accountId: string) {
   })
   const found = series.find((s) => s.account.id === accountId)
   return (found?.months ?? []).slice().reverse()
+}
+
+// ---- Dashboard and charts (AC-7, R-10 to R-12) ----
+
+export type InsightsData = {
+  today: string
+  /** The months the charts cover: the last 12, from the first month any account existed. */
+  months: string[]
+  netWorth: {
+    month: string
+    total: number
+    cash: number
+    investments: number
+    debt: number
+    carried: boolean
+    estimated: boolean
+    missingRate: boolean
+  }[]
+  flows: {
+    month: string
+    spent: number
+    income: number
+    estimated: boolean
+    /** Some EUR or USD entry had no rate at all and is left out of this month's sums. */
+    missingRate: boolean
+  }[]
+  /** Active accounts' month-end balances in their own currency (null before they opened). */
+  accounts: {
+    id: string
+    name: string
+    currency: 'CZK' | 'EUR' | 'USD'
+    balances: (number | null)[]
+  }[]
+  /** This month per category against the average of the previous 5 or 11 months. */
+  comparison: Record<
+    6 | 12,
+    {
+      monthsInAverage: number
+      categories: {
+        id: string
+        name: string
+        total: number
+        average: number | null
+      }[]
+    }
+  >
+}
+
+export async function insightsData(userId: string): Promise<InsightsData> {
+  const db = getDb()
+  const today = todayInPrague()
+  const current = monthOf(today)
+  const [accounts, categories, transactions, values, book] = await Promise.all([
+    listAccounts(db, userId),
+    listCategories(db, userId),
+    listTransactions(db, userId),
+    listMonthValues(db, userId),
+    loadRateBook(db),
+  ])
+  const firstOpened = accounts.reduce<string | null>(
+    (first, a) =>
+      first === null || monthOf(a.openedOn) < first
+        ? monthOf(a.openedOn)
+        : first,
+    null,
+  )
+  let from = addMonths(current, -11)
+  if (firstOpened && firstOpened > from)
+    from = firstOpened <= current ? firstOpened : current
+  const months = monthsBetween(from, current)
+  const range = { from, to: current, today }
+  const series = computeMonthEndBalances(
+    accounts,
+    transactions,
+    values,
+    book,
+    range,
+  )
+  const netWorth = computeNetWorth(series, months).map((m) => ({
+    month: m.month,
+    total: m.totalCzk,
+    cash: m.byGroup.cash,
+    investments: m.byGroup.investments,
+    debt: m.byGroup.debt,
+    carried: m.carried,
+    estimated: m.estimated,
+    missingRate: m.missingRate,
+  }))
+  const flows = computeMonthlyFlows(accounts, transactions, book, months).map(
+    (f) => ({
+      month: f.month,
+      spent: f.spentCzk,
+      income: f.incomeCzk,
+      estimated: f.estimated,
+      missingRate: f.missingRate,
+    }),
+  )
+  const nameOf = new Map(categories.map((c) => [c.id, c.name]))
+  const compare = (previousMonths: number) => {
+    const report = computeSpending(accounts, transactions, book, {
+      month: current,
+      previousMonths,
+    })
+    return {
+      monthsInAverage: report.monthsInAverage,
+      categories: report.categories.map((c) => ({
+        id: c.categoryId,
+        name: nameOf.get(c.categoryId) ?? '',
+        total: c.totalCzk,
+        average: c.averageCzk,
+      })),
+    }
+  }
+  return {
+    today,
+    months,
+    netWorth,
+    flows,
+    accounts: series
+      .filter(({ account }) => !account.archived)
+      .sort((a, b) => a.account.name.localeCompare(b.account.name, 'cs'))
+      .map(({ account, months: accountMonths }) => ({
+        id: account.id,
+        name: account.name,
+        currency: account.currency,
+        balances: months.map(
+          (m) => accountMonths.find((x) => x.month === m)?.minor ?? null,
+        ),
+      })),
+    comparison: { 6: compare(5), 12: compare(11) },
+  }
 }

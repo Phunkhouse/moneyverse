@@ -4,10 +4,13 @@ import {
   CURRENCIES,
   currencySymbol,
   formatAmount,
+  formatCompact,
   formatDate,
   formatDayLong,
   formatDayShort,
+  formatMonthLong,
   formatMonthName,
+  formatMonthShort,
   formatMoney,
   formatMonth,
   todayInPrague,
@@ -72,6 +75,13 @@ describe('formatAmount', () => {
   })
 })
 
+describe('formatCompact', () => {
+  it('shortens axis labels the Czech way', () => {
+    expect(plain(formatCompact(123_456_700, 'CZK'))).toBe('1,2 mil. Kč')
+    expect(plain(formatCompact(0, 'CZK'))).toBe('0 Kč')
+  })
+})
+
 describe('dates', () => {
   it('formats a day as 26. 11. 2026', () => {
     expect(plain(formatDate('2026-11-26'))).toBe('26. 11. 2026')
@@ -83,6 +93,8 @@ describe('dates', () => {
     expect(formatMonth('2026-11-26')).toBe('listopad 2026')
     expect(plain(formatDayShort('2026-11-26'))).toBe('čt 26. listopadu')
     expect(formatMonthName('2026-10')).toBe('Říjen')
+    expect(formatMonthShort('2026-11')).toBe('lis')
+    expect(formatMonthLong('2026-11')).toBe('Listopad 2026')
   })
 
   it('rejects days that do not exist', () => {

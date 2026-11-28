@@ -1,12 +1,18 @@
 import Link from 'next/link'
 import { connection } from 'next/server'
 import { Suspense } from 'react'
-import { Banner, Card, EmptyState } from '@/ui/kit/index.ts'
+import { Banner, Card, EmptyState, Money } from '@/ui/kit/index.ts'
 import { HomeIcon, ListIcon } from '@/ui/kit/icons.tsx'
 import iconButton from '@/ui/kit/IconButton.module.scss'
 import { formatDayLong, formatMonthName, todayInPrague } from '@/ui/format.ts'
 import { cs } from '@/ui/messages.ts'
-import { monthValuesData, transactionItems } from '../_lib/money.ts'
+import {
+  insightsData,
+  monthValuesData,
+  transactionItems,
+} from '../_lib/money.ts'
+import { PairedBars } from '@/ui/charts/Chart.tsx'
+import { NetWorthHero } from './_insights/NetWorthHero.tsx'
 import { MonthValuesButton } from './_values/MonthValues.tsx'
 import { requireUser } from '../_lib/session.ts'
 import { TransactionList } from './_quickadd/TransactionList.tsx'
@@ -37,6 +43,9 @@ export default function OverviewPage() {
     >
       <Suspense fallback={null}>
         <ValuesReminder />
+      </Suspense>
+      <Suspense fallback={null}>
+        <Dashboard />
       </Suspense>
       <Suspense fallback={<p className={styles.muted}>{cs.common.loading}</p>}>
         <Recent />
@@ -83,6 +92,53 @@ async function ValuesReminder() {
     >
       {cs.values.due(formatMonthName(data.months[0]), data.dueCount)}
     </Banner>
+  )
+}
+
+/** Net worth and this month's spending (W-6); nothing until the first account exists. */
+async function Dashboard() {
+  const user = await requireUser()
+  const data = await insightsData(user.id)
+  if (data.accounts.length === 0) return null
+  const month = data.months.at(-1)!
+  const spending = data.comparison[6]
+  const spent = data.flows.at(-1)?.spent ?? 0
+  return (
+    <>
+      <NetWorthHero data={data} />
+      <Card
+        title={cs.charts.spentIn(formatMonthName(month))}
+        action={<Link href="/grafy">{cs.charts.seeCharts}</Link>}
+      >
+        <div className={styles.spent}>
+          <span className={styles.figure}>
+            <Money minor={spent} currency="CZK" />
+          </span>
+          {spending.monthsInAverage > 0 && (
+            <span className={styles.muted}>
+              {cs.charts.average(spending.monthsInAverage)}
+            </span>
+          )}
+        </div>
+        {spending.categories.length === 0 ? (
+          <p className={styles.muted}>{cs.charts.noSpending}</p>
+        ) : (
+          <PairedBars
+            currency="CZK"
+            names={[
+              formatMonthName(month),
+              cs.charts.average(spending.monthsInAverage),
+            ]}
+            rows={spending.categories.slice(0, 4).map((c) => ({
+              id: c.id,
+              label: c.name,
+              a: c.total,
+              b: c.average,
+            }))}
+          />
+        )}
+      </Card>
+    </>
   )
 }
 
