@@ -462,6 +462,20 @@ export async function deleteTransaction(db: Db, userId: string, id: string) {
   return deleted
 }
 
+export async function getTransaction(db: Db, userId: string, id: string) {
+  const [found] = await db
+    .select()
+    .from(moneyTransaction)
+    .where(
+      and(
+        eq(moneyTransaction.id, assertId(id, 'id')),
+        eq(moneyTransaction.userId, userId),
+      ),
+    )
+  if (!found) throw new MoneyError('NOT_FOUND', 'Transaction not found')
+  return found
+}
+
 export async function listTransactions(db: Db, userId: string) {
   return db
     .select()

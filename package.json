@@ -16,6 +16,7 @@
     "format:check": "prettier --check .",
     "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "test": "vitest run",
+    "e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "invite:create": "node --env-file-if-exists=.env.local scripts/invite.ts",
@@ -33,6 +34,8 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.1",
+    "@playwright/test": "^1.65.1",
     "@types/node": "^26.6.10",
     "@types/react": "^19",
     "@types/react-dom": "^19",

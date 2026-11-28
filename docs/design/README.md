@@ -32,6 +32,11 @@ All in the prototype: Přehled (dashboard with net worth hero), Rychlé zadání
 
 None open.
 
+## Differences from the prototype (proposal, owner to confirm)
+
+- **Text contrast** (PR #7): the tertiary ink is darker in light mode (`#6c6689`, was `#8f8aa8`) and lighter in dark mode (`#928daf`, was `#827ca3`), and accent text on the soft accent background is mixed 20 % towards the ink. The prototype's values were below WCAG AA (4.5:1) for small text, which the axe checks enforce.
+- **Quick add currency preview** (PR #7): the prototype showed "≈ … Kč" while typing a EUR or USD amount and pre-filled the arriving amount of a cross-currency transfer. Conversions happen only on the server (ADR 0003), so the sheet asks for the arriving amount instead and the list shows the converted value after saving.
+
 ## Decided
 
 - **Plán tab in the MVP** (owner, 2026-11-27): shown as "coming later". The tab stays in the navigation; it opens a short screen saying budgets and the payment calendar are coming, without sample data or controls. It becomes the real screen when R-14 or R-15 is built.

@@ -91,7 +91,7 @@ AC-10 (budget overspending, R-14) and AC-11 (recurring payments, R-15, R-16) bel
 | Language | Czech only: a typed message catalogue plus `Intl` formatters for `cs-CZ`; no i18n library yet | decided by the owner, 2026-11-26 |
 | PWA | Web manifest and icons only; a service worker waits for offline entry (R-5) | decided by the owner, 2026-11-26 |
 | Exchange rates | ČNB JSON API, fetched daily by Vercel Cron, stored per day | decided, [ADR 0005](decisions/0005-ledger-data-model.md) |
-| Tests | Vitest, with database tests on a migrated libSQL file each; Playwright with axe from the quick-add flow on | Vitest in use; Playwright a proposal |
+| Tests | Vitest, with database tests on a migrated libSQL file each; Playwright with axe from the quick-add flow on | Both in use; Playwright and axe since PR #7 (`pnpm e2e`, CI job `e2e`) |
 | Checks | `pnpm verify` locally; the `check` job in CI on every PR | decided, see `AGENTS.md` |
 
 The starter pack revision, profile and recipes are recorded in the Governance section of `AGENTS.md`.

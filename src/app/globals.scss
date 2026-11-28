@@ -13,7 +13,8 @@
   --line: #2e2950;
   --ink: #f1eefc;
   --ink-2: #b3add0;
-  --ink-3: #827ca3;
+  // #827ca3 in the prototype; lighter for WCAG AA contrast (4.5:1) on the dark surfaces.
+  --ink-3: #928daf;
   --accent: #a48bff;
   --accent-ink: #ffffff;
   --accent-soft: #2a2350;
@@ -68,7 +69,8 @@
   --line: #e4e0f3;
   --ink: #16122b;
   --ink-2: #5b5675;
-  --ink-3: #8f8aa8;
+  // #8f8aa8 in the prototype; darker for WCAG AA contrast (4.5:1) on the light surfaces.
+  --ink-3: #6c6689;
 
   // Roles
   --accent: #6d4dff;
