@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { IMPORT_MAX_BYTES } from './src/server/money/limits.ts'
 
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -28,7 +29,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   experimental: {
     // Imports of an export file (AC-13) arrive through a server action; about ten years of data.
-    serverActions: { bodySizeLimit: '5mb' },
+    serverActions: { bodySizeLimit: IMPORT_MAX_BYTES },
   },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]

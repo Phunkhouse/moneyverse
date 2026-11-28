@@ -8,6 +8,9 @@ import { ImportForm } from './ImportForm.tsx'
 
 export const metadata: Metadata = { title: cs.data.title }
 
+// The import action runs here; a large file may take a while against Turso.
+export const maxDuration = 60
+
 // Static: the download route and the import action each check the session themselves.
 export default function DataPage() {
   return (

@@ -2,25 +2,29 @@
 // and version, amounts in minor units with their currency, and no user ids, sessions or rates:
 // it is the user's own data and nothing else. Import goes into an empty ledger only, all or
 // nothing, with fresh ids and every row checked by the same ledger rules as the screens.
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import type { Db } from '../db/client.ts'
-import { category, moneyAccount } from '../db/schema.ts'
+import {
+  category,
+  moneyAccount,
+  moneyTransaction,
+  monthValue,
+} from '../db/schema.ts'
 import { isDay, isMonth } from './calendar.ts'
 import {
   createAccount,
   createCategory,
-  createTransaction,
   listAccounts,
   listCategories,
   listMonthValues,
   listTransactions,
-  setMonthValue,
-  type TransactionInput,
+  optionalText,
 } from './ledger.ts'
 import {
   ACCOUNT_TYPES,
   CURRENCIES,
   MoneyError,
+  VALUE_TRACKED,
   type AccountType,
   type Currency,
 } from './types.ts'
@@ -260,7 +264,7 @@ export function parseExportFile(text: string): ExportFile {
   return {
     format: FILE_FORMAT,
     version: FILE_VERSION,
-    exportedAt: typeof root.exportedAt === 'string' ? root.exportedAt : '',
+    exportedAt: str(root.exportedAt, 'exportedAt'),
     accounts,
     categories,
     transactions,
@@ -277,32 +281,59 @@ export type ImportSummary = {
   monthValues: number
 }
 
+/** Thrown when the user already has data: the only reason an import is refused for state. */
+export class LedgerNotEmptyError extends MoneyError {
+  constructor() {
+    super('CONFLICT', 'Import needs an empty ledger')
+    this.name = 'LedgerNotEmptyError'
+  }
+}
+
+/** Rows per insert statement: few round trips to Turso, well under SQLite's parameter limit. */
+const BATCH = 100
+
+async function insertInBatches<T>(
+  rows: T[],
+  insert: (batch: T[]) => Promise<unknown>,
+) {
+  for (let i = 0; i < rows.length; i += BATCH)
+    await insert(rows.slice(i, i + BATCH))
+}
+
 /**
  * Imports a parsed file into the user's ledger, which must be empty (no accounts, categories or
- * transactions), so an import never mixes with or doubles existing data. Runs in one database
- * transaction: any invalid row rolls everything back.
+ * transactions), so an import never mixes with or doubles existing data. Everything, including
+ * that check, runs in one database transaction: a second import started at the same time waits
+ * and then finds the data, and any invalid row rolls everything back.
+ *
+ * Accounts and categories go through the ledger functions. Transactions and monthly values are
+ * checked here in memory against the same rules (the database constraints check them again) and
+ * written in batches, because one query per row is thousands of round trips to Turso.
  */
 export async function importLedger(
   db: Db,
   userId: string,
   file: ExportFile,
 ): Promise<ImportSummary> {
-  const [accounts, categories, transactions] = await Promise.all([
-    listAccounts(db, userId),
-    listCategories(db, userId),
-    listTransactions(db, userId),
-  ])
-  if (accounts.length || categories.length || transactions.length) {
-    throw new MoneyError('CONFLICT', 'Import needs an empty ledger')
-  }
   return db.transaction(async (tx) => {
     // The transaction handle has the same query API as the database; the ledger functions only
     // use that API.
     const t = tx as unknown as Db
-    const accountIds = new Map<string, string>()
-    const categoryIds = new Map<string, string>()
+    const [accounts, categories, transactions] = await Promise.all([
+      listAccounts(t, userId),
+      listCategories(t, userId),
+      listTransactions(t, userId),
+    ])
+    if (accounts.length || categories.length || transactions.length) {
+      throw new LedgerNotEmptyError()
+    }
+
     // Everything is created active first: archived accounts and categories take no new
     // transactions (ADR 0005). Archiving is restored at the end.
+    const accountMap = new Map<
+      string,
+      { id: string; currency: Currency; type: AccountType }
+    >()
     for (const a of file.accounts) {
       const created = await createAccount(t, userId, {
         name: a.name,
@@ -311,65 +342,147 @@ export async function importLedger(
         openingBalanceMinor: a.openingBalanceMinor,
         openedOn: a.openedOn,
       })
-      accountIds.set(a.id, created.id)
-    }
-    for (const c of file.categories) {
-      const created = await createCategory(t, userId, {
-        kind: c.kind,
-        name: c.name,
+      accountMap.set(a.id, {
+        id: created.id,
+        currency: created.currency,
+        type: created.type,
       })
-      categoryIds.set(c.id, created.id)
     }
-    for (const x of file.transactions) {
-      const common = {
-        date: x.date,
-        accountId: accountIds.get(x.accountId)!,
-        amountMinor: x.amountMinor,
-        what: x.what,
-        note: x.note,
+    const categoryMap = new Map<
+      string,
+      { id: string; kind: 'expense' | 'income' }
+    >()
+    for (const c of file.categories) {
+      try {
+        const created = await createCategory(t, userId, {
+          kind: c.kind,
+          name: c.name,
+        })
+        categoryMap.set(c.id, { id: created.id, kind: created.kind })
+      } catch (error) {
+        // Two categories whose names match ignoring case: a problem with the file, not the ledger.
+        if (error instanceof MoneyError && error.code === 'CONFLICT') {
+          throw new MoneyError(
+            'INVALID',
+            `Not a valid export file: repeated category "${c.name}"`,
+          )
+        }
+        throw error
       }
-      const input: TransactionInput =
-        x.kind === 'transfer'
-          ? {
-              ...common,
-              kind: 'transfer',
-              toAccountId: accountIds.get(x.toAccountId ?? '') ?? '',
-              toAmountMinor: x.toAmountMinor ?? undefined,
-            }
-          : {
-              ...common,
-              kind: x.kind,
-              categoryId: categoryIds.get(x.categoryId ?? '') ?? '',
-            }
-      // A fresh id: the file's ids may already exist in this database (another user, a restore).
-      await createTransaction(t, userId, crypto.randomUUID(), input)
     }
-    for (const v of file.monthValues) {
-      await setMonthValue(t, userId, {
-        accountId: accountIds.get(v.accountId)!,
+
+    const transactionRows = file.transactions.map((x, i) => {
+      const where = `transactions[${i}]`
+      const bad = (what: string) =>
+        new MoneyError('INVALID', `${where}: ${what}`)
+      if (x.amountMinor <= 0) throw bad('amountMinor must be positive')
+      const from = accountMap.get(x.accountId)!
+      const row = {
+        id: crypto.randomUUID(),
+        userId,
+        kind: x.kind,
+        date: x.date,
+        accountId: from.id,
+        amountMinor: x.amountMinor,
+        what: optionalText(x.what, `${where}.what`),
+        note: optionalText(x.note, `${where}.note`),
+      }
+      if (x.kind === 'transfer') {
+        if (x.categoryId !== null) throw bad('a transfer has no category')
+        const to =
+          x.toAccountId === null ? undefined : accountMap.get(x.toAccountId)
+        if (!to) throw bad('a transfer needs a target account')
+        if (to.id === from.id)
+          throw bad('a transfer needs two different accounts')
+        let toAmountMinor = x.amountMinor
+        if (to.currency !== from.currency) {
+          if (x.toAmountMinor === null || x.toAmountMinor <= 0) {
+            throw bad('toAmountMinor must be positive across currencies')
+          }
+          toAmountMinor = x.toAmountMinor
+        } else if (
+          x.toAmountMinor !== null &&
+          x.toAmountMinor !== x.amountMinor
+        ) {
+          throw bad('same-currency transfers move one amount')
+        }
+        return {
+          ...row,
+          categoryId: null,
+          categoryKind: null,
+          toAccountId: to.id,
+          toAmountMinor,
+        }
+      }
+      if (x.toAccountId !== null || x.toAmountMinor !== null)
+        throw bad('only a transfer has a target')
+      const cat =
+        x.categoryId === null ? undefined : categoryMap.get(x.categoryId)
+      if (!cat) throw bad('categoryId is required')
+      if (cat.kind !== x.kind)
+        throw bad(`an ${x.kind} needs an ${x.kind} category`)
+      return {
+        ...row,
+        categoryId: cat.id,
+        categoryKind: cat.kind,
+        toAccountId: null,
+        toAmountMinor: null,
+      }
+    })
+    await insertInBatches(transactionRows, (batch) =>
+      t.insert(moneyTransaction).values(batch),
+    )
+
+    const seenMonths = new Set<string>()
+    const valueRows = file.monthValues.map((v, i) => {
+      const account = accountMap.get(v.accountId)!
+      if (!VALUE_TRACKED.has(account.type)) {
+        throw new MoneyError(
+          'INVALID',
+          `monthValues[${i}]: only investment accounts take monthly values`,
+        )
+      }
+      const key = `${account.id}:${v.month}`
+      if (seenMonths.has(key))
+        throw new MoneyError('INVALID', `monthValues[${i}]: repeated month`)
+      seenMonths.add(key)
+      return {
+        id: crypto.randomUUID(),
+        userId,
+        accountId: account.id,
         month: v.month,
         valueMinor: v.valueMinor,
-      })
-    }
-    for (const a of file.accounts.filter((a) => a.archived)) {
+      }
+    })
+    await insertInBatches(valueRows, (batch) =>
+      t.insert(monthValue).values(batch),
+    )
+
+    const archivedAccounts = file.accounts
+      .filter((a) => a.archived)
+      .map((a) => accountMap.get(a.id)!.id)
+    if (archivedAccounts.length) {
       await t
         .update(moneyAccount)
         .set({ archived: true })
         .where(
           and(
-            eq(moneyAccount.id, accountIds.get(a.id)!),
             eq(moneyAccount.userId, userId),
+            inArray(moneyAccount.id, archivedAccounts),
           ),
         )
     }
-    for (const c of file.categories.filter((c) => c.archived)) {
+    const archivedCategories = file.categories
+      .filter((c) => c.archived)
+      .map((c) => categoryMap.get(c.id)!.id)
+    if (archivedCategories.length) {
       await t
         .update(category)
         .set({ archived: true })
         .where(
           and(
-            eq(category.id, categoryIds.get(c.id)!),
             eq(category.userId, userId),
+            inArray(category.id, archivedCategories),
           ),
         )
     }

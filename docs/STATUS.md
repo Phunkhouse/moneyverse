@@ -43,7 +43,7 @@ After PR #12 is merged:
 ## Last verified
 
 - **Commands:**
-  - `pnpm verify` passed: format:check, lint, typecheck, 157 tests and the build.
+  - `pnpm verify` passed: format:check, lint, typecheck, 161 tests and the build, including the PR #12 review fixes; a local import of 15 000 rows took 0.7 s.
   - `pnpm e2e` passed: 39 tests, including AC-13 (download, import into a second empty invented user, refusal when not empty, refusal of a foreign file, 401 for a forged session) and axe on `/data`.
 - **Revision:** branch `feat/export-import` on `main` at `dc93193`, changes uncommitted at the time.
 - **Working tree:** the PR #12 changes only.

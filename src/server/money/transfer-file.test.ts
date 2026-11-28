@@ -13,7 +13,13 @@ import {
   updateCategory,
 } from './ledger.ts'
 import { monthEndBalances } from './reports.ts'
-import { exportLedger, importLedger, parseExportFile } from './transfer-file.ts'
+import {
+  exportLedger,
+  importLedger,
+  LedgerNotEmptyError,
+  parseExportFile,
+  type ExportFile,
+} from './transfer-file.ts'
 
 // Invented data only (public repository).
 let db: Db
@@ -164,16 +170,107 @@ describe('export and re-import (AC-13)', () => {
   it('refuses to import into a ledger that already has data', async () => {
     await seed(me)
     const file = await exportLedger(db, me)
-    await expect(importLedger(db, me, file)).rejects.toMatchObject({
-      code: 'CONFLICT',
-    })
+    await expect(importLedger(db, me, file)).rejects.toBeInstanceOf(
+      LedgerNotEmptyError,
+    )
   })
+
+  it('imports once when two imports start at the same time', async () => {
+    await seed(me)
+    const file = await exportLedger(db, me)
+    const results = await Promise.allSettled([
+      importLedger(db, other, file),
+      importLedger(db, other, file),
+    ])
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1)
+    expect(await listAccounts(db, other)).toHaveLength(4)
+    expect(await listTransactions(db, other)).toHaveLength(4)
+  })
+
+  it('reports a repeated category name as a bad file, not as existing data', async () => {
+    await seed(me)
+    const file = await exportLedger(db, me)
+    file.categories.push({
+      ...file.categories[0],
+      id: 'copy',
+      name: file.categories[0].name.toUpperCase(),
+    })
+    const error = await importLedger(db, other, file).catch((e: unknown) => e)
+    expect(error).not.toBeInstanceOf(LedgerNotEmptyError)
+    expect(error).toMatchObject({
+      code: 'INVALID',
+      message: expect.stringContaining('repeated category'),
+    })
+    expect(await listAccounts(db, other)).toEqual([])
+  })
+
+  it('applies the transfer rules to imported rows', async () => {
+    await seed(me)
+    const file = await exportLedger(db, me)
+    const bankId = file.accounts.find((a) => a.name === 'Běžný účet')!.id
+    const oldId = file.accounts.find((a) => a.name === 'Starý účet')!.id
+    file.transactions.push({
+      id: 'x',
+      kind: 'transfer',
+      date: '2026-10-05',
+      accountId: bankId,
+      amountMinor: 1_000,
+      categoryId: null,
+      toAccountId: oldId,
+      toAmountMinor: 999,
+      what: null,
+      note: null,
+    })
+    await expect(importLedger(db, other, file)).rejects.toThrow('one amount')
+  })
+
+  it('imports ten years of entries in batches, quickly', async () => {
+    const bank = await createAccount(db, me, {
+      name: 'Běžný účet',
+      type: 'checking',
+      currency: 'CZK',
+      openedOn: '2016-01-01',
+      openingBalanceMinor: 100_000_000,
+    })
+    const food = await createCategory(db, me, {
+      kind: 'expense',
+      name: 'Jídlo',
+    })
+    const file: ExportFile = {
+      ...(await exportLedger(db, me)),
+      transactions: Array.from({ length: 15_000 }, (_, i) => ({
+        id: `t${i}`,
+        kind: 'expense' as const,
+        date: `20${16 + Math.floor(i / 1500)}-0${1 + (i % 9)}-1${i % 9}`,
+        accountId: bank.id,
+        amountMinor: 100 + (i % 5_000),
+        categoryId: food.id,
+        toAccountId: null,
+        toAmountMinor: null,
+        what: null,
+        note: null,
+      })),
+    }
+    const started = performance.now()
+    const summary = await importLedger(
+      db,
+      other,
+      parseExportFile(JSON.stringify(file)),
+    )
+    const seconds = (performance.now() - started) / 1000
+    console.log(`Imported 15 000 transactions in ${seconds.toFixed(2)} s`)
+    expect(summary.transactions).toBe(15_000)
+    expect(await listTransactions(db, other)).toHaveLength(15_000)
+    // About 150 insert statements instead of some 60 000 queries; a generous bound for slow CI.
+    expect(seconds).toBeLessThan(20)
+  }, 60_000)
 
   it('writes nothing when one row is invalid', async () => {
     await seed(me)
     const file = await exportLedger(db, me)
     file.transactions[2].amountMinor = 0
     await expect(importLedger(db, other, file)).rejects.toThrow('positive')
+    expect((await listAccounts(db, other)).length).toBe(0)
     expect(await listAccounts(db, other)).toEqual([])
     expect(await listCategories(db, other)).toEqual([])
     expect(await listTransactions(db, other)).toEqual([])
@@ -190,6 +287,9 @@ describe('export and re-import (AC-13)', () => {
     expect(() => parseExportFile('{')).toThrow('not JSON')
     expect(() => parseExportFile(broken((f) => (f.format = 'other')))).toThrow(
       'format',
+    )
+    expect(() => parseExportFile(broken((f) => delete f.exportedAt))).toThrow(
+      'exportedAt',
     )
     expect(() => parseExportFile(broken((f) => (f.version = 2)))).toThrow(
       'version 2',

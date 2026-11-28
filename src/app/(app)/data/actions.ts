@@ -1,14 +1,16 @@
 'use server'
 
 import { refresh } from 'next/cache'
-import { importLedger, parseExportFile } from '@/server/money/transfer-file.ts'
+import { IMPORT_MAX_BYTES } from '@/server/money/limits.ts'
+import {
+  importLedger,
+  LedgerNotEmptyError,
+  parseExportFile,
+} from '@/server/money/transfer-file.ts'
 import { MoneyError } from '@/server/money/types.ts'
 import { cs } from '@/ui/messages.ts'
 import { getDb } from '../../_lib/db.ts'
 import { requireUser } from '../../_lib/session.ts'
-
-/** Keep in step with `serverActions.bodySizeLimit` in next.config.ts. */
-const MAX_BYTES = 5 * 1024 * 1024
 
 export type ImportState =
   | { status: 'idle' }
@@ -25,20 +27,21 @@ export async function importAction(
   if (!(file instanceof File) || file.size === 0) {
     return { status: 'error', message: cs.data.noFile }
   }
-  if (file.size > MAX_BYTES)
+  if (file.size > IMPORT_MAX_BYTES) {
     return { status: 'error', message: cs.data.tooLarge }
+  }
   try {
     const parsed = parseExportFile(await file.text())
     const summary = await importLedger(getDb(), user.id, parsed)
     refresh()
     return { status: 'ok', message: cs.data.imported(summary) }
   } catch (error) {
+    // Only "the ledger already has data" is about the app; everything else is about the file.
+    if (error instanceof LedgerNotEmptyError) {
+      return { status: 'error', message: cs.data.notEmpty }
+    }
     if (error instanceof MoneyError) {
-      return {
-        status: 'error',
-        message:
-          error.code === 'CONFLICT' ? cs.data.notEmpty : cs.data.invalidFile,
-      }
+      return { status: 'error', message: cs.data.invalidFile }
     }
     console.error(
       'Import failed:',
