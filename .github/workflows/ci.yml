@@ -28,3 +28,25 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm run --if-present test
       - run: pnpm build
+
+  # End-to-end flows and axe (AC-1, AC-3, AC-4) against a production build with invented data.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+      # Only invented data from e2e/global-setup.ts can appear in the report (public repository).
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

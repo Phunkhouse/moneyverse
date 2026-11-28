@@ -2,7 +2,11 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
-import { accountsWithBalances, todayInPrague } from '@/app/_lib/money.ts'
+import {
+  accountsWithBalances,
+  todayInPrague,
+  transactionItems,
+} from '@/app/_lib/money.ts'
 import { requireUser } from '@/app/_lib/session.ts'
 import { Card, EmptyState, Money, Pill } from '@/ui/kit/index.ts'
 import { BackIcon, ListIcon } from '@/ui/kit/icons.tsx'
@@ -10,6 +14,7 @@ import { cs } from '@/ui/messages.ts'
 import { Screen } from '../../_shell/Screen.tsx'
 import styles from '../accounts.module.scss'
 import { openingForForm } from '../view.ts'
+import { TransactionList } from '../../_quickadd/TransactionList.tsx'
 import { AccountActions } from './AccountActions.tsx'
 
 export const metadata: Metadata = { title: cs.accounts.detailTitle }
@@ -43,9 +48,12 @@ async function AccountDetail({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser()
   const { id } = await params
   // Only the signed-in user's accounts are loaded, so another user's id is simply not found.
-  const item = (await accountsWithBalances(user.id)).find(
-    (i) => i.account.id === id,
-  )
+  // Only the signed-in user's rows are loaded, so another user's id is simply not found.
+  const [all, items] = await Promise.all([
+    accountsWithBalances(user.id),
+    transactionItems(user.id, { accountId: id }),
+  ])
+  const item = all.find((i) => i.account.id === id)
   if (!item) notFound()
   const { account, balance } = item
   const valueTracked = VALUE_TRACKED.has(account.type)
@@ -104,18 +112,26 @@ async function AccountDetail({ params }: { params: Promise<{ id: string }> }) {
           />
         </div>
       </Card>
-      <Card>
-        <EmptyState
-          icon={<ListIcon />}
-          title={
-            valueTracked
-              ? cs.accounts.valuesTitle
-              : cs.accounts.transactionsTitle
-          }
-        >
-          {valueTracked ? cs.accounts.valueTracked : cs.accounts.noTransactions}
-        </EmptyState>
-      </Card>
+      {valueTracked ? (
+        <Card>
+          <EmptyState icon={<ListIcon />} title={cs.accounts.valuesTitle}>
+            {cs.accounts.valueTracked}
+          </EmptyState>
+        </Card>
+      ) : (
+        <Card title={cs.accounts.transactionsTitle}>
+          {items.length === 0 ? (
+            <p className={styles.muted}>{cs.accounts.noTransactions}</p>
+          ) : (
+            <TransactionList
+              items={items}
+              today={todayInPrague()}
+              accountId={account.id}
+              grouped
+            />
+          )}
+        </Card>
+      )}
     </>
   )
 }

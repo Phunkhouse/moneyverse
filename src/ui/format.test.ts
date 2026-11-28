@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { CURRENCIES as SERVER_CURRENCIES } from '../server/money/types.ts'
 import {
   CURRENCIES,
+  currencySymbol,
   formatDate,
   formatDayLong,
+  formatDayShort,
   formatMoney,
   formatMonth,
   todayInPrague,
@@ -68,6 +70,7 @@ describe('dates', () => {
   it('formats long days and months in Czech', () => {
     expect(formatDayLong('2026-11-26')).toBe('Čtvrtek 26. listopadu')
     expect(formatMonth('2026-11-26')).toBe('listopad 2026')
+    expect(plain(formatDayShort('2026-11-26'))).toBe('čt 26. listopadu')
   })
 
   it('rejects days that do not exist', () => {
@@ -84,6 +87,14 @@ describe('dates', () => {
 })
 
 describe('currencies', () => {
+  it('shows the same symbols as formatMoney', () => {
+    for (const currency of CURRENCIES) {
+      expect(plain(formatMoney(100, currency))).toContain(
+        currencySymbol(currency),
+      )
+    }
+  })
+
   it('matches the money rules in src/server', () => {
     expect([...CURRENCIES]).toEqual([...SERVER_CURRENCIES])
   })

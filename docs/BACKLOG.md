@@ -6,7 +6,6 @@ The single home for work not yet started, when the project keeps its backlog in 
 
 MVP build order, one PR at a time ([SPEC](SPEC.md#planning-and-open-questions)):
 
-- Quick add and transaction list with edit, delete and undo; Playwright and axe. AC-1, AC-3, AC-4. Then H-1.
 - Monthly investment values. AC-6, then H-4.
 - Dashboard and charts. AC-7, R-10 to R-12.
 - Export and re-import; PWA and phone checks. AC-13, AC-14. Check the installed app's launch screen in dark mode: the manifest's `background_color` and `theme_color` are the light `#f3f1fb`, and a manifest cannot follow the system theme (PR #4 review).

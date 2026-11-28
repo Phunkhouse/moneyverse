@@ -12,6 +12,7 @@ import {
   PlusIcon,
 } from '@/ui/kit/icons.tsx'
 import { cs } from '@/ui/messages.ts'
+import { useQuickAdd } from '../_quickadd/QuickAddProvider.tsx'
 import styles from './Nav.module.scss'
 
 type Item = { href: string; label: string; icon: ReactNode }
@@ -60,21 +61,24 @@ export function NavBar({ pathname }: { pathname: string | null }) {
         <Brand />
       </div>
       {before.map(link)}
-      <button
-        type="button"
-        className={styles.add}
-        aria-disabled="true"
-        aria-describedby="nav-add-soon"
-        title={cs.nav.addSoon}
-      >
-        <PlusIcon />
-        <span className={styles.addLabel}>{cs.nav.add}</span>
-      </button>
-      {/* Outside the button, so it describes the button without joining its name. */}
-      <span id="nav-add-soon" hidden>
-        {cs.nav.addSoon}
-      </span>
+      <AddButton />
       {after.map(link)}
     </nav>
+  )
+}
+
+/** The raised + (phones) or "Přidat transakci" (sidebar); waits until quick add has its data. */
+function AddButton() {
+  const { data, open } = useQuickAdd()
+  return (
+    <button
+      type="button"
+      className={styles.add}
+      aria-disabled={data ? undefined : 'true'}
+      onClick={() => data && open()}
+    >
+      <PlusIcon />
+      <span className={styles.addLabel}>{cs.nav.add}</span>
+    </button>
   )
 }

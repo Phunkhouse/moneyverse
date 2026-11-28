@@ -1,0 +1,20 @@
+.days {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.dayhead {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: var(--sp-3) 0 2px;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: var(--w-head);
+  color: var(--ink-2);
+
+  :last-child {
+    font-weight: var(--w-text);
+    color: var(--ink-3);
+  }
+}

@@ -65,6 +65,13 @@ export function formatMoney(
   return moneyFormat(currency, digits, signed).format(minorToDecimal(value))
 }
 
+const SYMBOLS: Record<Currency, string> = { CZK: 'Kč', EUR: '€', USD: 'US$' }
+
+/** The symbol cs-CZ shows for a currency: Kč, € or US$. */
+export function currencySymbol(currency: Currency): string {
+  return SYMBOLS[currency]
+}
+
 /** A calendar day as ISO `YYYY-MM-DD`; days carry no time zone. */
 export type IsoDate = `${number}-${number}-${number}`
 
@@ -107,6 +114,22 @@ export function formatDate(day: IsoDate): string {
 export function formatDayLong(day: IsoDate): string {
   const text = dateLong.format(parseIsoDate(day))
   return text.charAt(0).toLocaleUpperCase(LOCALE) + text.slice(1)
+}
+
+const dayShortWeekday = new Intl.DateTimeFormat(LOCALE, {
+  weekday: 'short',
+  timeZone: 'UTC',
+})
+const dayMonth = new Intl.DateTimeFormat(LOCALE, {
+  day: 'numeric',
+  month: 'long',
+  timeZone: 'UTC',
+})
+
+/** `2026-11-26` → "čt 26. listopadu", for day headings in lists. */
+export function formatDayShort(day: IsoDate): string {
+  const date = parseIsoDate(day)
+  return `${dayShortWeekday.format(date)} ${dayMonth.format(date)}`
 }
 
 /** `2026-11-26` → "listopad 2026". */

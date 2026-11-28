@@ -47,6 +47,7 @@ Node 26 (`.nvmrc`, `engines`) and pnpm (pinned in `packageManager`); run `nvm us
 - `pnpm format:check` (Prettier check; `pnpm format` writes), `pnpm lint` (ESLint, including the `src/server/` import boundary), `pnpm typecheck` (`next typegen && tsc --noEmit`).
 - `pnpm test`: Vitest. Database tests run on a fresh, migrated libSQL file each, so they need no services.
 - `pnpm verify`: runs `format:check`, `lint`, `typecheck`, `test` and `build` in order and changes no files.
+- `pnpm e2e`: Playwright with axe (`e2e/`) against a production build on port 3100 and the separate database `.data/e2e.db`, with an invented user and session from `e2e/global-setup.ts`. Needs Chromium once: `pnpm exec playwright install chromium`. CI runs it in the `e2e` job.
 - `pnpm db:generate`: writes a migration in `drizzle/` after a schema change (`src/server/db/schema.ts`). Never `drizzle-kit push` on real data.
 - `pnpm db:migrate`: applies the migrations to `DATABASE_URL` (default `file:.data/dev.db`).
 - `pnpm invite:create --email <email> --name <name>` (or `--existing`): creates a single-use invite and prints its link once (`.env.local` or the shell's environment).

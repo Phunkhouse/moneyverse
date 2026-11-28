@@ -15,7 +15,8 @@
 }
 
 .accent {
-  color: var(--accent);
+  // Slightly stronger than --accent so the small text keeps 4.5:1 on the soft background.
+  color: color-mix(in srgb, var(--accent) 80%, var(--ink));
   background: var(--accent-soft);
 }
 

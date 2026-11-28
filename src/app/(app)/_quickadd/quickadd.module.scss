@@ -1,0 +1,93 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.kind {
+  align-self: center;
+}
+
+.amount {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-3xl);
+  font-weight: var(--w-key);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+
+  .digits {
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+.income .digits {
+  background: linear-gradient(90deg, #10b981, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.currency {
+  font-size: var(--fs-xl);
+  font-weight: var(--w-head);
+  color: var(--ink-3);
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.label {
+  font-size: var(--fs-xs);
+  font-weight: var(--w-head);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.date {
+  min-height: 36px;
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  font-size: var(--fs-sm);
+}
+
+.inline {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-2);
+
+  > :first-child {
+    flex: 1;
+  }
+}
+
+.warn {
+  font-size: var(--fs-sm);
+  color: var(--neg);
+}
+
+.muted {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.foot {
+  display: flex;
+  gap: var(--sp-2);
+  position: sticky;
+  bottom: calc(-20px - env(safe-area-inset-bottom, 0px));
+  margin: 0 -20px calc(-20px - env(safe-area-inset-bottom, 0px));
+  padding: var(--sp-3) 20px calc(14px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}

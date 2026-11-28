@@ -80,6 +80,8 @@
 
     &[aria-current='page'] {
       background: var(--accent-soft);
+      // Stronger than --accent so the label keeps 4.5:1 on the soft background (WCAG AA).
+      color: color-mix(in srgb, var(--accent) 80%, var(--ink));
     }
   }
 }
@@ -103,9 +105,9 @@
     height: 26px;
   }
 
-  // Not built yet (quick add comes with the transactions PR): visible but inert.
+  // Until the user's accounts and categories have loaded (a moment after the page).
   &[aria-disabled='true'] {
-    cursor: not-allowed;
+    cursor: progress;
     filter: saturate(0.6);
   }
 

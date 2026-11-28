@@ -1,0 +1,56 @@
+@use '../styles/breakpoints' as bp;
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--bottom-bar) + 20px + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  max-width: calc(100% - 32px);
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-control);
+  background: rgba(20, 16, 40, 0.92);
+  color: #fff;
+  font-size: var(--fs-sm);
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  transform: translateX(-50%);
+  animation: in 0.2s ease;
+
+  @include bp.wide {
+    bottom: 28px;
+    left: calc(50% + var(--sidebar) / 2);
+  }
+}
+
+@keyframes in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+}
+
+.message {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.action {
+  flex: none;
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  color: #c4b5fd;
+  font-weight: var(--w-key);
+
+  &:focus-visible {
+    outline: 2px solid #c4b5fd;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
