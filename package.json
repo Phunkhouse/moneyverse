@@ -18,7 +18,8 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/db-migrate.ts",
+    "db:migrate:prod": "node scripts/db-migrate.ts --production",
     "invite:create": "node --env-file-if-exists=.env.local scripts/invite.ts",
     "icons:render": "node scripts/render-icons.ts",
     "rates:backfill": "node --env-file-if-exists=.env.local scripts/rates-backfill.ts"

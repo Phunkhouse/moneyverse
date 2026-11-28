@@ -1,7 +1,8 @@
 import { defineConfig } from 'drizzle-kit'
 
 // `pnpm db:generate` writes migrations from the schema; it needs no database.
-// `pnpm db:migrate` applies them to DATABASE_URL (with DATABASE_AUTH_TOKEN for Turso).
+// Migrations are applied by scripts/db-migrate.ts (`pnpm db:migrate`, `pnpm db:migrate:prod`), which
+// check the target first; do not run `drizzle-kit migrate` or `push` directly.
 export default defineConfig({
   dialect: 'turso',
   schema: './src/server/db/schema.ts',

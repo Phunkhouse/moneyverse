@@ -32,7 +32,7 @@ Done once by the owner; kept here for a rebuild or a move. Steps 2, 3, 5 and 7 w
    export BETTER_AUTH_SECRET="$(openssl rand -base64 32)" BETTER_AUTH_URL="https://money.david-krapka.eu"
    ```
 
-4. **Migrate:** `pnpm db:migrate`. Check that its `url:` line shows `libsql://moneyverse-…`. If it shows `file:.data/dev.db`, `DATABASE_URL` is not set in this shell and the migration went to the local file (this happened on the first try; the invite script then failed with `no such table: user`).
+4. **Migrate:** `pnpm db:migrate:prod`, in the same terminal as step 3. It refuses to run unless `DATABASE_URL` is a `libsql://` URL and `DATABASE_AUTH_TOKEN` is set, prints `Migrating PRODUCTION database: moneyverse-….turso.io`, and ends with `✓ N migrations applied; all … tables present.` (Since 2026-11-28. Before that, plain `pnpm db:migrate` silently migrated the local file when the variables were missing: on the first deploy, and again for PRs #5 and #6, which broke every screen after PR #7.)
 5. **Vercel:** import `Phunkhouse/moneyverse` (framework Next.js). Settings → Environment Variables, **Production** only: `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (copy each with `echo "$NAME"`, then clear the terminal). Settings → Domains: add the domain and create the CNAME record Vercel shows at the domain's DNS provider (with Cloudflare: DNS only, not proxied). Redeploy after setting the variables.
 6. **Check:** the site redirects to `/prihlaseni` and responses carry the security headers from `next.config.ts`.
 7. **Invite yourself** in the same terminal, open the link on the device that should hold the passkey, create it, and check you land signed in:
@@ -46,7 +46,7 @@ Done once by the owner; kept here for a rebuild or a move. Steps 2, 3, 5 and 7 w
 
 ## Deploy
 
-Merging to `main` deploys to production automatically. If the PR adds a file in `drizzle/`, run `pnpm db:migrate` against production (steps 3 and 4 of the first deploy, checking the `url:` line) **before** merging; the PR says so in an `IMPORTANT` block. Check a deploy by opening the site and signing in.
+Merging to `main` deploys to production automatically. If the PR adds a file in `drizzle/`, run `pnpm db:migrate:prod` (steps 3 and 4 of the first deploy) **before** merging and check that it ends with all tables present; the PR says so in an `IMPORTANT` block. Check a deploy by opening the site and signing in.
 
 ## Exchange rates
 
@@ -84,4 +84,6 @@ Not set up. Production holds only the owner's account and passkey, no financial 
 
 ## Incidents
 
-Not set up yet. Errors are in the Vercel project's logs. First checks: the site redirects to `/prihlaseni`; `/api/auth/get-session` answers; the Turso database is reachable.
+No alerting yet. Errors are in the Vercel project's logs; a screen that fails shows "Něco se pokazilo" with a code (`Kód chyby`) that matches the log entry's `digest`. First checks: the site redirects to `/prihlaseni`; `/api/auth/get-session` answers; the Turso database is reachable; `turso db shell moneyverse ".tables"` lists the tables in `src/server/db/target.ts`.
+
+- **2026-11-28, every app screen failed after PR #7:** `no such table: money_account`. The PR #5 and #6 migrations had gone to the local file because `DATABASE_URL` was not set in the terminal. Fixed by migrating Turso; prevented by `pnpm db:migrate:prod`, and a failing quick-add load no longer takes every page down.
