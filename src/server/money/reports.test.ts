@@ -11,6 +11,7 @@ import {
 } from './ledger.ts'
 import { loadRateBook } from './rates.ts'
 import {
+  computeMonthlyFlows,
   convertFromCzk,
   monthEndBalances,
   netWorthByMonth,
@@ -319,5 +320,59 @@ describe('foreign currency (AC-15)', () => {
       minor: 10_000,
       estimated: false,
     })
+  })
+})
+
+describe('monthly flows (R-12)', () => {
+  it('sums expenses and income per month in CZK, without transfers', async () => {
+    const bank = await account('checking', 1_000_000)
+    const eur = await account('checking', 0, 'EUR')
+    const savings = await account('savings')
+    const food = await createCategory(db, me, {
+      kind: 'expense',
+      name: 'Jídlo',
+    })
+    const pay = await createCategory(db, me, { kind: 'income', name: 'Mzda' })
+    await storeEurRate('2026-10-10', 25_000)
+    await save({
+      kind: 'expense',
+      date: '2026-10-10',
+      accountId: bank.id,
+      amountMinor: 10_000,
+      categoryId: food.id,
+    })
+    await save({
+      kind: 'expense',
+      date: '2026-10-10',
+      accountId: eur.id,
+      amountMinor: 1_000,
+      categoryId: food.id,
+    })
+    await save({
+      kind: 'income',
+      date: '2026-11-01',
+      accountId: bank.id,
+      amountMinor: 500_000,
+      categoryId: pay.id,
+    })
+    await save({
+      kind: 'transfer',
+      date: '2026-11-02',
+      accountId: bank.id,
+      amountMinor: 200_000,
+      toAccountId: savings.id,
+    })
+    const { listAccounts, listTransactions } = await import('./ledger.ts')
+    const flows = computeMonthlyFlows(
+      await listAccounts(db, me),
+      await listTransactions(db, me),
+      await loadRateBook(db),
+      ['2026-10', '2026-11'],
+    )
+    expect(flows.map((f) => [f.month, f.spentCzk, f.incomeCzk])).toEqual([
+      // 100 Kč + 10 EUR × 25 Kč
+      ['2026-10', 35_000, 0],
+      ['2026-11', 0, 500_000],
+    ])
   })
 })

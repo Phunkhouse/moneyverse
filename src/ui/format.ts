@@ -92,6 +92,26 @@ export function formatAmount(minor: number | bigint): string {
   )
 }
 
+const compactFormats = new Map<Currency, Intl.NumberFormat>()
+
+/** A short amount for chart axes: 123456700 → "1,2 mil. Kč". Never for exact values. */
+export function formatCompact(
+  minor: number | bigint,
+  currency: Currency,
+): string {
+  let format = compactFormats.get(currency)
+  if (!format) {
+    format = new Intl.NumberFormat(LOCALE, {
+      style: 'currency',
+      currency,
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    })
+    compactFormats.set(currency, format)
+  }
+  return format.format(minorToDecimal(BigInt(minor)))
+}
+
 /** A calendar day as ISO `YYYY-MM-DD`; days carry no time zone. */
 export type IsoDate = `${number}-${number}-${number}`
 
@@ -160,6 +180,22 @@ const monthNameFormat = new Intl.DateTimeFormat(LOCALE, {
 /** `2026-10` → "Říjen": a month's name on its own, capitalised, for labels. */
 export function formatMonthName(month: string): string {
   const text = monthNameFormat.format(parseIsoDate(`${month}-01` as IsoDate))
+  return text.charAt(0).toLocaleUpperCase(LOCALE) + text.slice(1)
+}
+
+const monthShortFormat = new Intl.DateTimeFormat(LOCALE, {
+  month: 'short',
+  timeZone: 'UTC',
+})
+
+/** `2026-11` → "lis", for chart axes. */
+export function formatMonthShort(month: string): string {
+  return monthShortFormat.format(parseIsoDate(`${month}-01` as IsoDate))
+}
+
+/** `2026-11` → "Listopad 2026", for chart tooltips. */
+export function formatMonthLong(month: string): string {
+  const text = monthYear.format(parseIsoDate(`${month}-01` as IsoDate))
   return text.charAt(0).toLocaleUpperCase(LOCALE) + text.slice(1)
 }
 

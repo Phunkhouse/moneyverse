@@ -17,3 +17,19 @@
   font-size: var(--fs-sm);
   color: var(--ink-3);
 }
+
+.spent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+}
+
+.figure {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: var(--w-key);
+  letter-spacing: -0.02em;
+}

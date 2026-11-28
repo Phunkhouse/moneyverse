@@ -287,3 +287,54 @@ export async function spendingByCategory(
   ])
   return computeSpending(accounts, transactions, book, options)
 }
+
+export type MonthFlow = {
+  month: Month
+  /** Expenses in CZK minor units (transfers never count). */
+  spentCzk: number
+  /** Income in CZK minor units. */
+  incomeCzk: number
+  estimated: boolean
+  missingRate: boolean
+}
+
+/** Expenses and income per month in CZK, at each transaction's day rate (R-12 trend). */
+export function computeMonthlyFlows(
+  accounts: Account[],
+  transactions: Transaction[],
+  book: RateBook,
+  months: Month[],
+): MonthFlow[] {
+  const currencyOf = new Map(accounts.map((a) => [a.id, a.currency]))
+  const byMonth = new Map(
+    months.map((month) => [
+      month,
+      { month, spent: 0n, income: 0n, estimated: false, missingRate: false },
+    ]),
+  )
+  for (const tx of transactions) {
+    if (tx.kind === 'transfer') continue
+    const entry = byMonth.get(monthOf(tx.date))
+    if (!entry) continue
+    const converted = convertToCzk(
+      book,
+      tx.amountMinor,
+      currencyOf.get(tx.accountId)!,
+      tx.date,
+    )
+    entry.estimated ||= converted.estimated
+    if (converted.czk === null) {
+      entry.missingRate = true
+      continue
+    }
+    if (tx.kind === 'expense') entry.spent += BigInt(converted.czk)
+    else entry.income += BigInt(converted.czk)
+  }
+  return [...byMonth.values()].map((e) => ({
+    month: e.month,
+    spentCzk: toSafeNumber(e.spent),
+    incomeCzk: toSafeNumber(e.income),
+    estimated: e.estimated,
+    missingRate: e.missingRate,
+  }))
+}

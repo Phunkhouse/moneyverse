@@ -2,6 +2,12 @@
 
 import { useState } from 'react'
 import { Brand, Mark } from '@/ui/brand/Brand.tsx'
+import {
+  ColumnChart,
+  Legend,
+  LineChart,
+  PairedBars,
+} from '@/ui/charts/Chart.tsx'
 import { formatDate, formatMoney } from '@/ui/format.ts'
 import {
   Banner,
@@ -284,6 +290,85 @@ export function KitGallery() {
             </Button>
           </div>
         </Sheet>
+      </section>
+
+      <section className={styles.section}>
+        <h2>Grafy</h2>
+        <div className={styles.grid}>
+          <Card title="Vrstvený graf s čárou">
+            <LineChart
+              label="Ukázkový vrstvený graf"
+              labels={['srp', 'zář', 'říj', 'lis']}
+              tipLabels={[
+                'Srpen 2026',
+                'Září 2026',
+                'Říjen 2026',
+                'Listopad 2026',
+              ]}
+              currency="CZK"
+              series={[
+                {
+                  name: 'Hotovost',
+                  color: 'var(--s1)',
+                  values: [8_000_000, 9_000_000, 8_500_000, 9_600_000],
+                  stack: true,
+                },
+                {
+                  name: 'Investice',
+                  color: 'var(--s2)',
+                  values: [20_000_000, 21_000_000, 22_500_000, 22_000_000],
+                  stack: true,
+                },
+                {
+                  name: 'Celkem',
+                  color: 'var(--ink)',
+                  values: [27_000_000, 29_000_000, 30_000_000, 30_600_000],
+                  dash: true,
+                },
+              ]}
+              extraRows={[
+                {
+                  name: 'Dluhy',
+                  values: [-1_000_000, -1_000_000, -1_000_000, -1_000_000],
+                },
+              ]}
+            />
+            <Legend
+              items={[
+                { name: 'Hotovost', color: 'var(--s1)' },
+                { name: 'Investice', color: 'var(--s2)' },
+                { name: 'Celkem', dash: true },
+              ]}
+            />
+          </Card>
+          <Card title="Sloupce s průměrem">
+            <ColumnChart
+              label="Ukázkové sloupce"
+              name="Výdaje"
+              labels={['srp', 'zář', 'říj', 'lis']}
+              tipLabels={[
+                'Srpen 2026',
+                'Září 2026',
+                'Říjen 2026',
+                'Listopad 2026',
+              ]}
+              currency="CZK"
+              values={[1_850_000, 2_100_000, 1_700_000, 1_200_000]}
+              reference={{ value: 1_883_333, label: 'Průměr 3 měsíců' }}
+            />
+          </Card>
+          <Card title="Dvojice pruhů">
+            <PairedBars
+              currency="CZK"
+              names={['Listopad', 'Průměr']}
+              rows={[
+                { id: 'a', label: 'Potraviny', a: 650_000, b: 720_000 },
+                { id: 'b', label: 'Doprava', a: 120_000, b: 95_000 },
+                { id: 'c', label: 'Zábava', a: 0, b: 210_000 },
+              ]}
+            />
+          </Card>
+        </div>
       </section>
 
       <section className={styles.section}>

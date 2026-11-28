@@ -237,7 +237,43 @@ export const cs = {
     subtitle: 'Trendy a srovnání',
     emptyTitle: 'Zatím není co kreslit',
     emptyBody:
-      'Grafy čistého jmění, zůstatků a kategorií se objeví, až budou v aplikaci první data.',
+      'Grafy čistého jmění, zůstatků a kategorií se objeví, až v Účtech přidáte první účet.',
+    range: 'Období',
+    months: (n: number) =>
+      n === 1 ? '1 měsíc' : n <= 4 ? `${n} měsíce` : `${n} měsíců`,
+    covers: (n: number) =>
+      `Grafy zatím pokrývají ${n === 1 ? '1 měsíc' : n <= 4 ? `${n} měsíce` : `${n} měsíců`}.`,
+    netWorth: 'Čisté jmění',
+    composition: 'Složení čistého jmění',
+    cash: 'Hotovost a spoření',
+    investments: 'Investice',
+    debt: 'Dluhy',
+    netWorthAfterDebt: 'Čisté jmění po odečtení dluhů',
+    compositionNote:
+      'Měsíce bez zadané hodnoty investic používají poslední hodnotu. Účty v EUR a USD jsou přepočtené kurzem ČNB ke konci měsíce.',
+    estimatedNote: 'Některé částky jsou přepočtené posledním známým kurzem.',
+    missingNote: 'Některý účet v cizí měně nejde přepočítat, chybí kurz ČNB.',
+    spendingByMonth: 'Výdaje po měsících',
+    spending: 'Výdaje',
+    average: (n: number) => `Průměr ${n === 1 ? '1 měsíce' : `${n} měsíců`}`,
+    currentMonthNote:
+      'Poslední měsíc je zatím neúplný. Čárkovaně: průměr předchozích měsíců.',
+    vsAverage: (month: string, n: number) =>
+      n === 0
+        ? month
+        : `${month} vs. průměr ${n === 1 ? '1 měsíce' : `${n} měsíců`}`,
+    noSpending: 'Tento měsíc zatím žádné výdaje.',
+    noHistory: 'Průměr se ukáže, až bude za sebou aspoň jeden celý měsíc.',
+    balances: 'Zůstatky účtů',
+    balanceOf: (name: string) => `Zůstatek účtu ${name}`,
+    incomeVsSpending: 'Příjmy a výdaje',
+    income: 'Příjmy',
+    saved: (amount: string) => `Ušetřeno ${amount}`,
+    vsLastMonth: 'oproti konci minulého měsíce',
+    // "za listopad": the accusative equals the nominative for Czech month names, so the plain
+    // lower-case name is correct; the locative ("v říjnu") is not, so it is avoided.
+    spentIn: (month: string) => `Výdaje za ${month.toLocaleLowerCase('cs-CZ')}`,
+    seeCharts: 'Grafy',
   },
   auth: {
     signInTitle: 'Přihlášení',
