@@ -51,6 +51,11 @@ function assertName(value: unknown, field: string): string {
   return name
 }
 
+/** How category names are compared: Czech lower case, composed form, single spaces. */
+export function nameKey(name: string): string {
+  return name.normalize('NFC').toLocaleLowerCase('cs-CZ').replace(/\s+/g, ' ')
+}
+
 function optionalText(value: unknown, field: string): string | null {
   if (value === undefined || value === null) return null
   if (typeof value !== 'string' || value.length > MAX_TEXT) {
@@ -144,6 +149,11 @@ export async function listAccounts(db: Db, userId: string) {
   return db.select().from(moneyAccount).where(eq(moneyAccount.userId, userId))
 }
 
+/** One of the user's accounts; another user's account is NOT_FOUND, like a missing one. */
+export async function findAccount(db: Db, userId: string, accountId: unknown) {
+  return getAccount(db, userId, accountId, 'accountId')
+}
+
 async function getAccount(
   db: Db,
   userId: string,
@@ -160,6 +170,20 @@ async function getAccount(
   return account
 }
 
+/**
+ * The stored opening balance from what the form shows. A credit card's debt is typed as a positive
+ * number and stored negative; a negative number there would silently become an asset, so it is
+ * refused.
+ */
+export function openingFromForm(type: AccountType, typedMinor: number): number {
+  if (type !== 'credit_card') return typedMinor
+  if (typedMinor < 0) {
+    throw new MoneyError('INVALID', 'A card debt is typed as a positive number')
+  }
+  // `0 - x` rather than `-x`, so a zero debt is 0 and not -0.
+  return 0 - typedMinor
+}
+
 // ---- Categories ----
 
 export async function createCategory(
@@ -172,20 +196,61 @@ export async function createCategory(
   try {
     const [created] = await db
       .insert(category)
-      .values({ id: crypto.randomUUID(), userId, kind, name })
+      .values({
+        id: crypto.randomUUID(),
+        userId,
+        kind,
+        name,
+        nameKey: nameKey(name),
+      })
       .returning()
     return created
   } catch (error) {
-    if (
-      String((error as { cause?: unknown })?.cause ?? error).includes('UNIQUE')
-    ) {
-      throw new MoneyError(
-        'CONFLICT',
-        'A category with this name already exists',
-      )
-    }
-    throw error
+    throw uniqueToConflict(error)
   }
+}
+
+/** Renames or archives a category; its kind cannot change (transactions depend on it). */
+export async function updateCategory(
+  db: Db,
+  userId: string,
+  categoryId: string,
+  changes: { name?: string; archived?: boolean },
+) {
+  const set: Partial<typeof category.$inferInsert> = {}
+  if (changes.name !== undefined) {
+    set.name = assertName(changes.name, 'name')
+    set.nameKey = nameKey(set.name)
+  }
+  if (changes.archived !== undefined) set.archived = changes.archived === true
+  if (Object.keys(set).length === 0) {
+    throw new MoneyError('INVALID', 'Nothing to change')
+  }
+  const id = assertId(categoryId, 'categoryId')
+  try {
+    const [updated] = await db
+      .update(category)
+      .set(set)
+      .where(and(eq(category.id, id), eq(category.userId, userId)))
+      .returning()
+    if (!updated) throw new MoneyError('NOT_FOUND', 'Category not found')
+    return updated
+  } catch (error) {
+    throw uniqueToConflict(error)
+  }
+}
+
+function uniqueToConflict(error: unknown) {
+  if (
+    !(error instanceof MoneyError) &&
+    String((error as { cause?: unknown })?.cause ?? error).includes('UNIQUE')
+  ) {
+    return new MoneyError(
+      'CONFLICT',
+      'A category with this name already exists',
+    )
+  }
+  return error
 }
 
 export async function listCategories(db: Db, userId: string) {

@@ -10,45 +10,45 @@ Build the MVP in [SPEC.md](SPEC.md) (D-3), one PR at a time in the order under "
 
 ## State
 
-- Done and merged: project setup and sign-in (PR #1), first deploy recorded (PR #2), esbuild override (PR #3), design tokens, app shell, theme, kit part 1 and manifest (PR #4).
-- Deployed at https://money.david-krapka.eu (Vercel Hobby `fra1`, Turso free plan). The owner's passkey works on the Mac and the phone; the WebAuthn ceremony has no automated test.
-- In review (PR #5, branch `feat/money-rules`): the ledger in `src/server/money/` ([ADR 0005](decisions/0005-ledger-data-model.md)):
-  - Accounts of seven types, categories, idempotent transactions with transfers that keep both amounts, monthly values with carried months.
-  - Archived accounts and categories take no new entries; edits of existing ones still work.
-  - Month-end balances, net worth by kind of account, and spending per category against earlier months, all in CZK at the day's ČNB rate, marked when estimated.
-  - ČNB rates through a daily Vercel Cron and `pnpm rates:backfill`.
-  - A favicon (`src/app/favicon.ico`). The site had no linked icon since PR #4, because `metadata.icons` hid the file icons. The Apple icon is now `src/app/apple-icon.png`.
-- The rules have tests for AC-2, AC-5, AC-8, AC-9 and AC-15 (except budgets, R-14). The criteria stay unticked until their screens and walkthroughs exist.
-- No screen uses the ledger yet; the accounts and categories PR is next.
+- Done and merged: setup and sign-in (PR #1), first deploy (PR #2), esbuild override (PR #3), app shell, theme, kit part 1 and manifest (PR #4), money rules, ČNB rates and favicon (PR #5).
+- Deployed at https://money.david-krapka.eu (Vercel Hobby `fra1`, Turso free plan).
+- In review (PR #6, branch `feat/accounts-categories`):
+  - Účty: net worth, assets and debts; accounts grouped as in the prototype; EUR and USD balances with the CZK value, estimated ones underlined; add, edit and archive in a sheet; an account page per account.
+  - Kategorie (`/kategorie`, linked from the Nastavení card on Přehled): expense and income lists; add, rename and archive.
+  - Kit part 2: Sheet (native `<dialog>`), Select, Row and RowList, Glyph and Money, all on `/dev/kit`; a Czech 404.
+  - Amounts are typed in Czech form ("1 234,50") and parsed on the server. A credit card's opening debt is typed as a positive number and stored negative.
+  - Fix: category names are now unique ignoring case for Czech letters too (migration `0002`); SQLite's `lower()` folds only ASCII.
+- R-4 and R-7 have screens. AC-5 has its rule test and now a screen; the owner can tick it after a walkthrough.
 - Production holds no financial data yet, and there is no backup.
 
 ## Next step
 
-After PR #5 is merged: the accounts and categories screens (R-4, R-7), BACKLOG "Next", first item.
+After PR #6 is merged: quick add and the transaction list with Playwright and axe (AC-1, AC-3, AC-4), BACKLOG "Next", first item. H-1 can start after it.
 
 ## Blockers and open questions
 
-- Owner, for PR #5, before merging: run `pnpm db:migrate` against production; add `CRON_SECRET` to Vercel (Production). Optional: `pnpm rates:backfill` for past years (runbook "Exchange rates").
+- Owner, for PR #6, before merging: run `pnpm db:migrate` against production (migration `0002_category_name_key`).
+- Owner: was PR #5's `CRON_SECRET` set, and did `PRAGMA foreign_keys` print `1`? Not confirmed in this session.
 - Owner, before the first real money entry: backups with a tested restore (runbook "Backup and restore").
 - Owner, if not done: branch protection on `main` requiring `check`.
 - On 2026-12-27: check H-3's idle rule and read Vercel Hobby's limits.
-- New assumption O-14 (investment balances ignore contributions until the next monthly value) waits for the owner or H-4.
+- O-14 (investment balances ignore contributions until the next monthly value) waits for the owner or H-4.
 - Open questions Q-1 and Q-3 to Q-10 ([SPEC](SPEC.md#planning-and-open-questions)).
 
 ## Last verified
 
-- Command: `pnpm verify` (format:check, lint, typecheck, 113 tests, build), including the PR #5 review fixes; `pnpm db:generate` shows no drift.
-- Live checks on 2026-11-27:
-  - Rate sync against the ČNB API into the local database: four days stored; the 26 November EUR rate of 24,455 matches ČNB.
-  - `/api/cron/rates` on `pnpm dev`: 401 with a wrong secret, 200 with the right one.
-  - `/favicon.ico`, `/icon.svg` and `/apple-icon.png` are linked in the page head and served.
-- Revision: branch `feat/money-rules` at `f69cc52` plus the review fixes, uncommitted at the time.
-- Working tree: the PR #5 changes only.
+- Command: `pnpm verify` (format:check, lint, typecheck, 133 tests, build), including the PR #6 review fixes; `pnpm db:generate` shows no drift.
+- Browser on `pnpm dev`, with an invented local user and a session minted in the local database:
+  - At 375 px: created an account and a credit card (stored as −9 500 Kč); edited with an invalid amount (error shown, typed values kept), then with a valid one (sheet closed, page refreshed).
+  - At 1280 px: account groups, EUR and USD rows with the CZK value, a carried fund value, archiving.
+  - Categories: created; "ÍDLO" refused next to "Jídlo"; archived.
+  - An unknown account id shows the Czech 404 inside the shell.
+- Revision: branch `feat/accounts-categories` at `9094a1f` plus the review fixes, uncommitted at the time.
+- Working tree: the PR #6 changes only.
 - Result: passed.
 - Not run:
-  - The 503 answer without `CRON_SECRET`.
-  - A Vercel Cron run.
-  - The backfill against ČNB.
-  - Foreign keys enforced on Turso. They are enforced on local libSQL, as tested; check after the migration.
-  - Přehled while signed in (owner check from PR #4).
+  - The review fixes in the browser (negative card debt, archive errors); they are covered by unit tests only.
+  - axe and Playwright (planned for the next PR).
+  - The screens while signed in with a real passkey.
+  - The migration on Turso.
   - Vercel rollback.

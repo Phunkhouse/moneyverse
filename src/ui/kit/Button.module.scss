@@ -15,6 +15,12 @@
   line-height: 1.2;
   text-decoration: none;
   white-space: nowrap;
+
+  svg {
+    flex: none;
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .primary {

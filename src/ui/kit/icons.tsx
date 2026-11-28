@@ -75,3 +75,16 @@ export const ClockIcon = () => (
     <path d="M12 8v4l3 2" />
   </svg>
 )
+
+export const CloseIcon = () => (
+  <svg {...base} strokeWidth={2}>
+    <path d="M6 6l12 12M18 6L6 18" />
+  </svg>
+)
+
+export const TagIcon = () => (
+  <svg {...base}>
+    <path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z" />
+    <circle cx="8" cy="8" r="1.5" />
+  </svg>
+)

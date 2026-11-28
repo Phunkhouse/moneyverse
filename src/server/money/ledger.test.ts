@@ -9,8 +9,11 @@ import {
   createTransaction,
   deleteMonthValue,
   deleteTransaction,
+  findAccount,
+  openingFromForm,
   listTransactions,
   setMonthValue,
+  updateCategory,
   updateAccount,
   updateTransaction,
 } from './ledger.ts'
@@ -96,6 +99,29 @@ describe('accounts', () => {
     await expect(
       updateAccount(db, me, theirs.id, { name: 'Moje' }),
     ).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    })
+  })
+})
+
+describe('opening balances from the form', () => {
+  it('stores a card’s typed debt as negative and refuses a negative debt', () => {
+    expect(openingFromForm('credit_card', 950_000)).toBe(-950_000)
+    expect(openingFromForm('credit_card', 0)).toBe(0)
+    expect(() => openingFromForm('credit_card', -500_000)).toThrow('positive')
+    expect(openingFromForm('checking', -500_000)).toBe(-500_000)
+    expect(openingFromForm('brokerage', 500_000)).toBe(500_000)
+  })
+
+  it('finds only the user’s own account, by its stored type', async () => {
+    const card = await createAccount(db, me, {
+      name: 'Karta',
+      type: 'credit_card',
+      currency: 'CZK',
+      openedOn: '2026-01-01',
+    })
+    expect((await findAccount(db, me, card.id)).type).toBe('credit_card')
+    await expect(findAccount(db, other, card.id)).rejects.toMatchObject({
       code: 'NOT_FOUND',
     })
   })
@@ -369,6 +395,20 @@ describe('categories and monthly values', () => {
       createCategory(db, me, { kind: 'expense', name: 'jídlo' }),
     ).rejects.toMatchObject({
       code: 'CONFLICT',
+    })
+    const other_ = await createCategory(db, me, {
+      kind: 'expense',
+      name: 'Doprava',
+    })
+    await expect(
+      updateCategory(db, me, other_.id, { name: 'JÍDLO' }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' })
+    expect(
+      (await updateCategory(db, me, other_.id, { name: 'MHD', archived: true }))
+        .archived,
+    ).toBe(true)
+    await expect(updateCategory(db, me, other_.id, {})).rejects.toMatchObject({
+      code: 'INVALID',
     })
     // The same name is fine for income and for another user.
     await createCategory(db, me, { kind: 'income', name: 'Jídlo' })
