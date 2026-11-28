@@ -107,6 +107,13 @@ export const cs = {
     transfer: 'Převod',
     recent: 'Poslední transakce',
   },
+  error: {
+    title: 'Něco se pokazilo',
+    body: 'Stránku se nepodařilo načíst. Zkuste to znovu; pokud chyba trvá, pošlete správci kód níže.',
+    retry: 'Zkusit znovu',
+    home: 'Zpět na přehled',
+    code: (digest: string) => `Kód chyby: ${digest}`,
+  },
   notFound: {
     title: 'Stránka neexistuje',
     body: 'Odkaz je neplatný, nebo záznam už byl odstraněn.',

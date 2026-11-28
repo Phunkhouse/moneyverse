@@ -49,11 +49,12 @@ Node 26 (`.nvmrc`, `engines`) and pnpm (pinned in `packageManager`); run `nvm us
 - `pnpm verify`: runs `format:check`, `lint`, `typecheck`, `test` and `build` in order and changes no files.
 - `pnpm e2e`: Playwright with axe (`e2e/`) against a production build on port 3100 and the separate database `.data/e2e.db`, with an invented user and session from `e2e/global-setup.ts`. Needs Chromium once: `pnpm exec playwright install chromium`. CI runs it in the `e2e` job.
 - `pnpm db:generate`: writes a migration in `drizzle/` after a schema change (`src/server/db/schema.ts`). Never `drizzle-kit push` on real data.
-- `pnpm db:migrate`: applies the migrations to `DATABASE_URL` (default `file:.data/dev.db`).
+- `pnpm db:migrate`: applies the migrations to the local file (`DATABASE_URL`, default `file:.data/dev.db`; a remote URL is refused) and checks the tables.
+- `pnpm db:migrate:prod`: applies them to Turso; refuses unless `DATABASE_URL` (`libsql://…`) and `DATABASE_AUTH_TOKEN` are set in that terminal, then checks every table exists. Owner only.
 - `pnpm invite:create --email <email> --name <name>` (or `--existing`): creates a single-use invite and prints its link once (`.env.local` or the shell's environment).
 - `pnpm icons:render`: re-renders the app icons (`public/icons/`, `src/app/apple-icon.png`, `src/app/favicon.ico`) from the brand mark (`scripts/render-icons.ts`); run after a logo change and commit them.
 - `pnpm rates:backfill --year <YYYY>`: loads whole years of ČNB rates into `DATABASE_URL` (repeatable).
-- **Production is owner-run only.** Never run `db:migrate`, `invite:create` or `rates:backfill` against production, and never ask for, read or print production values; give the owner the command from `docs/runbook.md` instead.
+- **Production is owner-run only.** Never run `db:migrate:prod`, `invite:create` or `rates:backfill` against production, and never ask for, read or print production values; give the owner the command from `docs/runbook.md` instead.
 
 Code layout: `src/ui/` holds the design tokens' Sass helpers, the kit (`src/ui/kit/`, shown at `/dev/kit` in development), the Czech catalogue (`messages.ts`) and formatters (`format.ts`); global tokens are in `src/app/globals.scss`. `src/server/` is framework-free (database, auth, the money rules in `src/server/money/`) with relative `.ts` imports, so Node runs the scripts in `scripts/` directly; the app reaches it through `src/app/_lib/`. Every page and server action that touches a user's data calls `requireUser()` first and scopes queries by that user's id.
 
